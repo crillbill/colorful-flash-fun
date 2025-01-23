@@ -69,9 +69,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       });
 
       if (isCorrect) {
-        await playAudioFeedback("Excellent pronunciation!");
+        await playAudioFeedback("Great job! Your pronunciation was correct!");
       } else {
-        await playAudioFeedback("Let me show you the correct pronunciation.");
+        await playAudioFeedback(`I heard ${transcribedText}. Let me show you how to pronounce ${expectedWord} correctly.`);
         // Short pause before playing the correct pronunciation
         await new Promise(resolve => setTimeout(resolve, 500));
         await playAudioFeedback(currentWord);
@@ -102,7 +102,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       managerRef.current.sendData({ type: 'start_recording' });
       
-      // Changed timeout from 5000ms to 2000ms (2 seconds)
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Auto-stopping recording after timeout');
         if (managerRef.current) {
