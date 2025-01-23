@@ -26,22 +26,30 @@ export const FlashCard = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(3);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    if (isListening) {
-      timeoutId = setTimeout(() => {
-        setIsListening(false);
-        setIsProcessing(true);
-      }, 2000);
+    let intervalId: NodeJS.Timeout;
+    
+    if (isListening && timeLeft > 0) {
+      intervalId = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
     }
+
+    if (timeLeft === 0 && isListening) {
+      setIsListening(false);
+      setIsProcessing(true);
+      setTimeLeft(3); // Reset for next attempt
+    }
+
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (intervalId) {
+        clearInterval(intervalId);
       }
     };
-  }, [isListening]);
+  }, [isListening, timeLeft]);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -59,13 +67,8 @@ export const FlashCard = ({
 
   const handlePronunciationResult = (isCorrect: boolean) => {
     console.log('Pronunciation result received:', isCorrect);
-    // Reset states before handling the answer
-    setIsListening(false);
     setIsProcessing(false);
-    // Small delay to ensure UI updates before proceeding
-    setTimeout(() => {
-      handleAnswer(isCorrect);
-    }, 100);
+    handleAnswer(isCorrect);
   };
 
   const playAudio = async (text: string) => {
@@ -195,6 +198,7 @@ export const FlashCard = ({
             onClick={() => {
               if (!isListening && !isProcessing) {
                 setIsListening(true);
+                setTimeLeft(3);
                 toast.info("Listening...", {
                   description: "Speak the Hebrew word now",
                 });
@@ -206,11 +210,11 @@ export const FlashCard = ({
             {isProcessing 
               ? "Processing..." 
               : isListening 
-                ? "Listening..." 
+                ? `Speak now... (${timeLeft}s)` 
                 : `Say "${question}"`}
           </Button>
           <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-muted-foreground">
-            {isListening && "Speak now... (2 seconds remaining)"}
+            {isListening && `${timeLeft} seconds remaining...`}
             {isProcessing && "Analyzing your pronunciation..."}
           </div>
         </div>

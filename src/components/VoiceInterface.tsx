@@ -23,11 +23,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const isCorrect = message.includes('correct') && !message.includes('incorrect');
       
       console.log('Processing message:', message, 'isCorrect:', isCorrect);
-      
-      // Send the result back to the parent component
       onPronunciationResult(isCorrect);
       
-      // Show feedback toast
       if (isCorrect) {
         toast.success("Good job!", {
           description: event.message.content,
@@ -51,9 +48,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       chatRef.current = new RealtimeChat(handleMessage);
       await chatRef.current.init(currentWord);
       
-      toast.info("Recording Started", {
-        description: "Speak the Hebrew word now",
-      });
+      console.log('Recording started for word:', currentWord);
     } catch (error) {
       console.error('Error starting recording:', error);
       toast.error('Failed to start recording');
@@ -62,6 +57,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   const stopRecording = () => {
+    console.log('Stopping recording');
     if (chatRef.current) {
       chatRef.current.disconnect();
       chatRef.current = null;
@@ -69,11 +65,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   useEffect(() => {
-    if (isListening && !chatRef.current) {
+    if (isListening) {
+      console.log('Starting new recording session');
       startRecording();
-    }
-    
-    if (!isListening) {
+    } else if (!isListening && chatRef.current) {
+      console.log('Ending recording session');
       stopRecording();
     }
 
