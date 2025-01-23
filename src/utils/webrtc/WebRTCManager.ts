@@ -1,18 +1,42 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export class WebRTCManager {
+  private pc: RTCPeerConnection | null = null;
+  private dc: RTCDataChannel | null = null;
+  private audioEl: HTMLAudioElement;
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
   private isRecording: boolean = false;
 
   constructor(private onMessage: (message: any) => void) {
     console.log('WebRTCManager: Initializing');
+    this.audioEl = document.createElement("audio");
+    this.audioEl.autoplay = true;
   }
 
   async initialize(requireMicrophone: boolean = true) {
     try {
       console.log('WebRTCManager: Starting initialization');
+
+      // Get ephemeral token from our Edge Function
+      const tokenResponse = await supabase.functions.invoke("realtime-speech");
+      const data = await tokenResponse.data;
       
+      if (!data?.client_secret?.value) {
+        throw new Error("Failed to get ephemeral token");
+      }
+
+      const EPHEMERAL_KEY = data.client_secret.value;
+
+      // Create peer connection
+      this.pc = new RTCPeerConnection();
+
+      // Set up remote audio
+      this.pc.ontrack = e => {
+        console.log('WebRTCManager: Received audio track');
+        this.audioEl.srcObject = e.streams[0];
+      };
+
       if (requireMicrophone) {
         const stream = await navigator.mediaDevices.getUserMedia({ 
           audio: {
@@ -54,9 +78,43 @@ export class WebRTCManager {
             this.isRecording = false;
           }
         };
+
+        // Add local audio track for recording
+        this.pc.addTrack(stream.getTracks()[0]);
       }
 
-      console.log('WebRTCManager: Initialization complete');
+      // Set up data channel
+      this.dc = this.pc.createDataChannel("oai-events");
+      this.dc.addEventListener("message", (e) => {
+        const event = JSON.parse(e.data);
+        console.log("Received event:", event);
+        this.onMessage(event);
+      });
+
+      // Create and set local description
+      const offer = await this.pc.createOffer();
+      await this.pc.setLocalDescription(offer);
+
+      // Connect to OpenAI's Realtime API
+      const baseUrl = "https://api.openai.com/v1/realtime";
+      const model = "gpt-4o-realtime-preview-2024-12-17";
+      const sdpResponse = await fetch(`${baseUrl}?model=${model}`, {
+        method: "POST",
+        body: offer.sdp,
+        headers: {
+          Authorization: `Bearer ${EPHEMERAL_KEY}`,
+          "Content-Type": "application/sdp"
+        },
+      });
+
+      const answer = {
+        type: "answer" as RTCSdpType,
+        sdp: await sdpResponse.text(),
+      };
+      
+      await this.pc.setRemoteDescription(answer);
+      console.log("WebRTC connection established");
+
       return true;
     } catch (error) {
       console.error('WebRTCManager: Error initializing:', error);
@@ -96,6 +154,9 @@ export class WebRTCManager {
         }
         this.mediaRecorder.stop();
         console.log('WebRTCManager: Stopped recording');
+      } else if (this.dc?.readyState === 'open') {
+        console.log('WebRTCManager: Sending data:', data);
+        this.dc.send(JSON.stringify(data));
       }
     } catch (error) {
       console.error('WebRTCManager: Error handling data:', error);
@@ -109,6 +170,9 @@ export class WebRTCManager {
     }
     this.audioChunks = [];
     this.isRecording = false;
+    this.dc?.close();
+    this.pc?.close();
+    this.audioEl.srcObject = null;
     console.log('WebRTCManager: Disconnected');
   }
 }

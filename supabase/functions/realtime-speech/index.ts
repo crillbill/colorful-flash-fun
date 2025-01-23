@@ -26,15 +26,9 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "gpt-4o-realtime-preview-2024-12-17",
         voice: "alloy",
-        instructions: "You are a Hebrew language pronunciation assistant. When the user speaks a Hebrew word, carefully evaluate their pronunciation and provide specific feedback. For each word, you should: 1) Indicate if the pronunciation was correct or incorrect, 2) Provide specific feedback about what was good or needs improvement, 3) If incorrect, explain how to fix any pronunciation issues. Be encouraging but precise in your feedback."
+        instructions: "You are a Hebrew language pronunciation assistant. Your role is to accurately pronounce Hebrew words and phrases with proper intonation and emphasis."
       }),
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenAI API error:", errorText);
-      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
-    }
 
     const data = await response.json();
     console.log("Session created:", data);
