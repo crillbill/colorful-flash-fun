@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { RealtimeChat } from '@/utils/RealtimeAudio';
 import { Mic, MicOff } from 'lucide-react';
 
@@ -13,7 +13,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   currentWord, 
   onPronunciationResult 
 }) => {
-  const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const chatRef = useRef<RealtimeChat | null>(null);
 
@@ -23,10 +22,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     if (event.type === 'conversation.item.message') {
       const message = event.message.content.toLowerCase();
       const isCorrect = message.includes('correct') && !message.includes('incorrect');
+      
+      // Send the result back to the parent component
       onPronunciationResult(isCorrect);
       
-      toast({
-        title: isCorrect ? "Good job!" : "Keep practicing",
+      // Show feedback toast
+      toast(isCorrect ? "Good job!" : "Keep practicing", {
         description: event.message.content,
       });
       
@@ -40,14 +41,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       await chatRef.current.init(currentWord);
       setIsRecording(true);
       
-      toast({
-        title: "Recording Started",
+      toast("Recording Started", {
         description: "Speak the Hebrew word now",
       });
     } catch (error) {
       console.error('Error starting recording:', error);
-      toast({
-        title: "Error",
+      toast("Error", {
         description: error instanceof Error ? error.message : 'Failed to start recording',
         variant: "destructive",
       });
@@ -55,13 +54,17 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   const stopRecording = () => {
-    chatRef.current?.disconnect();
-    setIsRecording(false);
+    if (chatRef.current) {
+      chatRef.current.disconnect();
+      setIsRecording(false);
+    }
   };
 
   useEffect(() => {
     return () => {
-      chatRef.current?.disconnect();
+      if (chatRef.current) {
+        chatRef.current.disconnect();
+      }
     };
   }, []);
 
