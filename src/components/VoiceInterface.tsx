@@ -68,6 +68,14 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     return transliterations[hebrewWord.trim()] || hebrewWord;
   };
 
+  const getEnglishTranslation = (hebrewWord: string): string => {
+    const translations: { [key: string]: string } = {
+      'שלום': 'hello',
+      'מה שלומך היום': 'how are you today',
+    };
+    return translations[hebrewWord.trim()] || hebrewWord;
+  };
+
   const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
     const normalizedTranscribed = transcribed.toLowerCase().trim();
     const expectedTransliteration = await getHebrewTransliteration(expected);
@@ -90,6 +98,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const expectedWord = currentWord;
       const isCorrect = await evaluatePronunciation(transcribedText, expectedWord);
       const expectedTransliteration = await getHebrewTransliteration(expectedWord);
+      const englishTranslation = getEnglishTranslation(expectedWord);
       
       console.log('VoiceInterface: Speech evaluation result:', {
         transcribed: transcribedText,
@@ -99,9 +108,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       });
 
       if (isCorrect) {
-        await playAudioFeedback(`Excellent! Your pronunciation of ${expectedTransliteration} was perfect!`);
+        await playAudioFeedback(`Excellent! Your pronunciation of ${expectedTransliteration} was perfect! Let me say it again: ${expectedWord}. In English, it means: ${englishTranslation}`);
       } else {
-        await playAudioFeedback(`I heard "${transcribedText}". For "${expectedTransliteration}", try to pronounce it like this:`);
+        await playAudioFeedback(`I heard "${transcribedText}". For "${expectedTransliteration}", which means "${englishTranslation}" in English, try to pronounce it like this:`);
         await new Promise(resolve => setTimeout(resolve, 1000));
         await playAudioFeedback(expectedWord);
       }
