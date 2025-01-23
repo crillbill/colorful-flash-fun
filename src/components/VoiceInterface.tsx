@@ -22,7 +22,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const response = await supabase.functions.invoke('text-to-speech', {
         body: {
           text,
-          voice: "alloy",
+          voice: "nova", // Using a female voice for feedback
         },
       });
 
@@ -41,7 +41,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   const getHebrewTransliteration = (hebrewWord: string): string => {
-    // Add mappings for Hebrew words to their English transliterations
     const transliterations: { [key: string]: string } = {
       'שלום': 'shalom',
       // Add more Hebrew words and their transliterations as needed
@@ -78,12 +77,24 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       });
 
       if (isCorrect) {
-        await playAudioFeedback("Great job! Your pronunciation was correct!");
+        await playAudioFeedback("Excellent! Your pronunciation of Shalom was perfect!");
       } else {
-        await playAudioFeedback(`I heard ${transcribedText}. Let me show you how to pronounce ${expectedWord} correctly.`);
+        // First provide feedback about what was heard
+        await playAudioFeedback(`I heard ${transcribedText}. The correct pronunciation is Shalom, let me demonstrate.`);
         // Short pause before playing the correct pronunciation
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await playAudioFeedback(currentWord);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Then play the correct pronunciation with a different voice
+        const response = await supabase.functions.invoke('text-to-speech', {
+          body: {
+            text: currentWord,
+            voice: "alloy", // Using the original voice for the word demonstration
+          },
+        });
+        if (!response.error) {
+          const { data: { audioContent } } = response;
+          const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+          await audio.play();
+        }
       }
 
       onPronunciationResult(isCorrect);
