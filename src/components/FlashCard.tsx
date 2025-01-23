@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Volume2, VolumeX, Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import VoiceInterface from "./VoiceInterface";
+import { toast } from "sonner";
 
 interface FlashCardProps {
   question: string;
@@ -24,6 +25,7 @@ export const FlashCard = ({
   const [isFlipped, setIsFlipped] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export const FlashCard = ({
     if (isListening) {
       timeoutId = setTimeout(() => {
         setIsListening(false);
+        setIsProcessing(true);
+        toast.info("Processing your pronunciation...");
       }, 2000); // Stop listening after 2 seconds
     }
     return () => {
@@ -56,6 +60,12 @@ export const FlashCard = ({
 
   const handlePronunciationResult = (isCorrect: boolean) => {
     setIsListening(false);
+    setIsProcessing(false);
+    if (isCorrect) {
+      toast.success("Great pronunciation!");
+    } else {
+      toast.error("Keep practicing. Try again!");
+    }
     handleAnswer(isCorrect);
   };
 
@@ -180,19 +190,24 @@ export const FlashCard = ({
       <div className="w-full max-w-md flex justify-center">
         <div className="relative">
           <Button
-            variant={isListening ? "destructive" : "default"}
+            variant={isListening ? "destructive" : isProcessing ? "secondary" : "default"}
             size="lg"
             className="gap-2"
             onClick={() => {
               setIsListening(true);
             }}
-            disabled={isListening}
+            disabled={isListening || isProcessing}
           >
             <Mic className={isListening ? "animate-pulse" : ""} />
-            {isListening ? "Listening..." : `Say "${question}"`}
+            {isProcessing 
+              ? "Processing..." 
+              : isListening 
+                ? "Listening..." 
+                : `Say "${question}"`}
           </Button>
           <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-muted-foreground">
             {isListening && "Speak now... (2 seconds remaining)"}
+            {isProcessing && "Analyzing your pronunciation..."}
           </div>
           <div className="hidden">
             <VoiceInterface
