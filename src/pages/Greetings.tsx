@@ -8,6 +8,7 @@ import { Mic, Volume2 } from "lucide-react";
 import { useState } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
 import { AudioButton } from "@/components/AudioButton";
+import { supabase } from "@/integrations/supabase/client";
 
 const Greetings = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -20,22 +21,20 @@ const Greetings = () => {
 
   const handlePlayAudio = async () => {
     try {
-      const response = await fetch("/api/text-to-speech", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('text-to-speech', {
+        body: {
           text: currentWord,
           voice: "alloy",
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate speech");
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to generate speech');
       }
 
-      const { audioContent } = await response.json();
+      const { data: { audioContent } } = response;
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
       
       setIsPlaying(true);
