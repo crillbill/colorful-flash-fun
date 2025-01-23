@@ -69,7 +69,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     if (isListening) {
       console.log('Starting new recording session');
       startRecording();
-    } else if (!isListening) {
+    } else if (!isListening && chatRef.current) {
       console.log('Ending recording session');
       stopRecording();
     }
