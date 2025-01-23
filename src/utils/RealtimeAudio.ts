@@ -10,6 +10,7 @@ export class AudioRecorder {
 
   async start() {
     try {
+      console.log('AudioRecorder: Requesting microphone access');
       this.stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: 24000,
@@ -19,6 +20,8 @@ export class AudioRecorder {
           autoGainControl: true
         }
       });
+      
+      console.log('AudioRecorder: Microphone access granted');
       
       this.audioContext = new AudioContext({
         sampleRate: 24000,
@@ -34,13 +37,15 @@ export class AudioRecorder {
       
       this.source.connect(this.processor);
       this.processor.connect(this.audioContext.destination);
+      console.log('AudioRecorder: Audio processing pipeline set up');
     } catch (error) {
-      console.error('Error accessing microphone:', error);
+      console.error('AudioRecorder: Error accessing microphone:', error);
       throw error;
     }
   }
 
   stop() {
+    console.log('AudioRecorder: Stopping recording');
     if (this.source) {
       this.source.disconnect();
       this.source = null;
@@ -57,6 +62,7 @@ export class AudioRecorder {
       this.audioContext.close();
       this.audioContext = null;
     }
+    console.log('AudioRecorder: Recording stopped');
   }
 }
 
@@ -67,57 +73,70 @@ export class RealtimeChat {
   private recorder: AudioRecorder | null = null;
 
   constructor(private onMessage: (message: any) => void) {
+    console.log('RealtimeChat: Initializing');
     this.audioEl = document.createElement("audio");
     this.audioEl.autoplay = true;
   }
 
   async init() {
     try {
+      console.log('RealtimeChat: Starting initialization');
       const { data, error } = await supabase.functions.invoke('realtime-speech');
       
       if (error) {
-        console.error("Supabase function error:", error);
+        console.error("RealtimeChat: Supabase function error:", error);
         throw error;
       }
 
       if (!data || !data.client_secret?.value) {
-        console.error("Invalid response data:", data);
+        console.error("RealtimeChat: Invalid response data:", data);
         throw new Error("Failed to get ephemeral token");
       }
 
       const EPHEMERAL_KEY = data.client_secret.value;
+      console.log('RealtimeChat: Got ephemeral token');
 
       this.pc = new RTCPeerConnection();
-      this.pc.ontrack = e => this.audioEl.srcObject = e.streams[0];
+      console.log('RealtimeChat: Created peer connection');
+
+      this.pc.ontrack = e => {
+        console.log('RealtimeChat: Received remote track');
+        this.audioEl.srcObject = e.streams[0];
+      };
 
       const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.pc.addTrack(ms.getTracks()[0]);
+      console.log('RealtimeChat: Added local audio track');
 
       this.dc = this.pc.createDataChannel("oai-events");
+      console.log('RealtimeChat: Created data channel');
       
       this.dc.onopen = () => {
-        console.log("Data channel is now open and ready");
+        console.log("RealtimeChat: Data channel is now open and ready");
       };
       
       this.dc.onerror = (error) => {
-        console.error("Data channel error:", error);
+        console.error("RealtimeChat: Data channel error:", error);
       };
       
       this.dc.onclose = () => {
-        console.log("Data channel closed");
+        console.log("RealtimeChat: Data channel closed");
       };
       
       this.dc.onmessage = (e) => {
         const event = JSON.parse(e.data);
-        console.log("Received event:", event);
+        console.log("RealtimeChat: Received event:", event);
         this.onMessage(event);
       };
 
       const offer = await this.pc.createOffer();
       await this.pc.setLocalDescription(offer);
+      console.log('RealtimeChat: Created and set local description');
 
       const baseUrl = "https://api.openai.com/v1/realtime";
       const model = "gpt-4o-realtime-preview-2024-12-17";
+      console.log('RealtimeChat: Connecting to OpenAI realtime API');
+      
       const sdpResponse = await fetch(`${baseUrl}?model=${model}`, {
         method: "POST",
         body: offer.sdp,
@@ -129,7 +148,7 @@ export class RealtimeChat {
 
       if (!sdpResponse.ok) {
         const errorText = await sdpResponse.text();
-        console.error("OpenAI SDP error:", errorText);
+        console.error("RealtimeChat: OpenAI SDP error:", errorText);
         throw new Error(`OpenAI SDP error: ${sdpResponse.status} ${errorText}`);
       }
 
@@ -139,15 +158,16 @@ export class RealtimeChat {
       };
       
       await this.pc.setRemoteDescription(answer);
-      console.log("WebRTC connection established");
+      console.log("RealtimeChat: WebRTC connection established");
 
       this.recorder = new AudioRecorder((audioData) => {
         this.sendAudioData(audioData);
       });
       await this.recorder.start();
+      console.log('RealtimeChat: Started audio recorder');
 
     } catch (error) {
-      console.error("Error initializing chat:", error);
+      console.error("RealtimeChat: Error initializing chat:", error);
       throw error;
     }
   }
@@ -155,7 +175,7 @@ export class RealtimeChat {
   private async sendAudioData(audioData: Float32Array) {
     try {
       if (!this.dc || this.dc.readyState !== 'open') {
-        console.warn('Data channel not ready, skipping audio data');
+        console.warn('RealtimeChat: Data channel not ready, skipping audio data');
         return;
       }
       
@@ -164,7 +184,7 @@ export class RealtimeChat {
         audio: this.encodeAudioData(audioData)
       }));
     } catch (error) {
-      console.error('Error sending audio data:', error);
+      console.error('RealtimeChat: Error sending audio data:', error);
     }
   }
 
@@ -189,6 +209,8 @@ export class RealtimeChat {
 
   async sendMessage(text: string) {
     try {
+      console.log('RealtimeChat: Attempting to send message:', text);
+      
       if (!this.dc || this.dc.readyState !== 'open') {
         throw new Error('Data channel not ready');
       }
@@ -207,16 +229,21 @@ export class RealtimeChat {
         }
       };
 
+      console.log('RealtimeChat: Sending message event:', event);
       this.dc.send(JSON.stringify(event));
+      
+      console.log('RealtimeChat: Sending response.create event');
       this.dc.send(JSON.stringify({type: 'response.create'}));
+      
+      console.log('RealtimeChat: Message sent successfully');
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('RealtimeChat: Error sending message:', error);
       throw error;
     }
   }
 
   disconnect() {
-    console.log('Stopping recording');
+    console.log('RealtimeChat: Starting disconnect');
     if (this.recorder) {
       this.recorder.stop();
       this.recorder = null;
@@ -229,5 +256,6 @@ export class RealtimeChat {
       this.pc.close();
       this.pc = null;
     }
+    console.log('RealtimeChat: Disconnect complete');
   }
 }
