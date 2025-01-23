@@ -219,6 +219,7 @@ export class RealtimeChat {
   }
 
   disconnect() {
+    console.log('Stopping recording');
     this.recorder?.stop();
     if (this.dc) {
       this.dc.close();
