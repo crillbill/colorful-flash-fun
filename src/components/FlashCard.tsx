@@ -59,6 +59,7 @@ export const FlashCard = ({
 
   const handlePronunciationResult = (isCorrect: boolean) => {
     console.log('Pronunciation result received:', isCorrect);
+    // Reset states before handling the answer
     setIsListening(false);
     setIsProcessing(false);
     handleAnswer(isCorrect);
