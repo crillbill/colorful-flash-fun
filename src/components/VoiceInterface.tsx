@@ -93,7 +93,14 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       if (isCorrect) {
         await playAudioFeedback(`Excellent! Your pronunciation of ${expectedTransliteration} was perfect!`);
       } else {
-        await playAudioFeedback(`Let me help you with ${expectedTransliteration}. Listen carefully to how it should sound.`);
+        // First provide feedback about what was heard
+        await playAudioFeedback(`I heard "${transcribedText}". For "${expectedTransliteration}", try to pronounce it like this:`);
+        
+        // Short pause before playing the correct pronunciation
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Then demonstrate the correct pronunciation
+        await playAudioFeedback(expectedWord);
       }
 
       onPronunciationResult(isCorrect);
