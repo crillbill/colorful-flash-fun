@@ -1,15 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export class WebRTCManager {
-  private pc: RTCPeerConnection | null = null;
-  private dc: RTCDataChannel | null = null;
-  private audioEl: HTMLAudioElement;
   private isConnected: boolean = false;
+  private audioContext: AudioContext;
+  private mediaRecorder: MediaRecorder | null = null;
+  private audioChunks: Blob[] = [];
 
   constructor(private onMessage: (message: any) => void) {
     console.log('WebRTCManager: Initializing');
-    this.audioEl = document.createElement("audio");
-    this.audioEl.autoplay = true;
+    this.audioContext = new AudioContext();
   }
 
   async initialize() {
@@ -25,20 +24,11 @@ export class WebRTCManager {
 
       if (response.error) {
         console.error('Voice-to-text API error:', response.error);
-        throw new Error('Failed to initialize WebRTC connection');
+        throw new Error('Failed to initialize connection');
       }
 
-      this.pc = new RTCPeerConnection({
-        iceServers: [
-          {
-            urls: 'stun:stun.l.google.com:19302'
-          }
-        ]
-      });
-      console.log('WebRTCManager: Created peer connection');
-
-      this.setupEventHandlers();
-      await this.createDataChannel();
+      await this.setupMediaRecorder();
+      this.isConnected = true;
       console.log('WebRTCManager: Initialization complete');
     } catch (error) {
       console.error('WebRTCManager: Error initializing:', error);
@@ -46,63 +36,25 @@ export class WebRTCManager {
     }
   }
 
-  private setupEventHandlers() {
-    if (!this.pc) return;
+  private async setupMediaRecorder() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.mediaRecorder = new MediaRecorder(stream);
+      
+      this.mediaRecorder.ondataavailable = async (event) => {
+        if (event.data.size > 0) {
+          this.audioChunks.push(event.data);
+        }
+      };
 
-    this.pc.ontrack = e => {
-      console.log('WebRTCManager: Received remote track');
-      this.audioEl.srcObject = e.streams[0];
-    };
-
-    this.pc.oniceconnectionstatechange = () => {
-      console.log('WebRTCManager: ICE connection state changed to:', this.pc?.iceConnectionState);
-      if (this.pc?.iceConnectionState === 'connected') {
-        this.isConnected = true;
-      } else if (this.pc?.iceConnectionState === 'disconnected') {
-        this.isConnected = false;
-      }
-    };
-
-    this.pc.onicecandidate = event => {
-      if (event.candidate) {
-        console.log('WebRTCManager: New ICE candidate:', event.candidate);
-      }
-    };
-  }
-
-  private async createDataChannel() {
-    if (!this.pc) return;
-
-    this.dc = this.pc.createDataChannel("audio-channel");
-    console.log('WebRTCManager: Created data channel');
-    
-    this.dc.onopen = () => {
-      console.log("WebRTCManager: Data channel is now open");
-      this.isConnected = true;
-      // Send initial message to test connection
-      this.sendData({ type: 'init', message: 'Connection established' });
-    };
-    
-    this.dc.onerror = (error) => {
-      console.error("WebRTCManager: Data channel error:", error);
-      this.isConnected = false;
-    };
-    
-    this.dc.onclose = () => {
-      console.log("WebRTCManager: Data channel closed");
-      this.isConnected = false;
-    };
-    
-    this.dc.onmessage = async (e) => {
-      try {
-        const data = JSON.parse(e.data);
-        
-        if (data.type === 'audio_data') {
-          console.log('WebRTCManager: Received audio data, sending to voice-to-text API');
+      this.mediaRecorder.onstop = async () => {
+        try {
+          const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+          const base64Audio = await this.blobToBase64(audioBlob);
           
           const response = await supabase.functions.invoke('voice-to-text', {
             body: {
-              audio: data.audio
+              audio: base64Audio
             }
           });
 
@@ -110,42 +62,65 @@ export class WebRTCManager {
             throw new Error('Failed to process speech');
           }
 
-          const result = response.data;
-          this.onMessage(result);
-        } else {
-          this.onMessage(data);
+          this.onMessage(response.data);
+        } catch (error) {
+          console.error('WebRTCManager: Error processing audio:', error);
+          this.onMessage({ type: 'error', message: error.message });
+        } finally {
+          this.audioChunks = [];
         }
-      } catch (error) {
-        console.error("WebRTCManager: Error processing message:", error);
-        this.onMessage({ type: 'error', message: error.message });
-      }
-    };
+      };
+
+    } catch (error) {
+      console.error('WebRTCManager: Error setting up media recorder:', error);
+      throw error;
+    }
+  }
+
+  private async blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          // Remove the data URL prefix
+          const base64String = reader.result.split(',')[1];
+          resolve(base64String);
+        } else {
+          reject(new Error('Failed to convert blob to base64'));
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
 
   sendData(data: any) {
-    if (!this.dc || this.dc.readyState !== 'open' || !this.isConnected) {
-      console.warn('WebRTCManager: Data channel not ready or not connected');
+    if (!this.isConnected || !this.mediaRecorder) {
+      console.warn('WebRTCManager: Not connected or recorder not ready');
       return;
     }
     
     try {
-      this.dc.send(JSON.stringify(data));
+      if (data.type === 'start_recording' && this.mediaRecorder.state === 'inactive') {
+        this.audioChunks = [];
+        this.mediaRecorder.start();
+        console.log('WebRTCManager: Started recording');
+      } else if (data.type === 'stop_recording' && this.mediaRecorder.state === 'recording') {
+        this.mediaRecorder.stop();
+        console.log('WebRTCManager: Stopped recording');
+      }
     } catch (error) {
-      console.error('WebRTCManager: Error sending data:', error);
-      this.onMessage({ type: 'error', message: 'Failed to send audio data' });
+      console.error('WebRTCManager: Error handling data:', error);
+      this.onMessage({ type: 'error', message: 'Failed to handle audio recording' });
     }
   }
 
   disconnect() {
     this.isConnected = false;
-    if (this.dc) {
-      this.dc.close();
-      this.dc = null;
+    if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+      this.mediaRecorder.stop();
     }
-    if (this.pc) {
-      this.pc.close();
-      this.pc = null;
-    }
+    this.audioChunks = [];
     console.log('WebRTCManager: Disconnected');
   }
 }
