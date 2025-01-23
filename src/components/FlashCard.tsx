@@ -41,7 +41,7 @@ export const FlashCard = ({
     if (timeLeft === 0 && isListening) {
       setIsListening(false);
       setIsProcessing(true);
-      setTimeLeft(3); // Reset for next attempt
+      setTimeLeft(3);
     }
 
     return () => {
@@ -124,7 +124,7 @@ export const FlashCard = ({
         className="w-full max-w-md mx-auto"
       >
         <div
-          className={`flip-card h-64 w-full cursor-pointer ${
+          className={`flip-card h-[400px] w-full cursor-pointer ${
             isFlipped ? "flipped" : ""
           }`}
           onClick={handleFlip}
@@ -132,21 +132,51 @@ export const FlashCard = ({
           <div className="flip-card-inner">
             <Card className="flip-card-front p-6 flex flex-col items-center justify-between bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
               <h2 className="text-8xl font-bold text-center">{question}</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="mt-4"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  playAudio(question);
-                }}
-              >
-                {isPlaying ? (
-                  <VolumeX className="h-6 w-6" />
-                ) : (
-                  <Volume2 className="h-6 w-6" />
-                )}
-              </Button>
+              <div className="flex flex-col gap-4 items-center mt-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    playAudio(question);
+                  }}
+                >
+                  {isPlaying ? (
+                    <VolumeX className="h-6 w-6" />
+                  ) : (
+                    <Volume2 className="h-6 w-6" />
+                  )}
+                </Button>
+                <div className="relative">
+                  <Button
+                    variant={isListening ? "destructive" : isProcessing ? "secondary" : "default"}
+                    size="lg"
+                    className="gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!isListening && !isProcessing) {
+                        setIsListening(true);
+                        setTimeLeft(3);
+                        toast.info("Listening...", {
+                          description: "Speak the Hebrew word now",
+                        });
+                      }
+                    }}
+                    disabled={isListening || isProcessing}
+                  >
+                    <Mic className={isListening ? "animate-pulse" : ""} />
+                    {isProcessing 
+                      ? "Processing..." 
+                      : isListening 
+                        ? `Speak now... (${timeLeft}s)` 
+                        : `Say "${question}"`}
+                  </Button>
+                  <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-muted-foreground">
+                    {isListening && `${timeLeft} seconds remaining...`}
+                    {isProcessing && "Analyzing your pronunciation..."}
+                  </div>
+                </div>
+              </div>
             </Card>
             <Card className="flip-card-back p-6 flex flex-col items-center justify-between bg-accent">
               <h3 className="text-xl font-semibold text-center">{answer}</h3>
@@ -190,37 +220,6 @@ export const FlashCard = ({
           </div>
         </div>
       </motion.div>
-
-      <div className="w-full max-w-md flex justify-center">
-        <div className="relative">
-          <Button
-            variant={isListening ? "destructive" : isProcessing ? "secondary" : "default"}
-            size="lg"
-            className="gap-2"
-            onClick={() => {
-              if (!isListening && !isProcessing) {
-                setIsListening(true);
-                setTimeLeft(3);
-                toast.info("Listening...", {
-                  description: "Speak the Hebrew word now",
-                });
-              }
-            }}
-            disabled={isListening || isProcessing}
-          >
-            <Mic className={isListening ? "animate-pulse" : ""} />
-            {isProcessing 
-              ? "Processing..." 
-              : isListening 
-                ? `Speak now... (${timeLeft}s)` 
-                : `Say "${question}"`}
-          </Button>
-          <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-muted-foreground">
-            {isListening && `${timeLeft} seconds remaining...`}
-            {isProcessing && "Analyzing your pronunciation..."}
-          </div>
-        </div>
-      </div>
       <VoiceInterface
         currentWord={question}
         onPronunciationResult={handlePronunciationResult}
