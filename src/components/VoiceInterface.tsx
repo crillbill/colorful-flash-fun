@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { WebRTCManager } from '@/utils/webrtc/WebRTCManager';
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface VoiceInterfaceProps {
@@ -38,16 +37,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       console.log('VoiceInterface: Pronunciation playback completed');
     } catch (error) {
       console.error("VoiceInterface: Error playing pronunciation:", error);
-      toast.error("Failed to play pronunciation");
     }
   };
 
   const evaluatePronunciation = (transcribed: string, expected: string): boolean => {
-    // Convert both strings to lowercase and trim whitespace
     const normalizedTranscribed = transcribed.toLowerCase().trim();
     const normalizedExpected = expected.toLowerCase().trim();
-
-    // Calculate similarity score (can be enhanced with more sophisticated algorithms)
     const isMatch = normalizedTranscribed.includes(normalizedExpected);
     
     console.log('VoiceInterface: Pronunciation evaluation:', {
@@ -73,26 +68,14 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         isCorrect
       });
 
-      if (isCorrect) {
-        toast.success("Good job!", {
-          description: `Your pronunciation of "${currentWord}" was correct!`,
-        });
-      } else {
-        toast.error("Keep practicing", {
-          description: `I heard "${transcribedText}" - let me show you how to pronounce "${currentWord}"`,
-        });
-        // Play the correct pronunciation after a short delay
-        setTimeout(() => {
-          playCorrectPronunciation();
-        }, 1000);
+      if (!isCorrect) {
+        // Play the correct pronunciation immediately if incorrect
+        playCorrectPronunciation();
       }
 
       onPronunciationResult(isCorrect);
     } else if (event.type === 'error') {
       console.error('VoiceInterface: Error event received:', event);
-      toast.error("Error processing pronunciation", {
-        description: event.message || "Please try again",
-      });
       onPronunciationResult(false);
     }
   };
@@ -123,15 +106,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         }
       }, 5000);
       
-      toast.info("Ready to evaluate", {
-        description: `Speak the word "${currentWord}" clearly`,
-      });
-      
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);
-      toast.error('Failed to start recording', {
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-      });
       onPronunciationResult(false);
     }
   };
