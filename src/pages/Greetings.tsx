@@ -54,7 +54,7 @@ const Greetings = () => {
       });
 
       console.log('Initializing WebRTCManager');
-      await manager.initialize();
+      await manager.initialize(false); // Don't require microphone for speaking
       
       console.log('Sending conversation item');
       await manager.sendData({

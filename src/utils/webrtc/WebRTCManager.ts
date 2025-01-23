@@ -9,49 +9,52 @@ export class WebRTCManager {
     console.log('WebRTCManager: Initializing');
   }
 
-  async initialize() {
+  async initialize(requireMicrophone: boolean = true) {
     try {
       console.log('WebRTCManager: Starting initialization');
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        } 
-      });
-
-      this.mediaRecorder = new MediaRecorder(stream);
       
-      this.mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          this.audioChunks.push(event.data);
-        }
-      };
+      if (requireMicrophone) {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        });
 
-      this.mediaRecorder.onstop = async () => {
-        try {
-          const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-          const base64Audio = await this.blobToBase64(audioBlob);
-          
-          console.log('WebRTCManager: Processing audio data');
-          const response = await supabase.functions.invoke('voice-to-text', {
-            body: { audio: base64Audio }
-          });
-
-          if (response.error) {
-            throw new Error(response.error.message);
+        this.mediaRecorder = new MediaRecorder(stream);
+        
+        this.mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            this.audioChunks.push(event.data);
           }
+        };
 
-          console.log('WebRTCManager: Audio processing complete', response.data);
-          this.onMessage(response.data);
-        } catch (error) {
-          console.error('WebRTCManager: Error processing audio:', error);
-          this.onMessage({ type: 'error', message: error.message });
-        } finally {
-          this.audioChunks = [];
-          this.isRecording = false;
-        }
-      };
+        this.mediaRecorder.onstop = async () => {
+          try {
+            const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+            const base64Audio = await this.blobToBase64(audioBlob);
+            
+            console.log('WebRTCManager: Processing audio data');
+            const response = await supabase.functions.invoke('voice-to-text', {
+              body: { audio: base64Audio }
+            });
+
+            if (response.error) {
+              throw new Error(response.error.message);
+            }
+
+            console.log('WebRTCManager: Audio processing complete', response.data);
+            this.onMessage(response.data);
+          } catch (error) {
+            console.error('WebRTCManager: Error processing audio:', error);
+            this.onMessage({ type: 'error', message: error.message });
+          } finally {
+            this.audioChunks = [];
+            this.isRecording = false;
+          }
+        };
+      }
 
       console.log('WebRTCManager: Initialization complete');
       return true;
@@ -78,18 +81,19 @@ export class WebRTCManager {
   }
 
   sendData(data: any) {
-    if (!this.mediaRecorder) {
-      console.warn('WebRTCManager: MediaRecorder not initialized');
-      return;
-    }
-    
     try {
       if (data.type === 'start_recording' && !this.isRecording) {
+        if (!this.mediaRecorder) {
+          throw new Error('MediaRecorder not initialized. Did you call initialize with requireMicrophone=true?');
+        }
         this.audioChunks = [];
         this.mediaRecorder.start();
         this.isRecording = true;
         console.log('WebRTCManager: Started recording');
       } else if (data.type === 'stop_recording' && this.isRecording) {
+        if (!this.mediaRecorder) {
+          throw new Error('MediaRecorder not initialized');
+        }
         this.mediaRecorder.stop();
         console.log('WebRTCManager: Stopped recording');
       }
