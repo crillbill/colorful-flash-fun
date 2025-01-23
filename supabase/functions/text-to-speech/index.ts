@@ -27,7 +27,6 @@ serve(async (req) => {
 
     console.log('Text-to-speech: Generating speech for text:', text, 'with voice:', voice || 'alloy')
 
-    // Make a direct API call to OpenAI without using the client
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
