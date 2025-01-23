@@ -13,16 +13,14 @@ export class WebRTCManager {
     try {
       console.log('WebRTCManager: Starting initialization');
       
-      // Use import.meta.env instead of process.env
-      const response = await fetch('https://api.openai.com/v1/audio/speech', {
+      // Test the connection using Supabase's text-to-speech function
+      const response = await fetch('/api/text-to-speech', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "tts-1",
-          input: "Test connection",
+          text: "Test connection",
           voice: "alloy"
         })
       });
