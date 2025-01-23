@@ -18,10 +18,17 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
+    const openAiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openAiKey) {
+      throw new Error('OPENAI_API_KEY is not set in environment variables')
+    }
+
+    console.log('Making request to OpenAI API with text:', text)
+
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Authorization': `Bearer ${openAiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -33,8 +40,9 @@ serve(async (req) => {
     })
 
     if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error?.message || 'Failed to generate speech')
+      const error = await response.text()
+      console.error('OpenAI API error:', error)
+      throw new Error(`OpenAI API error: ${error}`)
     }
 
     const arrayBuffer = await response.arrayBuffer()
@@ -47,6 +55,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Error in text-to-speech function:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
