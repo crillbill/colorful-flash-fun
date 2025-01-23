@@ -4,14 +4,15 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Mic } from "lucide-react";
+import { Mic, Volume2 } from "lucide-react";
 import { useState } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
-import { supabase } from "@/integrations/supabase/client";
+import { WebRTCManager } from "@/utils/webrtc/WebRTCManager";
 
 const Greetings = () => {
   const [isListening, setIsListening] = useState(false);
   const [isListeningSecond, setIsListeningSecond] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const currentWord = "שלום"; // Shalom
   const secondWord = "מה שלומך היום"; // Ma shlomcha hayom
 
@@ -30,6 +31,36 @@ const Greetings = () => {
       toast.success("Excellent!");
     } else {
       toast.error("Keep practicing!");
+    }
+  };
+
+  const speakWord = async (word: string) => {
+    if (isSpeaking) return;
+    
+    try {
+      setIsSpeaking(true);
+      const manager = new WebRTCManager((message) => {
+        console.log("Received message:", message);
+        if (message.type === 'response.audio.done') {
+          setIsSpeaking(false);
+          manager.disconnect();
+        }
+      });
+
+      await manager.initialize();
+      await manager.sendData({
+        type: 'conversation.item.create',
+        item: {
+          type: 'message',
+          role: 'user',
+          content: [{ type: 'input_text', text: word }]
+        }
+      });
+      manager.sendData({ type: 'response.create' });
+    } catch (error) {
+      console.error('Error speaking word:', error);
+      toast.error("Failed to speak the word");
+      setIsSpeaking(false);
     }
   };
 
@@ -61,6 +92,15 @@ const Greetings = () => {
               <Button
                 variant="ghost"
                 size="icon"
+                onClick={() => speakWord(currentWord)}
+                disabled={isSpeaking}
+                className={isSpeaking ? "bg-blue-100" : ""}
+              >
+                <Volume2 className="h-6 w-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setIsListening(true)}
                 className={isListening ? "bg-red-100" : ""}
               >
@@ -85,6 +125,15 @@ const Greetings = () => {
             <div className="flex items-center gap-4">
               <span className="text-xl">How are you today?</span>
               <span className="text-xl font-bold">{secondWord}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => speakWord(secondWord)}
+                disabled={isSpeaking}
+                className={isSpeaking ? "bg-blue-100" : ""}
+              >
+                <Volume2 className="h-6 w-6" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
