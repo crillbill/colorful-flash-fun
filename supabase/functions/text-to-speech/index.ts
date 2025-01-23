@@ -19,15 +19,15 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    console.log('Text-to-speech: Generating speech for text:', text, 'with voice:', voice || 'alloy')
-
     const openAiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openAiKey) {
       console.error('Text-to-speech: OPENAI_API_KEY is not set in environment variables')
       throw new Error('OPENAI_API_KEY is not set in environment variables')
     }
 
-    // Generate speech from text using OpenAI API directly
+    console.log('Text-to-speech: Generating speech for text:', text, 'with voice:', voice || 'alloy')
+
+    // Make a direct API call to OpenAI without using the client
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
