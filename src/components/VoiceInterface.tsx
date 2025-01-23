@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { toast } from "sonner";
 import { RealtimeChat } from '@/utils/RealtimeChat';
+import { toast } from "sonner";
 
 interface VoiceInterfaceProps {
   currentWord: string;
@@ -18,25 +18,27 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const handleMessage = (event: any) => {
     console.log('VoiceInterface: Received message:', event);
     
-    if (event.type === 'conversation.item.message') {
-      const message = event.message.content.toLowerCase();
-      const isCorrect = message.includes('correct') && !message.includes('incorrect');
+    if (event.text) {
+      // We got a valid transcription response
+      const transcribedText = event.text.toLowerCase().trim();
+      const expectedWord = currentWord.toLowerCase().trim();
+      const isCorrect = transcribedText.includes(expectedWord);
       
-      console.log('VoiceInterface: Processing message:', {
-        message,
-        isCorrect,
-        eventType: event.type
+      console.log('VoiceInterface: Comparing:', {
+        transcribed: transcribedText,
+        expected: expectedWord,
+        isCorrect
       });
 
       onPronunciationResult(isCorrect);
       
       if (isCorrect) {
         toast.success("Good job!", {
-          description: event.message.content,
+          description: `Your pronunciation of "${currentWord}" was correct!`,
         });
       } else {
         toast.error("Keep practicing", {
-          description: event.message.content,
+          description: `I heard "${transcribedText}" - try saying "${currentWord}" again`,
         });
       }
     } else if (event.type === 'error') {
@@ -70,15 +72,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       setTimeout(async () => {
         try {
           if (chatRef.current) {
-            console.log('VoiceInterface: Sending initial message for word:', currentWord);
-            const prompt = `I will speak the Hebrew word "${currentWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`;
-            console.log('VoiceInterface: Prompt:', prompt);
-            
-            await chatRef.current.sendMessage(prompt);
-            console.log('VoiceInterface: Initial message sent successfully');
-            
+            console.log('VoiceInterface: Ready to evaluate word:', currentWord);
             toast.info("Ready to evaluate", {
-              description: "Connection established successfully",
+              description: `Speak the word "${currentWord}" clearly`,
             });
           }
         } catch (error) {
@@ -105,7 +101,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       startRecording();
     }
 
-    // Only cleanup when component unmounts, not when transitioning states
     return () => {
       if (chatRef.current) {
         console.log('VoiceInterface: Cleaning up recording session on unmount');
