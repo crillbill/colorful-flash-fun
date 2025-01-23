@@ -56,20 +56,32 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   useEffect(() => {
-    let cleanup = false;
+    let isActive = true;
 
-    if (isListening && !cleanup) {
-      console.log('Starting new recording session');
-      startRecording();
-    }
+    const initializeRecording = async () => {
+      if (isListening && isActive) {
+        console.log('Starting new recording session');
+        await startRecording();
+        
+        // Only send the message if the chat is still active and initialized
+        if (chatRef.current && isActive) {
+          try {
+            await chatRef.current.sendMessage(
+              `I will speak the Hebrew word "${currentWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`
+            );
+          } catch (error) {
+            console.error('Error sending initial message:', error);
+          }
+        }
+      }
+    };
+
+    initializeRecording();
 
     return () => {
-      cleanup = true;
+      isActive = false;
       if (chatRef.current) {
         console.log('Cleaning up recording session');
-        if (isListening) {
-          chatRef.current.sendMessage(`I will speak the Hebrew word "${currentWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`);
-        }
         chatRef.current.disconnect();
         chatRef.current = null;
       }
