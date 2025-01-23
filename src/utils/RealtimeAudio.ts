@@ -73,8 +73,9 @@ export class RealtimeChat {
 
   async init(currentWord: string) {
     try {
-      const tokenResponse = await supabase.functions.invoke("realtime-speech");
-      const data = await tokenResponse.data;
+      const { data, error } = await supabase.functions.invoke('realtime-speech');
+      
+      if (error) throw error;
       
       if (!data.client_secret?.value) {
         throw new Error("Failed to get ephemeral token");

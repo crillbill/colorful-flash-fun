@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -17,6 +18,7 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY is not set');
     }
 
+    // Request an ephemeral token from OpenAI
     const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
       method: "POST",
       headers: {
