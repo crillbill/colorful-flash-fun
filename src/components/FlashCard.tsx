@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -25,6 +25,20 @@ export const FlashCard = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (isListening) {
+      timeoutId = setTimeout(() => {
+        setIsListening(false);
+      }, 2000); // Stop listening after 2 seconds
+    }
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isListening]);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -178,7 +192,7 @@ export const FlashCard = ({
             {isListening ? "Listening..." : `Say "${question}"`}
           </Button>
           <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-muted-foreground">
-            {isListening && "Speak now..."}
+            {isListening && "Speak now... (2 seconds remaining)"}
           </div>
           <div className="hidden">
             <VoiceInterface
