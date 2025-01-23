@@ -40,14 +40,23 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     }
   };
 
+  const getHebrewTransliteration = (hebrewWord: string): string => {
+    // Add mappings for Hebrew words to their English transliterations
+    const transliterations: { [key: string]: string } = {
+      'שלום': 'shalom',
+      // Add more Hebrew words and their transliterations as needed
+    };
+    return transliterations[hebrewWord.trim()] || hebrewWord;
+  };
+
   const evaluatePronunciation = (transcribed: string, expected: string): boolean => {
     const normalizedTranscribed = transcribed.toLowerCase().trim();
-    const normalizedExpected = expected.toLowerCase().trim();
-    const isMatch = normalizedTranscribed.includes(normalizedExpected);
+    const expectedTransliteration = getHebrewTransliteration(expected);
+    const isMatch = normalizedTranscribed.includes(expectedTransliteration.toLowerCase());
     
     console.log('VoiceInterface: Pronunciation evaluation:', {
       transcribed: normalizedTranscribed,
-      expected: normalizedExpected,
+      expected: expectedTransliteration,
       isMatch
     });
 
@@ -59,7 +68,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     
     if (event.text) {
       const transcribedText = event.text.toLowerCase().trim();
-      const expectedWord = currentWord.toLowerCase().trim();
+      const expectedWord = currentWord;
       const isCorrect = evaluatePronunciation(transcribedText, expectedWord);
       
       console.log('VoiceInterface: Speech evaluation result:', {
