@@ -4,7 +4,9 @@ export class AudioRecorder {
   private processor: ScriptProcessorNode | null = null;
   private source: MediaStreamAudioSourceNode | null = null;
 
-  constructor(private onAudioData: (audioData: Float32Array) => void) {}
+  constructor(private onAudioData: (audioData: Float32Array) => void) {
+    console.log('AudioRecorder: Initializing');
+  }
 
   async start() {
     try {
