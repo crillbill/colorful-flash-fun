@@ -3,8 +3,9 @@ import { FlashCard } from "@/components/FlashCard";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
-const flashcards = [
+const hebrewLetters = [
   { question: "א", answer: "Alef (silent or glottal stop)" },
   { question: "ב", answer: "Bet (B as in 'boy' or V as in 'vet')" },
   { question: "ג", answer: "Gimel (G as in 'go')" },
@@ -34,13 +35,27 @@ const flashcards = [
   { question: "ת", answer: "Tav (T as in 'table' or S as in 'sun' in some traditions)" },
 ];
 
+const rainbowColors = [
+  { question: "אָדוֹם", answer: "Red (Adom)" },
+  { question: "כָּתוֹם", answer: "Orange (Katom)" },
+  { question: "צָהוֹב", answer: "Yellow (Tzahov)" },
+  { question: "יָרוֹק", answer: "Green (Yarok)" },
+  { question: "כָּחוֹל", answer: "Blue (Kachol)" },
+  { question: "סָגוֹל", answer: "Purple (Sagol)" },
+];
+
+type CardSet = "letters" | "colors";
+
 const Index = () => {
   const [currentCard, setCurrentCard] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
+  const [activeSet, setActiveSet] = useState<CardSet>("letters");
+
+  const currentDeck = activeSet === "letters" ? hebrewLetters : rainbowColors;
 
   const handleNext = () => {
-    if (currentCard === flashcards.length - 1) {
+    if (currentCard === currentDeck.length - 1) {
       toast("Congratulations! You've completed all cards!");
       setCurrentCard(0);
     } else {
@@ -59,19 +74,41 @@ const Index = () => {
     toast.error("Incorrect. Keep trying!");
   };
 
+  const switchSet = (set: CardSet) => {
+    setActiveSet(set);
+    setCurrentCard(0);
+    setCorrectAnswers(0);
+    setTotalAnswered(0);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
       <div className="max-w-2xl mx-auto space-y-8">
         <h1 className="text-4xl font-bold text-center text-primary mb-8">
-          Hebrew Letters Flashcards
+          {activeSet === "letters" ? "Hebrew Letters" : "Hebrew Rainbow Colors"}
         </h1>
+
+        <div className="flex justify-center gap-4 mb-8">
+          <Button
+            onClick={() => switchSet("letters")}
+            variant={activeSet === "letters" ? "default" : "outline"}
+          >
+            Hebrew Letters
+          </Button>
+          <Button
+            onClick={() => switchSet("colors")}
+            variant={activeSet === "colors" ? "default" : "outline"}
+          >
+            Rainbow Colors
+          </Button>
+        </div>
         
         <ScoreDisplay correct={correctAnswers} total={totalAnswered} />
-        <ProgressBar current={currentCard + 1} total={flashcards.length} />
+        <ProgressBar current={currentCard + 1} total={currentDeck.length} />
         
         <FlashCard
-          question={flashcards[currentCard].question}
-          answer={flashcards[currentCard].answer}
+          question={currentDeck[currentCard].question}
+          answer={currentDeck[currentCard].answer}
           onNext={handleNext}
           onCorrect={handleCorrect}
           onIncorrect={handleIncorrect}
