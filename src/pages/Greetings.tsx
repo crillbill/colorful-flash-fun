@@ -4,10 +4,52 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { Mic, Volume2 } from "lucide-react";
+import { useState } from "react";
+import VoiceInterface from "@/components/VoiceInterface";
+import { AudioButton } from "@/components/AudioButton";
 
 const Greetings = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const currentWord = "שלום"; // Shalom
+
   const handleGreet = () => {
     toast("Hello there! 👋");
+  };
+
+  const handlePlayAudio = async () => {
+    try {
+      const response = await fetch("/api/text-to-speech", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: currentWord,
+          voice: "alloy",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate speech");
+      }
+
+      const { audioContent } = await response.json();
+      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+      
+      setIsPlaying(true);
+      audio.play();
+      audio.onended = () => setIsPlaying(false);
+    } catch (error) {
+      console.error("Error playing audio:", error);
+      toast.error("Failed to play audio");
+      setIsPlaying(false);
+    }
+  };
+
+  const handlePronunciationResult = (isCorrect: boolean) => {
+    setIsListening(false);
   };
 
   return (
@@ -32,6 +74,24 @@ const Greetings = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
+            <div className="flex items-center gap-4">
+              <span className="text-xl">Hello</span>
+              <span className="text-xl font-bold">{currentWord}</span>
+              <AudioButton isPlaying={isPlaying} onToggle={handlePlayAudio} />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsListening(true)}
+                className={isListening ? "bg-red-100" : ""}
+              >
+                <Mic className="h-6 w-6" />
+              </Button>
+            </div>
+            <VoiceInterface
+              currentWord={currentWord}
+              onPronunciationResult={handlePronunciationResult}
+              isListening={isListening}
+            />
             <p className="text-lg text-center text-muted-foreground">
               Click the button below to receive a friendly greeting!
             </p>
