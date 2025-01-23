@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import VoiceInterface from "./VoiceInterface";
 
 interface FlashCardProps {
   question: string;
@@ -36,6 +37,10 @@ export const FlashCard = ({
     }
     setIsFlipped(false);
     onNext();
+  };
+
+  const handlePronunciationResult = (isCorrect: boolean) => {
+    handleAnswer(isCorrect);
   };
 
   const playAudio = async (text: string) => {
@@ -96,21 +101,27 @@ export const FlashCard = ({
         <div className="flip-card-inner">
           <Card className="flip-card-front p-6 flex flex-col items-center justify-between bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
             <h2 className="text-8xl font-bold text-center">{question}</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="mt-4"
-              onClick={(e) => {
-                e.stopPropagation();
-                playAudio(question);
-              }}
-            >
-              {isPlaying ? (
-                <VolumeX className="h-6 w-6" />
-              ) : (
-                <Volume2 className="h-6 w-6" />
-              )}
-            </Button>
+            <div className="flex gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="mt-4"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playAudio(question);
+                }}
+              >
+                {isPlaying ? (
+                  <VolumeX className="h-6 w-6" />
+                ) : (
+                  <Volume2 className="h-6 w-6" />
+                )}
+              </Button>
+              <VoiceInterface
+                currentWord={question}
+                onPronunciationResult={handlePronunciationResult}
+              />
+            </div>
           </Card>
           <Card className="flip-card-back p-6 flex flex-col items-center justify-between bg-accent">
             <h3 className="text-xl font-semibold text-center">{answer}</h3>
