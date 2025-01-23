@@ -4,6 +4,13 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const hebrewLetters = [
   { question: "א", answer: "Alef (silent or glottal stop)" },
@@ -81,6 +88,18 @@ const Index = () => {
     setTotalAnswered(0);
   };
 
+  const handlePrevious = () => {
+    if (currentCard > 0) {
+      setCurrentCard(currentCard - 1);
+    }
+  };
+
+  const handleManualNext = () => {
+    if (currentCard < currentDeck.length - 1) {
+      setCurrentCard(currentCard + 1);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
       <div className="max-w-2xl mx-auto space-y-8">
@@ -113,6 +132,23 @@ const Index = () => {
           onCorrect={handleCorrect}
           onIncorrect={handleIncorrect}
         />
+
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={handlePrevious}
+                className={currentCard === 0 ? "opacity-50 cursor-not-allowed" : ""}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext 
+                onClick={handleManualNext}
+                className={currentCard === currentDeck.length - 1 ? "opacity-50 cursor-not-allowed" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );
