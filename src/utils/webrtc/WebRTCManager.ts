@@ -1,47 +1,28 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export class WebRTCManager {
-  private isConnected: boolean = false;
-  private audioContext: AudioContext;
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
+  private isRecording: boolean = false;
 
   constructor(private onMessage: (message: any) => void) {
     console.log('WebRTCManager: Initializing');
-    this.audioContext = new AudioContext();
   }
 
   async initialize() {
     try {
       console.log('WebRTCManager: Starting initialization');
-      
-      // Test the connection using Supabase's voice-to-text function
-      const response = await supabase.functions.invoke('voice-to-text', {
-        body: {
-          audio: "" // Empty audio for connection test
-        }
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
       });
 
-      if (response.error) {
-        console.error('Voice-to-text API error:', response.error);
-        throw new Error('Failed to initialize connection');
-      }
-
-      await this.setupMediaRecorder();
-      this.isConnected = true;
-      console.log('WebRTCManager: Initialization complete');
-    } catch (error) {
-      console.error('WebRTCManager: Error initializing:', error);
-      throw error;
-    }
-  }
-
-  private async setupMediaRecorder() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.mediaRecorder = new MediaRecorder(stream);
       
-      this.mediaRecorder.ondataavailable = async (event) => {
+      this.mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           this.audioChunks.push(event.data);
         }
@@ -52,27 +33,30 @@ export class WebRTCManager {
           const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
           const base64Audio = await this.blobToBase64(audioBlob);
           
+          console.log('WebRTCManager: Processing audio data');
           const response = await supabase.functions.invoke('voice-to-text', {
-            body: {
-              audio: base64Audio
-            }
+            body: { audio: base64Audio }
           });
 
           if (response.error) {
-            throw new Error('Failed to process speech');
+            throw new Error(response.error.message);
           }
 
+          console.log('WebRTCManager: Audio processing complete', response.data);
           this.onMessage(response.data);
         } catch (error) {
           console.error('WebRTCManager: Error processing audio:', error);
           this.onMessage({ type: 'error', message: error.message });
         } finally {
           this.audioChunks = [];
+          this.isRecording = false;
         }
       };
 
+      console.log('WebRTCManager: Initialization complete');
+      return true;
     } catch (error) {
-      console.error('WebRTCManager: Error setting up media recorder:', error);
+      console.error('WebRTCManager: Error initializing:', error);
       throw error;
     }
   }
@@ -82,7 +66,6 @@ export class WebRTCManager {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          // Remove the data URL prefix
           const base64String = reader.result.split(',')[1];
           resolve(base64String);
         } else {
@@ -95,17 +78,18 @@ export class WebRTCManager {
   }
 
   sendData(data: any) {
-    if (!this.isConnected || !this.mediaRecorder) {
-      console.warn('WebRTCManager: Not connected or recorder not ready');
+    if (!this.mediaRecorder) {
+      console.warn('WebRTCManager: MediaRecorder not initialized');
       return;
     }
     
     try {
-      if (data.type === 'start_recording' && this.mediaRecorder.state === 'inactive') {
+      if (data.type === 'start_recording' && !this.isRecording) {
         this.audioChunks = [];
         this.mediaRecorder.start();
+        this.isRecording = true;
         console.log('WebRTCManager: Started recording');
-      } else if (data.type === 'stop_recording' && this.mediaRecorder.state === 'recording') {
+      } else if (data.type === 'stop_recording' && this.isRecording) {
         this.mediaRecorder.stop();
         console.log('WebRTCManager: Stopped recording');
       }
@@ -116,11 +100,11 @@ export class WebRTCManager {
   }
 
   disconnect() {
-    this.isConnected = false;
-    if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+    if (this.mediaRecorder && this.isRecording) {
       this.mediaRecorder.stop();
     }
     this.audioChunks = [];
+    this.isRecording = false;
     console.log('WebRTCManager: Disconnected');
   }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { RealtimeChat } from '@/utils/RealtimeChat';
+import { WebRTCManager } from '@/utils/webrtc/WebRTCManager';
 import { toast } from "sonner";
 
 interface VoiceInterfaceProps {
@@ -13,14 +13,13 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   onPronunciationResult,
   isListening
 }) => {
-  const chatRef = useRef<RealtimeChat | null>(null);
+  const managerRef = useRef<WebRTCManager | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   const handleMessage = (event: any) => {
     console.log('VoiceInterface: Received message:', event);
     
     if (event.text) {
-      // We got a valid transcription response
       const transcribedText = event.text.toLowerCase().trim();
       const expectedWord = currentWord.toLowerCase().trim();
       const isCorrect = transcribedText.includes(expectedWord);
@@ -55,28 +54,26 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     try {
       console.log('VoiceInterface: Starting new recording session');
       
-      if (chatRef.current) {
+      if (managerRef.current) {
         console.log('VoiceInterface: Cleaning up existing session');
-        chatRef.current.disconnect();
-        chatRef.current = null;
+        managerRef.current.disconnect();
+        managerRef.current = null;
       }
 
-      console.log('VoiceInterface: Creating new RealtimeChat instance');
-      chatRef.current = new RealtimeChat(handleMessage);
+      console.log('VoiceInterface: Creating new WebRTCManager instance');
+      managerRef.current = new WebRTCManager(handleMessage);
       
-      console.log('VoiceInterface: Initializing RealtimeChat');
-      await chatRef.current.init();
+      console.log('VoiceInterface: Initializing WebRTCManager');
+      await managerRef.current.init();
       
-      console.log('VoiceInterface: RealtimeChat initialized successfully');
+      managerRef.current.sendData({ type: 'start_recording' });
       
       // Set a timeout to automatically stop recording after 5 seconds
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Auto-stopping recording after timeout');
-        if (chatRef.current) {
-          chatRef.current.disconnect();
-          chatRef.current = null;
+        if (managerRef.current) {
+          managerRef.current.sendData({ type: 'stop_recording' });
         }
-        onPronunciationResult(false);
       }, 5000);
       
       toast.info("Ready to evaluate", {
@@ -102,10 +99,10 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      if (chatRef.current) {
+      if (managerRef.current) {
         console.log('VoiceInterface: Cleaning up recording session on unmount');
-        chatRef.current.disconnect();
-        chatRef.current = null;
+        managerRef.current.disconnect();
+        managerRef.current = null;
       }
     };
   }, [isListening, currentWord]);
