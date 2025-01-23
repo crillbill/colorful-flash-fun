@@ -18,6 +18,8 @@ export class WebRTCManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          'apikey': process.env.SUPABASE_ANON_KEY || '',
         },
         body: JSON.stringify({
           text: "Test connection",
@@ -26,6 +28,8 @@ export class WebRTCManager {
       });
 
       if (!response.ok) {
+        const error = await response.text();
+        console.error('Text-to-speech API error:', error);
         throw new Error('Failed to initialize WebRTC connection');
       }
 
