@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { toast } from "sonner";
 import { RealtimeChat } from '@/utils/RealtimeAudio';
 
@@ -69,6 +69,10 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   useEffect(() => {
     if (isListening && !chatRef.current) {
       startRecording();
+    }
+    
+    if (!isListening && chatRef.current) {
+      stopRecording();
     }
 
     return () => {
