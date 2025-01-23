@@ -32,6 +32,12 @@ serve(async (req) => {
       }),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("OpenAI API error:", errorText);
+      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
+    }
+
     const data = await response.json();
     console.log("Session created:", data);
     

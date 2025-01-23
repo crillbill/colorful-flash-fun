@@ -75,9 +75,13 @@ export class RealtimeChat {
     try {
       const { data, error } = await supabase.functions.invoke('realtime-speech');
       
-      if (error) throw error;
-      
-      if (!data.client_secret?.value) {
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw error;
+      }
+
+      if (!data || !data.client_secret?.value) {
+        console.error("Invalid response data:", data);
         throw new Error("Failed to get ephemeral token");
       }
 
@@ -109,6 +113,12 @@ export class RealtimeChat {
           "Content-Type": "application/sdp"
         },
       });
+
+      if (!sdpResponse.ok) {
+        const errorText = await sdpResponse.text();
+        console.error("OpenAI SDP error:", errorText);
+        throw new Error(`OpenAI SDP error: ${sdpResponse.status} ${errorText}`);
+      }
 
       const answer = {
         type: "answer" as RTCSdpType,
