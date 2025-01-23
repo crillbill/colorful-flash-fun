@@ -99,8 +99,7 @@ export class RealtimeChat {
       
       this.dc.onopen = () => {
         console.log("Data channel is now open and ready");
-        // Send the initial instruction with the target word
-        this.sendMessage(`I will speak the Hebrew word "${this.targetWord}". Please evaluate my pronunciation and provide specific feedback.`);
+        this.sendMessage(`I will speak the Hebrew word "${this.targetWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`);
       };
       
       this.dc.onerror = (error) => {

@@ -7,7 +7,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -18,7 +17,6 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY is not set');
     }
 
-    // Request an ephemeral token from OpenAI
     const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
       method: "POST",
       headers: {
@@ -28,7 +26,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "gpt-4o-realtime-preview-2024-12-17",
         voice: "alloy",
-        instructions: "You are a Hebrew language pronunciation assistant. Listen to the user's pronunciation and compare it to the correct pronunciation of Hebrew words. Respond with whether the pronunciation was correct or not, and provide specific feedback on what could be improved if needed."
+        instructions: "You are a Hebrew language pronunciation assistant. When the user speaks a Hebrew word, carefully evaluate their pronunciation and provide specific feedback. For each word, you should: 1) Indicate if the pronunciation was correct or incorrect, 2) Provide specific feedback about what was good or needs improvement, 3) If incorrect, explain how to fix any pronunciation issues. Be encouraging but precise in your feedback."
       }),
     });
 
