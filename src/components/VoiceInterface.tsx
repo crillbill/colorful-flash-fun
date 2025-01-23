@@ -69,12 +69,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     if (isListening) {
       console.log('Starting new recording session');
       startRecording();
-    } else if (!isListening) {  // Added explicit check
+    } else if (!isListening) {
       console.log('Ending recording session');
       stopRecording();
-      // Force a pronunciation result if we haven't received one yet
-      // This will reset the button state in the parent component
-      onPronunciationResult(false);
     }
 
     return () => {
