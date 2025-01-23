@@ -16,11 +16,13 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const managerRef = useRef<WebRTCManager | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const feedbackInProgressRef = useRef<boolean>(false);
+  const feedbackQueueRef = useRef<string[]>([]);
 
   const playAudioFeedback = async (text: string) => {
     try {
       if (feedbackInProgressRef.current) {
-        console.log('VoiceInterface: Skipping feedback as another one is in progress');
+        console.log('VoiceInterface: Adding feedback to queue:', text);
+        feedbackQueueRef.current.push(text);
         return;
       }
 
@@ -41,17 +43,24 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const { data: { audioContent } } = response;
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
       
+      audio.addEventListener('ended', () => {
+        feedbackInProgressRef.current = false;
+        const nextFeedback = feedbackQueueRef.current.shift();
+        if (nextFeedback) {
+          playAudioFeedback(nextFeedback);
+        }
+      });
+
       await audio.play();
       console.log('VoiceInterface: Audio feedback completed');
-      
-      feedbackInProgressRef.current = false;
     } catch (error) {
       console.error("VoiceInterface: Error playing audio feedback:", error);
       feedbackInProgressRef.current = false;
     }
   };
 
-  const getHebrewTransliteration = (hebrewWord: string): string => {
+  const getHebrewTransliteration = async (hebrewWord: string): Promise<string> => {
+    // Replace with a dynamic transliteration API or a more comprehensive mapping
     const transliterations: { [key: string]: string } = {
       'שלום': 'shalom',
       'מה שלומך היום': 'ma shlomcha hayom',
@@ -80,7 +89,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const transcribedText = event.text.toLowerCase().trim();
       const expectedWord = currentWord;
       const isCorrect = evaluatePronunciation(transcribedText, expectedWord);
-      const expectedTransliteration = getHebrewTransliteration(expectedWord);
+      const expectedTransliteration = await getHebrewTransliteration(expectedWord);
       
       console.log('VoiceInterface: Speech evaluation result:', {
         transcribed: transcribedText,
@@ -122,12 +131,14 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       managerRef.current.sendData({ type: 'start_recording' });
       
+      // Adjust timeout based on word length
+      const timeoutDuration = currentWord.length * 1000; // 1 second per character
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Auto-stopping recording after timeout');
         if (managerRef.current) {
           managerRef.current.sendData({ type: 'stop_recording' });
         }
-      }, 2000);
+      }, timeoutDuration);
       
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);
