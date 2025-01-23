@@ -64,7 +64,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       managerRef.current = new WebRTCManager(handleMessage);
       
       console.log('VoiceInterface: Initializing WebRTCManager');
-      await managerRef.current.init();
+      await managerRef.current.initialize();
       
       managerRef.current.sendData({ type: 'start_recording' });
       
