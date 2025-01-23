@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,13 +18,14 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
+    console.log('Text-to-speech: Generating speech for text:', text, 'with voice:', voice || 'alloy')
+
     const openAiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openAiKey) {
       throw new Error('OPENAI_API_KEY is not set in environment variables')
     }
 
-    console.log('Making request to OpenAI API with text:', text)
-
+    // Generate speech from text using OpenAI API directly
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
@@ -42,12 +42,15 @@ serve(async (req) => {
 
     if (!response.ok) {
       const error = await response.text()
-      console.error('OpenAI API error:', error)
+      console.error('Text-to-speech: OpenAI API error:', error)
       throw new Error(`OpenAI API error: ${error}`)
     }
 
+    // Convert audio buffer to base64
     const arrayBuffer = await response.arrayBuffer()
     const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+
+    console.log('Text-to-speech: Successfully generated speech')
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),
@@ -56,7 +59,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
-    console.error('Error in text-to-speech function:', error)
+    console.error('Text-to-speech: Error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
