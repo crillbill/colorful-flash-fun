@@ -59,13 +59,9 @@ export const FlashCard = ({
   };
 
   const handlePronunciationResult = (isCorrect: boolean) => {
+    console.log('Pronunciation result received:', isCorrect);
     setIsListening(false);
     setIsProcessing(false);
-    if (isCorrect) {
-      toast.success("Great pronunciation!");
-    } else {
-      toast.error("Keep practicing. Try again!");
-    }
     handleAnswer(isCorrect);
   };
 
@@ -209,12 +205,10 @@ export const FlashCard = ({
             {isListening && "Speak now... (2 seconds remaining)"}
             {isProcessing && "Analyzing your pronunciation..."}
           </div>
-          <div className="hidden">
-            <VoiceInterface
-              currentWord={question}
-              onPronunciationResult={handlePronunciationResult}
-            />
-          </div>
+          <VoiceInterface
+            currentWord={question}
+            onPronunciationResult={handlePronunciationResult}
+          />
         </div>
       </div>
     </div>

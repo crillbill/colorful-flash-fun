@@ -23,13 +23,21 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const message = event.message.content.toLowerCase();
       const isCorrect = message.includes('correct') && !message.includes('incorrect');
       
+      console.log('Processing message:', message, 'isCorrect:', isCorrect);
+      
       // Send the result back to the parent component
       onPronunciationResult(isCorrect);
       
       // Show feedback toast
-      toast(isCorrect ? "Good job!" : "Keep practicing", {
-        description: event.message.content,
-      });
+      if (isCorrect) {
+        toast.success("Good job!", {
+          description: event.message.content,
+        });
+      } else {
+        toast.error("Keep practicing", {
+          description: event.message.content,
+        });
+      }
       
       stopRecording();
     }
@@ -41,7 +49,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       await chatRef.current.init(currentWord);
       setIsRecording(true);
       
-      toast("Recording Started", {
+      toast.info("Recording Started", {
         description: "Speak the Hebrew word now",
       });
     } catch (error) {
