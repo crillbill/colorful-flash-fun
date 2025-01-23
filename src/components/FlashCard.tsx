@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { Volume2, VolumeX, Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import VoiceInterface from "./VoiceInterface";
 import { toast } from "sonner";
@@ -29,17 +32,28 @@ export const FlashCard = ({
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    console.log("isListening or timeLeft changed:", { isListening, timeLeft });
+    console.log("FlashCard: State change detected:", { 
+      isListening, 
+      timeLeft,
+      isProcessing,
+      isPlaying,
+      isFlipped 
+    });
+
     let intervalId: NodeJS.Timeout;
-    
+
     if (isListening && timeLeft > 0) {
+      console.log("FlashCard: Starting countdown timer:", timeLeft);
       intervalId = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+        setTimeLeft((prev) => {
+          console.log("FlashCard: Countdown update:", prev - 1);
+          return prev - 1;
+        });
       }, 1000);
     }
 
     if (timeLeft === 0 && isListening) {
-      console.log("Time's up! Switching to processing state.");
+      console.log("FlashCard: Countdown finished, transitioning to processing state");
       setIsListening(false);
       setIsProcessing(true);
       setTimeLeft(3);
@@ -47,30 +61,43 @@ export const FlashCard = ({
 
     return () => {
       if (intervalId) {
-        console.log("Clearing interval.");
+        console.log("FlashCard: Cleaning up interval timer");
         clearInterval(intervalId);
       }
     };
   }, [isListening, timeLeft]);
 
   const handleFlip = () => {
-    console.log("Flipping card.");
+    console.log("FlashCard: Card flip triggered, current state:", !isFlipped);
     setIsFlipped(!isFlipped);
   };
 
   const handleAnswer = (correct: boolean) => {
-    console.log("Handling answer:", correct ? "Correct" : "Incorrect");
+    console.log("FlashCard: Answer handled:", {
+      correct,
+      currentQuestion: question,
+      currentAnswer: answer
+    });
+    
     if (correct) {
+      console.log("FlashCard: Correct answer registered");
       onCorrect();
     } else {
+      console.log("FlashCard: Incorrect answer registered");
       onIncorrect();
     }
+    
     setIsFlipped(false);
     onNext();
   };
 
   const handlePronunciationResult = (isCorrect: boolean) => {
-    console.log("Pronunciation result received. Correct?", isCorrect);
+    console.log("FlashCard: Pronunciation result received:", {
+      isCorrect,
+      currentWord: question,
+      processingState: isProcessing
+    });
+    
     setIsProcessing(false);
     setIsListening(false);
     setTimeLeft(3);
@@ -80,52 +107,76 @@ export const FlashCard = ({
   const playAudio = async (text: string) => {
     try {
       if (isPlaying) {
-        console.log("Pausing audio.");
+        console.log("FlashCard: Stopping current audio playback");
         audio?.pause();
         setIsPlaying(false);
         return;
       }
 
-      console.log("Fetching audio for text:", text);
+      console.log("FlashCard: Initiating audio playback for text:", text);
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { text },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("FlashCard: Supabase text-to-speech error:", error);
+        toast.error("Failed to generate audio", {
+          description: error.message
+        });
+        throw error;
+      }
 
+      if (!data || !data.audioContent) {
+        console.error("FlashCard: Invalid audio data received:", data);
+        toast.error("Invalid audio data received");
+        return;
+      }
+
+      console.log("FlashCard: Audio data received, creating blob");
       const audioContent = data.audioContent;
       const audioBlob = new Blob(
         [Uint8Array.from(atob(audioContent), c => c.charCodeAt(0))],
         { type: 'audio/mp3' }
       );
       const audioUrl = URL.createObjectURL(audioBlob);
-      
+
       if (audio) {
+        console.log("FlashCard: Cleaning up previous audio instance");
         audio.pause();
         URL.revokeObjectURL(audio.src);
       }
 
+      console.log("FlashCard: Setting up new audio instance");
       const newAudio = new Audio(audioUrl);
       setAudio(newAudio);
-      
+
       newAudio.onended = () => {
-        console.log("Audio playback ended.");
+        console.log("FlashCard: Audio playback completed");
         setIsPlaying(false);
         URL.revokeObjectURL(audioUrl);
       };
 
-      console.log("Playing audio.");
+      newAudio.onerror = (e) => {
+        console.error("FlashCard: Audio playback error:", e);
+        toast.error("Error playing audio");
+        setIsPlaying(false);
+      };
+
+      console.log("FlashCard: Starting audio playback");
       setIsPlaying(true);
       await newAudio.play();
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error("FlashCard: Audio playback error:", error);
+      toast.error("Failed to play audio", {
+        description: error instanceof Error ? error.message : "Unknown error occurred"
+      });
       setIsPlaying(false);
     }
   };
 
   const handleStartListening = () => {
     if (!isListening && !isProcessing) {
-      console.log("Starting listening.");
+      console.log("FlashCard: Starting listening.");
       setIsListening(true);
       setTimeLeft(3);
       toast.info("Listening...", {
@@ -175,3 +226,5 @@ export const FlashCard = ({
     </div>
   );
 };
+
+export default FlashCard;
