@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { WebRTCManager } from '@/utils/webrtc/WebRTCManager';
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface VoiceInterfaceProps {
   currentWord: string;
@@ -16,7 +17,29 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const managerRef = useRef<WebRTCManager | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const handleMessage = (event: any) => {
+  const playCorrectPronunciation = async () => {
+    try {
+      const response = await supabase.functions.invoke('text-to-speech', {
+        body: {
+          text: currentWord,
+          voice: "alloy",
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to generate speech');
+      }
+
+      const { data: { audioContent } } = response;
+      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+      audio.play();
+    } catch (error) {
+      console.error("Error playing pronunciation:", error);
+      toast.error("Failed to play pronunciation");
+    }
+  };
+
+  const handleMessage = async (event: any) => {
     console.log('VoiceInterface: Received message:', event);
     
     if (event.text) {
@@ -38,8 +61,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         });
       } else {
         toast.error("Keep practicing", {
-          description: `I heard "${transcribedText}" - try saying "${currentWord}" again`,
+          description: `I heard "${transcribedText}" - let me show you how to pronounce "${currentWord}"`,
         });
+        // Play the correct pronunciation after a short delay
+        setTimeout(() => {
+          playCorrectPronunciation();
+        }, 1000);
       }
     } else if (event.type === 'error') {
       console.error('VoiceInterface: Error event received:', event);
