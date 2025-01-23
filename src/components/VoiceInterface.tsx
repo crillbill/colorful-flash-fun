@@ -14,6 +14,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   isListening
 }) => {
   const chatRef = useRef<RealtimeChat | null>(null);
+  const connectionPromiseRef = useRef<Promise<void> | null>(null);
 
   const handleMessage = (event: any) => {
     console.log('Received message:', event);
@@ -46,7 +47,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       }
 
       chatRef.current = new RealtimeChat(handleMessage);
-      await chatRef.current.init(currentWord);
+      connectionPromiseRef.current = chatRef.current.init(currentWord);
+      await connectionPromiseRef.current;
       
       console.log('Recording started for word:', currentWord);
     } catch (error) {
@@ -56,11 +58,19 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     }
   };
 
-  const stopRecording = () => {
+  const stopRecording = async () => {
     console.log('Stopping recording');
-    if (chatRef.current) {
-      chatRef.current.disconnect();
-      chatRef.current = null;
+    try {
+      // Wait for any pending connection to complete before disconnecting
+      if (connectionPromiseRef.current) {
+        await connectionPromiseRef.current;
+      }
+      if (chatRef.current) {
+        chatRef.current.disconnect();
+        chatRef.current = null;
+      }
+    } catch (error) {
+      console.error('Error stopping recording:', error);
     }
   };
 
@@ -68,7 +78,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     if (isListening) {
       console.log('Starting new recording session');
       startRecording();
-    } else if (!isListening && chatRef.current) {
+    } else {
       console.log('Ending recording session');
       stopRecording();
     }
