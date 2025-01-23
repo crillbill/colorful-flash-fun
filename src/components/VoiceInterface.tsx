@@ -5,13 +5,14 @@ import { RealtimeChat } from '@/utils/RealtimeAudio';
 interface VoiceInterfaceProps {
   currentWord: string;
   onPronunciationResult: (isCorrect: boolean) => void;
+  isListening: boolean;
 }
 
 const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ 
   currentWord, 
-  onPronunciationResult 
+  onPronunciationResult,
+  isListening
 }) => {
-  const [isRecording, setIsRecording] = useState(false);
   const chatRef = useRef<RealtimeChat | null>(null);
 
   const handleMessage = (event: any) => {
@@ -46,7 +47,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       if (!chatRef.current) {
         chatRef.current = new RealtimeChat(handleMessage);
         await chatRef.current.init(currentWord);
-        setIsRecording(true);
         
         toast.info("Recording Started", {
           description: "Speak the Hebrew word now",
@@ -55,7 +55,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     } catch (error) {
       console.error('Error starting recording:', error);
       toast.error('Failed to start recording');
-      setIsRecording(false);
+      onPronunciationResult(false);
     }
   };
 
@@ -63,12 +63,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     if (chatRef.current) {
       chatRef.current.disconnect();
       chatRef.current = null;
-      setIsRecording(false);
     }
   };
 
   useEffect(() => {
-    if (!isRecording) {
+    if (isListening && !chatRef.current) {
       startRecording();
     }
 
@@ -78,7 +77,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         chatRef.current = null;
       }
     };
-  }, [currentWord]);
+  }, [isListening, currentWord]);
 
   return null;
 };

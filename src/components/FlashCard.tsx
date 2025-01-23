@@ -215,6 +215,7 @@ export const FlashCard = ({
       <VoiceInterface
         currentWord={question}
         onPronunciationResult={handlePronunciationResult}
+        isListening={isListening}
       />
     </div>
   );
