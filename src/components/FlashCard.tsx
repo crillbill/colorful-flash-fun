@@ -34,8 +34,7 @@ export const FlashCard = ({
       timeoutId = setTimeout(() => {
         setIsListening(false);
         setIsProcessing(true);
-        toast.info("Processing your pronunciation...");
-      }, 2000); // Stop listening after 2 seconds
+      }, 2000);
     }
     return () => {
       if (timeoutId) {
@@ -190,7 +189,12 @@ export const FlashCard = ({
             size="lg"
             className="gap-2"
             onClick={() => {
-              setIsListening(true);
+              if (!isListening && !isProcessing) {
+                setIsListening(true);
+                toast.info("Listening...", {
+                  description: "Speak the Hebrew word now",
+                });
+              }
             }}
             disabled={isListening || isProcessing}
           >

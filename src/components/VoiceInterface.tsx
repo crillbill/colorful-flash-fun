@@ -54,15 +54,15 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       });
     } catch (error) {
       console.error('Error starting recording:', error);
-      toast.error('Failed to start recording', {
-        description: error instanceof Error ? error.message : 'Unknown error occurred',
-      });
+      toast.error('Failed to start recording');
+      setIsRecording(false);
     }
   };
 
   const stopRecording = () => {
     if (chatRef.current) {
       chatRef.current.disconnect();
+      chatRef.current = null;
       setIsRecording(false);
     }
   };
@@ -71,24 +71,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     return () => {
       if (chatRef.current) {
         chatRef.current.disconnect();
+        chatRef.current = null;
       }
     };
   }, []);
 
-  return (
-    <Button
-      variant={isRecording ? "destructive" : "secondary"}
-      size="icon"
-      onClick={isRecording ? stopRecording : startRecording}
-      className="mt-4"
-    >
-      {isRecording ? (
-        <MicOff className="h-6 w-6" />
-      ) : (
-        <Mic className="h-6 w-6" />
-      )}
-    </Button>
-  );
+  return null; // We don't need to render anything as the parent component handles the UI
 };
 
 export default VoiceInterface;
