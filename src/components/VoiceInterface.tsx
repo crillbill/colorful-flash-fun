@@ -22,7 +22,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const response = await supabase.functions.invoke('text-to-speech', {
         body: {
           text,
-          voice: "nova", // Using a female voice for feedback
+          voice: "nova", // Using nova voice for all feedback
         },
       });
 
@@ -83,18 +83,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         await playAudioFeedback(`I heard ${transcribedText}. The correct pronunciation is Shalom, let me demonstrate.`);
         // Short pause before playing the correct pronunciation
         await new Promise(resolve => setTimeout(resolve, 1000));
-        // Then play the correct pronunciation with a different voice
-        const response = await supabase.functions.invoke('text-to-speech', {
-          body: {
-            text: currentWord,
-            voice: "alloy", // Using the original voice for the word demonstration
-          },
-        });
-        if (!response.error) {
-          const { data: { audioContent } } = response;
-          const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
-          await audio.play();
-        }
+        // Then play the correct pronunciation with the same voice
+        await playAudioFeedback("Shalom");
       }
 
       onPronunciationResult(isCorrect);
