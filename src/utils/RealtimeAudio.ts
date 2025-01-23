@@ -65,16 +65,14 @@ export class RealtimeChat {
   private dc: RTCDataChannel | null = null;
   private audioEl: HTMLAudioElement;
   private recorder: AudioRecorder | null = null;
-  private targetWord: string = '';
 
   constructor(private onMessage: (message: any) => void) {
     this.audioEl = document.createElement("audio");
     this.audioEl.autoplay = true;
   }
 
-  async init(currentWord: string) {
+  async init() {
     try {
-      this.targetWord = currentWord;
       const { data, error } = await supabase.functions.invoke('realtime-speech');
       
       if (error) {
@@ -99,7 +97,6 @@ export class RealtimeChat {
       
       this.dc.onopen = () => {
         console.log("Data channel is now open and ready");
-        this.sendMessage(`I will speak the Hebrew word "${this.targetWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`);
       };
       
       this.dc.onerror = (error) => {
