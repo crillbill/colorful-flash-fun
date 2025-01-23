@@ -48,6 +48,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       await chatRef.current.init();
       
       console.log('Recording started for word:', currentWord);
+      
+      // Send the initial message right after initialization
+      await chatRef.current.sendMessage(
+        `I will speak the Hebrew word "${currentWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`
+      );
     } catch (error) {
       console.error('Error starting recording:', error);
       toast.error('Failed to start recording');
@@ -56,30 +61,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   useEffect(() => {
-    let isActive = true;
-
-    const initializeRecording = async () => {
-      if (isListening && isActive) {
-        console.log('Starting new recording session');
-        await startRecording();
-        
-        // Only send the message if the chat is still active and initialized
-        if (chatRef.current && isActive) {
-          try {
-            await chatRef.current.sendMessage(
-              `I will speak the Hebrew word "${currentWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`
-            );
-          } catch (error) {
-            console.error('Error sending initial message:', error);
-          }
-        }
-      }
-    };
-
-    initializeRecording();
+    if (isListening) {
+      console.log('Starting new recording session');
+      startRecording();
+    }
 
     return () => {
-      isActive = false;
       if (chatRef.current) {
         console.log('Cleaning up recording session');
         chatRef.current.disconnect();
