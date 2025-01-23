@@ -15,14 +15,22 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 }) => {
   const managerRef = useRef<WebRTCManager | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const feedbackInProgressRef = useRef<boolean>(false);
 
   const playAudioFeedback = async (text: string) => {
     try {
+      if (feedbackInProgressRef.current) {
+        console.log('VoiceInterface: Skipping feedback as another one is in progress');
+        return;
+      }
+
       console.log('VoiceInterface: Playing audio feedback:', text);
+      feedbackInProgressRef.current = true;
+
       const response = await supabase.functions.invoke('text-to-speech', {
         body: {
           text,
-          voice: "nova", // Using nova voice for all feedback
+          voice: "nova",
         },
       });
 
@@ -32,17 +40,21 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
       const { data: { audioContent } } = response;
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
-      await audio.play();
       
+      await audio.play();
       console.log('VoiceInterface: Audio feedback completed');
+      
+      feedbackInProgressRef.current = false;
     } catch (error) {
       console.error("VoiceInterface: Error playing audio feedback:", error);
+      feedbackInProgressRef.current = false;
     }
   };
 
   const getHebrewTransliteration = (hebrewWord: string): string => {
     const transliterations: { [key: string]: string } = {
       'שלום': 'shalom',
+      'מה שלומך היום': 'ma shlomcha hayom',
       // Add more Hebrew words and their transliterations as needed
     };
     return transliterations[hebrewWord.trim()] || hebrewWord;
@@ -69,22 +81,19 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const transcribedText = event.text.toLowerCase().trim();
       const expectedWord = currentWord;
       const isCorrect = evaluatePronunciation(transcribedText, expectedWord);
+      const expectedTransliteration = getHebrewTransliteration(expectedWord);
       
       console.log('VoiceInterface: Speech evaluation result:', {
         transcribed: transcribedText,
         expected: expectedWord,
+        expectedTransliteration,
         isCorrect
       });
 
       if (isCorrect) {
-        await playAudioFeedback("Excellent! Your pronunciation of Shalom was perfect!");
+        await playAudioFeedback(`Excellent! Your pronunciation of ${expectedTransliteration} was perfect!`);
       } else {
-        // First provide feedback about what was heard
-        await playAudioFeedback(`I heard ${transcribedText}. The correct pronunciation is Shalom, let me demonstrate.`);
-        // Short pause before playing the correct pronunciation
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // Then play the correct pronunciation with the same voice
-        await playAudioFeedback("Shalom");
+        await playAudioFeedback(`Let me help you with ${expectedTransliteration}. Listen carefully to how it should sound.`);
       }
 
       onPronunciationResult(isCorrect);
