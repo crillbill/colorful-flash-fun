@@ -44,6 +44,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         chatRef.current = null;
       }
 
+      console.log('Starting new recording session');
       chatRef.current = new RealtimeChat(handleMessage);
       await chatRef.current.init();
       
@@ -53,6 +54,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       setTimeout(async () => {
         try {
           if (chatRef.current) {
+            console.log('Sending initial message for word:', currentWord);
             await chatRef.current.sendMessage(
               `I will speak the Hebrew word "${currentWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`
             );
@@ -61,7 +63,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
           console.error('Error sending initial message:', error);
           onPronunciationResult(false);
         }
-      }, 1000); // Give the connection 1 second to establish
+      }, 1000);
       
     } catch (error) {
       console.error('Error starting recording:', error);
