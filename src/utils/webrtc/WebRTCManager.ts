@@ -12,19 +12,32 @@ export class WebRTCManager {
   async initialize() {
     try {
       console.log('WebRTCManager: Starting initialization');
+      
+      // Use import.meta.env instead of process.env
       const response = await fetch('https://api.openai.com/v1/audio/speech', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Authorization': `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({
+          model: "tts-1",
+          input: "Test connection",
+          voice: "alloy"
+        })
       });
 
       if (!response.ok) {
         throw new Error('Failed to initialize WebRTC connection');
       }
 
-      this.pc = new RTCPeerConnection();
+      this.pc = new RTCPeerConnection({
+        iceServers: [
+          {
+            urls: 'stun:stun.l.google.com:19302'
+          }
+        ]
+      });
       console.log('WebRTCManager: Created peer connection');
 
       this.setupEventHandlers();
@@ -47,6 +60,12 @@ export class WebRTCManager {
     this.pc.oniceconnectionstatechange = () => {
       console.log('WebRTCManager: ICE connection state changed to:', this.pc?.iceConnectionState);
     };
+
+    this.pc.onicecandidate = event => {
+      if (event.candidate) {
+        console.log('WebRTCManager: New ICE candidate:', event.candidate);
+      }
+    };
   }
 
   private async createDataChannel() {
@@ -55,7 +74,12 @@ export class WebRTCManager {
     this.dc = this.pc.createDataChannel("audio-channel");
     console.log('WebRTCManager: Created data channel');
     
-    this.dc.onopen = () => console.log("WebRTCManager: Data channel is now open");
+    this.dc.onopen = () => {
+      console.log("WebRTCManager: Data channel is now open");
+      // Send initial message to test connection
+      this.sendData({ type: 'init', message: 'Connection established' });
+    };
+    
     this.dc.onerror = (error) => console.error("WebRTCManager: Data channel error:", error);
     this.dc.onclose = () => console.log("WebRTCManager: Data channel closed");
     this.dc.onmessage = (e) => {
