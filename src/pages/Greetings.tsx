@@ -4,7 +4,7 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Mic, Volume2 } from "lucide-react";
+import { Mic } from "lucide-react";
 import { useState } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
 import { AudioButton } from "@/components/AudioButton";
@@ -12,20 +12,21 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Greetings = () => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayingSecond, setIsPlayingSecond] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isListeningSecond, setIsListeningSecond] = useState(false);
   const currentWord = "שלום"; // Shalom
+  const secondWord = "מה שלומך היום"; // Ma shlomcha hayom
 
   const handleGreet = () => {
     toast("Hello there! 👋");
   };
 
-  const handlePlayAudio = async () => {
+  const handlePlayAudio = async (word: string, setPlayingState: (state: boolean) => void) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const response = await supabase.functions.invoke('text-to-speech', {
         body: {
-          text: currentWord,
+          text: word,
           voice: "alloy",
         },
       });
@@ -37,18 +38,22 @@ const Greetings = () => {
       const { data: { audioContent } } = response;
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
       
-      setIsPlaying(true);
+      setPlayingState(true);
       audio.play();
-      audio.onended = () => setIsPlaying(false);
+      audio.onended = () => setPlayingState(false);
     } catch (error) {
       console.error("Error playing audio:", error);
       toast.error("Failed to play audio");
-      setIsPlaying(false);
+      setPlayingState(false);
     }
   };
 
   const handlePronunciationResult = (isCorrect: boolean) => {
     setIsListening(false);
+  };
+
+  const handleSecondPronunciationResult = (isCorrect: boolean) => {
+    setIsListeningSecond(false);
   };
 
   return (
@@ -76,7 +81,10 @@ const Greetings = () => {
             <div className="flex items-center gap-4">
               <span className="text-xl">Hello</span>
               <span className="text-xl font-bold">{currentWord}</span>
-              <AudioButton isPlaying={isPlaying} onToggle={handlePlayAudio} />
+              <AudioButton 
+                isPlaying={isPlaying} 
+                onToggle={() => handlePlayAudio(currentWord, setIsPlaying)} 
+              />
               <Button
                 variant="ghost"
                 size="icon"
@@ -91,12 +99,37 @@ const Greetings = () => {
               onPronunciationResult={handlePronunciationResult}
               isListening={isListening}
             />
-            <p className="text-lg text-center text-muted-foreground">
-              Click the button below to receive a friendly greeting!
-            </p>
-            <Button onClick={handleGreet} size="lg">
-              Greet Me!
-            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-4xl font-bold text-center text-primary">
+              How are you today?
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center space-y-4">
+            <div className="flex items-center gap-4">
+              <span className="text-xl">How are you today?</span>
+              <span className="text-xl font-bold">{secondWord}</span>
+              <AudioButton 
+                isPlaying={isPlayingSecond} 
+                onToggle={() => handlePlayAudio(secondWord, setIsPlayingSecond)} 
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsListeningSecond(true)}
+                className={isListeningSecond ? "bg-red-100" : ""}
+              >
+                <Mic className="h-6 w-6" />
+              </Button>
+            </div>
+            <VoiceInterface
+              currentWord={secondWord}
+              onPronunciationResult={handleSecondPronunciationResult}
+              isListening={isListeningSecond}
+            />
           </CardContent>
         </Card>
       </div>
