@@ -37,21 +37,23 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
           description: event.message.content,
         });
       }
-      
-      stopRecording();
     }
   };
 
   const startRecording = async () => {
     try {
-      if (!chatRef.current) {
-        chatRef.current = new RealtimeChat(handleMessage);
-        await chatRef.current.init(currentWord);
-        
-        toast.info("Recording Started", {
-          description: "Speak the Hebrew word now",
-        });
+      // Clean up any existing chat instance
+      if (chatRef.current) {
+        chatRef.current.disconnect();
+        chatRef.current = null;
       }
+
+      chatRef.current = new RealtimeChat(handleMessage);
+      await chatRef.current.init(currentWord);
+      
+      toast.info("Recording Started", {
+        description: "Speak the Hebrew word now",
+      });
     } catch (error) {
       console.error('Error starting recording:', error);
       toast.error('Failed to start recording');
@@ -71,15 +73,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       startRecording();
     }
     
-    if (!isListening && chatRef.current) {
+    if (!isListening) {
       stopRecording();
     }
 
     return () => {
-      if (chatRef.current) {
-        chatRef.current.disconnect();
-        chatRef.current = null;
-      }
+      stopRecording();
     };
   }, [isListening, currentWord]);
 
