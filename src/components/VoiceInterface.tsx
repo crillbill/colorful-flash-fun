@@ -68,9 +68,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     return transliterations[hebrewWord.trim()] || hebrewWord;
   };
 
-  const evaluatePronunciation = (transcribed: string, expected: string): boolean => {
+  const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
     const normalizedTranscribed = transcribed.toLowerCase().trim();
-    const expectedTransliteration = getHebrewTransliteration(expected);
+    const expectedTransliteration = await getHebrewTransliteration(expected);
     const isMatch = normalizedTranscribed.includes(expectedTransliteration.toLowerCase());
     
     console.log('VoiceInterface: Pronunciation evaluation:', {
@@ -88,7 +88,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     if (event.text) {
       const transcribedText = event.text.toLowerCase().trim();
       const expectedWord = currentWord;
-      const isCorrect = evaluatePronunciation(transcribedText, expectedWord);
+      const isCorrect = await evaluatePronunciation(transcribedText, expectedWord);
       const expectedTransliteration = await getHebrewTransliteration(expectedWord);
       
       console.log('VoiceInterface: Speech evaluation result:', {
