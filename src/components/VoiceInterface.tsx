@@ -39,13 +39,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
   const startRecording = async () => {
     try {
-      // Clean up any existing chat instance
       if (chatRef.current) {
         chatRef.current.disconnect();
         chatRef.current = null;
       }
 
-      // Create new chat instance and initialize
       chatRef.current = new RealtimeChat(handleMessage);
       await chatRef.current.init(currentWord);
       console.log('Recording started for word:', currentWord);

@@ -65,7 +65,7 @@ export class RealtimeChat {
   private dc: RTCDataChannel | null = null;
   private audioEl: HTMLAudioElement;
   private recorder: AudioRecorder | null = null;
-  private connectionPromise: Promise<void> | null = null;
+  private targetWord: string = '';
 
   constructor(private onMessage: (message: any) => void) {
     this.audioEl = document.createElement("audio");
@@ -74,6 +74,7 @@ export class RealtimeChat {
 
   async init(currentWord: string) {
     try {
+      this.targetWord = currentWord;
       const { data, error } = await supabase.functions.invoke('realtime-speech');
       
       if (error) {
@@ -94,34 +95,27 @@ export class RealtimeChat {
       const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.pc.addTrack(ms.getTracks()[0]);
 
-      // Create a promise to track data channel readiness
-      this.connectionPromise = new Promise((resolve, reject) => {
-        try {
-          this.dc = this.pc.createDataChannel("oai-events");
-          
-          this.dc.onopen = () => {
-            console.log("Data channel is now open and ready");
-            resolve();
-          };
-          
-          this.dc.onerror = (error) => {
-            console.error("Data channel error:", error);
-            reject(error);
-          };
-          
-          this.dc.onclose = () => {
-            console.log("Data channel closed");
-          };
-          
-          this.dc.onmessage = (e) => {
-            const event = JSON.parse(e.data);
-            console.log("Received event:", event);
-            this.onMessage(event);
-          };
-        } catch (err) {
-          reject(err);
-        }
-      });
+      this.dc = this.pc.createDataChannel("oai-events");
+      
+      this.dc.onopen = () => {
+        console.log("Data channel is now open and ready");
+        // Send the initial instruction with the target word
+        this.sendMessage(`I will speak the Hebrew word "${this.targetWord}". Please evaluate my pronunciation and provide specific feedback.`);
+      };
+      
+      this.dc.onerror = (error) => {
+        console.error("Data channel error:", error);
+      };
+      
+      this.dc.onclose = () => {
+        console.log("Data channel closed");
+      };
+      
+      this.dc.onmessage = (e) => {
+        const event = JSON.parse(e.data);
+        console.log("Received event:", event);
+        this.onMessage(event);
+      };
 
       const offer = await this.pc.createOffer();
       await this.pc.setLocalDescription(offer);
@@ -151,16 +145,10 @@ export class RealtimeChat {
       await this.pc.setRemoteDescription(answer);
       console.log("WebRTC connection established");
 
-      // Wait for data channel to be ready before proceeding
-      await this.connectionPromise;
-
       this.recorder = new AudioRecorder((audioData) => {
         this.sendAudioData(audioData);
       });
       await this.recorder.start();
-
-      // Send the current word to evaluate
-      await this.sendMessage(`Please evaluate my pronunciation of the Hebrew word: ${currentWord}`);
 
     } catch (error) {
       console.error("Error initializing chat:", error);
@@ -205,11 +193,6 @@ export class RealtimeChat {
 
   async sendMessage(text: string) {
     try {
-      // Wait for data channel to be ready if it's not already
-      if (this.connectionPromise) {
-        await this.connectionPromise;
-      }
-
       if (!this.dc || this.dc.readyState !== 'open') {
         throw new Error('Data channel not ready');
       }
@@ -246,6 +229,5 @@ export class RealtimeChat {
       this.pc.close();
       this.pc = null;
     }
-    this.connectionPromise = null;
   }
 }
