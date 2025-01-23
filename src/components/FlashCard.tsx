@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Volume2, VolumeX, Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import VoiceInterface from "./VoiceInterface";
 import { toast } from "sonner";
+import { CardFront } from "./CardFront";
+import { CardBack } from "./CardBack";
 
 interface FlashCardProps {
   question: string;
@@ -30,6 +29,7 @@ export const FlashCard = ({
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    console.log("isListening or timeLeft changed:", { isListening, timeLeft });
     let intervalId: NodeJS.Timeout;
     
     if (isListening && timeLeft > 0) {
@@ -39,6 +39,7 @@ export const FlashCard = ({
     }
 
     if (timeLeft === 0 && isListening) {
+      console.log("Time's up! Switching to processing state.");
       setIsListening(false);
       setIsProcessing(true);
       setTimeLeft(3);
@@ -46,16 +47,19 @@ export const FlashCard = ({
 
     return () => {
       if (intervalId) {
+        console.log("Clearing interval.");
         clearInterval(intervalId);
       }
     };
   }, [isListening, timeLeft]);
 
   const handleFlip = () => {
+    console.log("Flipping card.");
     setIsFlipped(!isFlipped);
   };
 
   const handleAnswer = (correct: boolean) => {
+    console.log("Handling answer:", correct ? "Correct" : "Incorrect");
     if (correct) {
       onCorrect();
     } else {
@@ -66,7 +70,7 @@ export const FlashCard = ({
   };
 
   const handlePronunciationResult = (isCorrect: boolean) => {
-    console.log('Pronunciation result received:', isCorrect);
+    console.log("Pronunciation result received. Correct?", isCorrect);
     setIsProcessing(false);
     setIsListening(false);
     setTimeLeft(3);
@@ -76,11 +80,13 @@ export const FlashCard = ({
   const playAudio = async (text: string) => {
     try {
       if (isPlaying) {
+        console.log("Pausing audio.");
         audio?.pause();
         setIsPlaying(false);
         return;
       }
 
+      console.log("Fetching audio for text:", text);
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { text },
       });
@@ -103,15 +109,28 @@ export const FlashCard = ({
       setAudio(newAudio);
       
       newAudio.onended = () => {
+        console.log("Audio playback ended.");
         setIsPlaying(false);
         URL.revokeObjectURL(audioUrl);
       };
 
+      console.log("Playing audio.");
       setIsPlaying(true);
       await newAudio.play();
     } catch (error) {
       console.error('Error playing audio:', error);
       setIsPlaying(false);
+    }
+  };
+
+  const handleStartListening = () => {
+    if (!isListening && !isProcessing) {
+      console.log("Starting listening.");
+      setIsListening(true);
+      setTimeLeft(3);
+      toast.info("Listening...", {
+        description: "Speak the Hebrew word now",
+      });
     }
   };
 
@@ -130,93 +149,21 @@ export const FlashCard = ({
           onClick={handleFlip}
         >
           <div className="flip-card-inner">
-            <Card className="flip-card-front p-6 flex flex-col items-center justify-between bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
-              <h2 className="text-8xl font-bold text-center">{question}</h2>
-              <div className="flex flex-col gap-4 items-center mt-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    playAudio(question);
-                  }}
-                >
-                  {isPlaying ? (
-                    <VolumeX className="h-6 w-6" />
-                  ) : (
-                    <Volume2 className="h-6 w-6" />
-                  )}
-                </Button>
-                <div className="relative">
-                  <Button
-                    variant={isListening ? "destructive" : isProcessing ? "secondary" : "default"}
-                    size="lg"
-                    className="gap-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!isListening && !isProcessing) {
-                        setIsListening(true);
-                        setTimeLeft(3);
-                        toast.info("Listening...", {
-                          description: "Speak the Hebrew word now",
-                        });
-                      }
-                    }}
-                    disabled={isListening || isProcessing}
-                  >
-                    <Mic className={isListening ? "animate-pulse" : ""} />
-                    {isProcessing 
-                      ? "Processing..." 
-                      : isListening 
-                        ? `Speak now... (${timeLeft}s)` 
-                        : `Say "${question}"`}
-                  </Button>
-                  <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-muted-foreground">
-                    {isListening && `${timeLeft} seconds remaining...`}
-                    {isProcessing && "Analyzing your pronunciation..."}
-                  </div>
-                </div>
-              </div>
-            </Card>
-            <Card className="flip-card-back p-6 flex flex-col items-center justify-between bg-accent">
-              <h3 className="text-xl font-semibold text-center">{answer}</h3>
-              <div className="flex flex-col gap-4 items-center">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    playAudio(answer);
-                  }}
-                >
-                  {isPlaying ? (
-                    <VolumeX className="h-6 w-6" />
-                  ) : (
-                    <Volume2 className="h-6 w-6" />
-                  )}
-                </Button>
-                <div className="flex gap-4">
-                  <Button
-                    variant="destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAnswer(false);
-                    }}
-                  >
-                    Incorrect
-                  </Button>
-                  <Button
-                    variant="default"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAnswer(true);
-                    }}
-                  >
-                    Correct
-                  </Button>
-                </div>
-              </div>
-            </Card>
+            <CardFront
+              question={question}
+              isPlaying={isPlaying}
+              isListening={isListening}
+              isProcessing={isProcessing}
+              timeLeft={timeLeft}
+              onPlayAudio={() => playAudio(question)}
+              onStartListening={handleStartListening}
+            />
+            <CardBack
+              answer={answer}
+              isPlaying={isPlaying}
+              onPlayAudio={() => playAudio(answer)}
+              onAnswer={handleAnswer}
+            />
           </div>
         </div>
       </motion.div>
