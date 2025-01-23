@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { WebRTCManager } from '@/utils/webrtc/WebRTCManager';
-import { supabase } from "@/integrations/supabase/client";
 
 interface VoiceInterfaceProps {
   currentWord: string;
@@ -17,47 +16,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const timeoutRef = useRef<NodeJS.Timeout>();
   const feedbackInProgressRef = useRef<boolean>(false);
   const feedbackQueueRef = useRef<string[]>([]);
-
-  const playAudioFeedback = async (text: string) => {
-    try {
-      if (feedbackInProgressRef.current) {
-        console.log('VoiceInterface: Adding feedback to queue:', text);
-        feedbackQueueRef.current.push(text);
-        return;
-      }
-
-      console.log('VoiceInterface: Playing audio feedback with Nova voice:', text);
-      feedbackInProgressRef.current = true;
-
-      const response = await supabase.functions.invoke('text-to-speech', {
-        body: {
-          text,
-          voice: "nova", // Explicitly using Nova for feedback
-        },
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to generate speech');
-      }
-
-      const { data: { audioContent } } = response;
-      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
-      
-      audio.addEventListener('ended', () => {
-        feedbackInProgressRef.current = false;
-        const nextFeedback = feedbackQueueRef.current.shift();
-        if (nextFeedback) {
-          playAudioFeedback(nextFeedback);
-        }
-      });
-
-      await audio.play();
-      console.log('VoiceInterface: Audio feedback completed');
-    } catch (error) {
-      console.error("VoiceInterface: Error playing audio feedback:", error);
-      feedbackInProgressRef.current = false;
-    }
-  };
 
   const getHebrewTransliteration = async (hebrewWord: string): Promise<string> => {
     // Replace with a dynamic transliteration API or a more comprehensive mapping
@@ -108,11 +66,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       });
 
       if (isCorrect) {
-        await playAudioFeedback(`Excellent! Your pronunciation of ${expectedTransliteration} was perfect! Let me say it again: ${expectedWord}. In English, it means: ${englishTranslation}`);
+        console.log('VoiceInterface: Correct pronunciation detected');
       } else {
-        await playAudioFeedback(`I heard "${transcribedText}". For "${expectedTransliteration}", which means "${englishTranslation}" in English, try to pronounce it like this:`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await playAudioFeedback(expectedWord);
+        console.log('VoiceInterface: Incorrect pronunciation detected');
       }
 
       onPronunciationResult(isCorrect);

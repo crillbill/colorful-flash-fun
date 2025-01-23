@@ -7,50 +7,30 @@ import { toast } from "sonner";
 import { Mic } from "lucide-react";
 import { useState } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
-import { AudioButton } from "@/components/AudioButton";
 import { supabase } from "@/integrations/supabase/client";
 
 const Greetings = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isPlayingSecond, setIsPlayingSecond] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isListeningSecond, setIsListeningSecond] = useState(false);
   const currentWord = "שלום"; // Shalom
   const secondWord = "מה שלומך היום"; // Ma shlomcha hayom
 
-  const handlePlayAudio = async (word: string, setPlayingState: (state: boolean) => void) => {
-    try {
-      console.log('Greetings: Playing initial word pronunciation with Alloy voice');
-      const response = await supabase.functions.invoke('text-to-speech', {
-        body: {
-          text: word,
-          voice: "alloy", // Explicitly using Alloy for initial word pronunciation
-        },
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to generate speech');
-      }
-
-      const { data: { audioContent } } = response;
-      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
-      
-      setPlayingState(true);
-      await audio.play();
-      audio.onended = () => setPlayingState(false);
-    } catch (error) {
-      console.error("Greetings: Error playing audio:", error);
-      toast.error("Failed to play audio");
-      setPlayingState(false);
-    }
-  };
-
   const handlePronunciationResult = (isCorrect: boolean) => {
     setIsListening(false);
+    if (isCorrect) {
+      toast.success("Great pronunciation!");
+    } else {
+      toast.error("Let's try that again");
+    }
   };
 
   const handleSecondPronunciationResult = (isCorrect: boolean) => {
     setIsListeningSecond(false);
+    if (isCorrect) {
+      toast.success("Excellent!");
+    } else {
+      toast.error("Keep practicing!");
+    }
   };
 
   return (
@@ -78,10 +58,6 @@ const Greetings = () => {
             <div className="flex items-center gap-4">
               <span className="text-xl">Hello</span>
               <span className="text-xl font-bold">{currentWord}</span>
-              <AudioButton 
-                isPlaying={isPlaying} 
-                onToggle={() => handlePlayAudio(currentWord, setIsPlaying)} 
-              />
               <Button
                 variant="ghost"
                 size="icon"
@@ -109,10 +85,6 @@ const Greetings = () => {
             <div className="flex items-center gap-4">
               <span className="text-xl">How are you today?</span>
               <span className="text-xl font-bold">{secondWord}</span>
-              <AudioButton 
-                isPlaying={isPlayingSecond} 
-                onToggle={() => handlePlayAudio(secondWord, setIsPlayingSecond)} 
-              />
               <Button
                 variant="ghost"
                 size="icon"
