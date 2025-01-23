@@ -19,6 +19,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
   const playCorrectPronunciation = async () => {
     try {
+      console.log('VoiceInterface: Playing correct pronunciation for:', currentWord);
       const response = await supabase.functions.invoke('text-to-speech', {
         body: {
           text: currentWord,
@@ -32,11 +33,30 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
       const { data: { audioContent } } = response;
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
-      audio.play();
+      await audio.play();
+      
+      console.log('VoiceInterface: Pronunciation playback completed');
     } catch (error) {
-      console.error("Error playing pronunciation:", error);
+      console.error("VoiceInterface: Error playing pronunciation:", error);
       toast.error("Failed to play pronunciation");
     }
+  };
+
+  const evaluatePronunciation = (transcribed: string, expected: string): boolean => {
+    // Convert both strings to lowercase and trim whitespace
+    const normalizedTranscribed = transcribed.toLowerCase().trim();
+    const normalizedExpected = expected.toLowerCase().trim();
+
+    // Calculate similarity score (can be enhanced with more sophisticated algorithms)
+    const isMatch = normalizedTranscribed.includes(normalizedExpected);
+    
+    console.log('VoiceInterface: Pronunciation evaluation:', {
+      transcribed: normalizedTranscribed,
+      expected: normalizedExpected,
+      isMatch
+    });
+
+    return isMatch;
   };
 
   const handleMessage = async (event: any) => {
@@ -45,16 +65,14 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     if (event.text) {
       const transcribedText = event.text.toLowerCase().trim();
       const expectedWord = currentWord.toLowerCase().trim();
-      const isCorrect = transcribedText.includes(expectedWord);
+      const isCorrect = evaluatePronunciation(transcribedText, expectedWord);
       
-      console.log('VoiceInterface: Comparing:', {
+      console.log('VoiceInterface: Speech evaluation result:', {
         transcribed: transcribedText,
         expected: expectedWord,
         isCorrect
       });
 
-      onPronunciationResult(isCorrect);
-      
       if (isCorrect) {
         toast.success("Good job!", {
           description: `Your pronunciation of "${currentWord}" was correct!`,
@@ -68,6 +86,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
           playCorrectPronunciation();
         }, 1000);
       }
+
+      onPronunciationResult(isCorrect);
     } else if (event.type === 'error') {
       console.error('VoiceInterface: Error event received:', event);
       toast.error("Error processing pronunciation", {
