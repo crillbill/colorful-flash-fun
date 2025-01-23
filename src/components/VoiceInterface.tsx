@@ -24,13 +24,13 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         return;
       }
 
-      console.log('VoiceInterface: Playing audio feedback:', text);
+      console.log('VoiceInterface: Playing audio feedback with Nova voice:', text);
       feedbackInProgressRef.current = true;
 
       const response = await supabase.functions.invoke('text-to-speech', {
         body: {
           text,
-          voice: "nova",
+          voice: "nova", // Explicitly using Nova for feedback
         },
       });
 
@@ -55,7 +55,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     const transliterations: { [key: string]: string } = {
       'שלום': 'shalom',
       'מה שלומך היום': 'ma shlomcha hayom',
-      // Add more Hebrew words and their transliterations as needed
     };
     return transliterations[hebrewWord.trim()] || hebrewWord;
   };
@@ -93,13 +92,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       if (isCorrect) {
         await playAudioFeedback(`Excellent! Your pronunciation of ${expectedTransliteration} was perfect!`);
       } else {
-        // First provide feedback about what was heard
         await playAudioFeedback(`I heard "${transcribedText}". For "${expectedTransliteration}", try to pronounce it like this:`);
-        
-        // Short pause before playing the correct pronunciation
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Then demonstrate the correct pronunciation
         await playAudioFeedback(expectedWord);
       }
 

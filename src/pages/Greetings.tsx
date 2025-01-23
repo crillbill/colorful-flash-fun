@@ -18,16 +18,13 @@ const Greetings = () => {
   const currentWord = "שלום"; // Shalom
   const secondWord = "מה שלומך היום"; // Ma shlomcha hayom
 
-  const handleGreet = () => {
-    toast("Hello there! 👋");
-  };
-
   const handlePlayAudio = async (word: string, setPlayingState: (state: boolean) => void) => {
     try {
+      console.log('Greetings: Playing initial word pronunciation with Alloy voice');
       const response = await supabase.functions.invoke('text-to-speech', {
         body: {
           text: word,
-          voice: "alloy",
+          voice: "alloy", // Explicitly using Alloy for initial word pronunciation
         },
       });
 
@@ -39,10 +36,10 @@ const Greetings = () => {
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
       
       setPlayingState(true);
-      audio.play();
+      await audio.play();
       audio.onended = () => setPlayingState(false);
     } catch (error) {
-      console.error("Error playing audio:", error);
+      console.error("Greetings: Error playing audio:", error);
       toast.error("Failed to play audio");
       setPlayingState(false);
     }
