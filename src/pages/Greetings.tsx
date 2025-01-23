@@ -35,19 +35,28 @@ const Greetings = () => {
   };
 
   const speakWord = async (word: string) => {
-    if (isSpeaking) return;
+    console.log('Speaking word:', word);
+    if (isSpeaking) {
+      console.log('Already speaking, returning early');
+      return;
+    }
     
     try {
       setIsSpeaking(true);
+      console.log('Creating new WebRTCManager instance');
       const manager = new WebRTCManager((message) => {
-        console.log("Received message:", message);
+        console.log("Received WebRTC message:", message);
         if (message.type === 'response.audio.done') {
+          console.log('Audio playback complete');
           setIsSpeaking(false);
           manager.disconnect();
         }
       });
 
+      console.log('Initializing WebRTCManager');
       await manager.initialize();
+      
+      console.log('Sending conversation item');
       await manager.sendData({
         type: 'conversation.item.create',
         item: {
@@ -56,6 +65,8 @@ const Greetings = () => {
           content: [{ type: 'input_text', text: word }]
         }
       });
+      
+      console.log('Requesting response creation');
       manager.sendData({ type: 'response.create' });
     } catch (error) {
       console.error('Error speaking word:', error);
