@@ -15,6 +15,7 @@ serve(async (req) => {
     const { text, voice } = await req.json()
 
     if (!text) {
+      console.error('Text-to-speech: Text is required but was not provided')
       throw new Error('Text is required')
     }
 
@@ -22,6 +23,7 @@ serve(async (req) => {
 
     const openAiKey = Deno.env.get('OPENAI_API_KEY')
     if (!openAiKey) {
+      console.error('Text-to-speech: OPENAI_API_KEY is not set in environment variables')
       throw new Error('OPENAI_API_KEY is not set in environment variables')
     }
 
