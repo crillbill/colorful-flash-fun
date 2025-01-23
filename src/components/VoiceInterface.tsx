@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { toast } from "sonner";
 import { RealtimeChat } from '@/utils/RealtimeAudio';
-import { Mic, MicOff } from 'lucide-react';
 
 interface VoiceInterfaceProps {
   currentWord: string;
@@ -45,13 +43,15 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
   const startRecording = async () => {
     try {
-      chatRef.current = new RealtimeChat(handleMessage);
-      await chatRef.current.init(currentWord);
-      setIsRecording(true);
-      
-      toast.info("Recording Started", {
-        description: "Speak the Hebrew word now",
-      });
+      if (!chatRef.current) {
+        chatRef.current = new RealtimeChat(handleMessage);
+        await chatRef.current.init(currentWord);
+        setIsRecording(true);
+        
+        toast.info("Recording Started", {
+          description: "Speak the Hebrew word now",
+        });
+      }
     } catch (error) {
       console.error('Error starting recording:', error);
       toast.error('Failed to start recording');
@@ -68,15 +68,19 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   useEffect(() => {
+    if (!isRecording) {
+      startRecording();
+    }
+
     return () => {
       if (chatRef.current) {
         chatRef.current.disconnect();
         chatRef.current = null;
       }
     };
-  }, []);
+  }, [currentWord]);
 
-  return null; // We don't need to render anything as the parent component handles the UI
+  return null;
 };
 
 export default VoiceInterface;

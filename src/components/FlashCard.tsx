@@ -209,12 +209,12 @@ export const FlashCard = ({
             {isListening && "Speak now... (2 seconds remaining)"}
             {isProcessing && "Analyzing your pronunciation..."}
           </div>
-          <VoiceInterface
-            currentWord={question}
-            onPronunciationResult={handlePronunciationResult}
-          />
         </div>
       </div>
+      <VoiceInterface
+        currentWord={question}
+        onPronunciationResult={handlePronunciationResult}
+      />
     </div>
   );
 };
