@@ -16,12 +16,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const managerRef = useRef<WebRTCManager | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const playCorrectPronunciation = async () => {
+  const playAudioFeedback = async (text: string) => {
     try {
-      console.log('VoiceInterface: Playing correct pronunciation for:', currentWord);
+      console.log('VoiceInterface: Playing audio feedback:', text);
       const response = await supabase.functions.invoke('text-to-speech', {
         body: {
-          text: currentWord,
+          text,
           voice: "alloy",
         },
       });
@@ -34,9 +34,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
       await audio.play();
       
-      console.log('VoiceInterface: Pronunciation playback completed');
+      console.log('VoiceInterface: Audio feedback completed');
     } catch (error) {
-      console.error("VoiceInterface: Error playing pronunciation:", error);
+      console.error("VoiceInterface: Error playing audio feedback:", error);
     }
   };
 
@@ -68,9 +68,13 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         isCorrect
       });
 
-      if (!isCorrect) {
-        // Play the correct pronunciation immediately if incorrect
-        playCorrectPronunciation();
+      if (isCorrect) {
+        await playAudioFeedback("Excellent pronunciation!");
+      } else {
+        await playAudioFeedback("Let me show you the correct pronunciation.");
+        // Short pause before playing the correct pronunciation
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await playAudioFeedback(currentWord);
       }
 
       onPronunciationResult(isCorrect);
@@ -98,7 +102,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       managerRef.current.sendData({ type: 'start_recording' });
       
-      // Set a timeout to automatically stop recording after 5 seconds
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Auto-stopping recording after timeout');
         if (managerRef.current) {
