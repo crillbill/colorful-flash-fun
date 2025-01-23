@@ -95,7 +95,7 @@ export const FlashCard = ({
       >
         <div className="flip-card-inner">
           <Card className="flip-card-front p-6 flex flex-col items-center justify-between bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
-            <h2 className="text-2xl font-bold text-center">{question}</h2>
+            <h2 className="text-8xl font-bold text-center">{question}</h2>
             <Button
               variant="ghost"
               size="icon"
