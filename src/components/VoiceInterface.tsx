@@ -49,10 +49,20 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       console.log('Recording started for word:', currentWord);
       
-      // Send the initial message right after initialization
-      await chatRef.current.sendMessage(
-        `I will speak the Hebrew word "${currentWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`
-      );
+      // Wait a short moment to ensure the data channel is ready
+      setTimeout(async () => {
+        try {
+          if (chatRef.current) {
+            await chatRef.current.sendMessage(
+              `I will speak the Hebrew word "${currentWord}". Please evaluate my pronunciation and provide detailed feedback. Specifically: 1) Tell me if it was correct or incorrect, 2) What aspects were good or need improvement, 3) If incorrect, how can I fix any issues?`
+            );
+          }
+        } catch (error) {
+          console.error('Error sending initial message:', error);
+          onPronunciationResult(false);
+        }
+      }, 1000); // Give the connection 1 second to establish
+      
     } catch (error) {
       console.error('Error starting recording:', error);
       toast.error('Failed to start recording');
