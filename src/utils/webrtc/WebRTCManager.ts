@@ -13,8 +13,8 @@ export class WebRTCManager {
     try {
       console.log('WebRTCManager: Starting initialization');
       
-      // Test the connection using Supabase's text-to-speech function
-      const response = await fetch('/api/text-to-speech', {
+      // Test the connection using Supabase's voice-to-text function
+      const response = await fetch('/api/voice-to-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,14 +22,13 @@ export class WebRTCManager {
           'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
         },
         body: JSON.stringify({
-          text: "Test connection",
-          voice: "alloy"
+          audio: "" // Empty audio for connection test
         })
       });
 
       if (!response.ok) {
         const error = await response.text();
-        console.error('Text-to-speech API error:', error);
+        console.error('Voice-to-text API error:', error);
         throw new Error('Failed to initialize WebRTC connection');
       }
 
@@ -84,10 +83,38 @@ export class WebRTCManager {
     
     this.dc.onerror = (error) => console.error("WebRTCManager: Data channel error:", error);
     this.dc.onclose = () => console.log("WebRTCManager: Data channel closed");
-    this.dc.onmessage = (e) => {
-      const event = JSON.parse(e.data);
-      console.log("WebRTCManager: Received event:", event);
-      this.onMessage(event);
+    this.dc.onmessage = async (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        
+        if (data.type === 'audio_data') {
+          console.log('WebRTCManager: Received audio data, sending to voice-to-text API');
+          
+          const response = await fetch('/api/voice-to-text', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+            },
+            body: JSON.stringify({
+              audio: data.audio
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to process speech');
+          }
+
+          const result = await response.json();
+          this.onMessage(result);
+        } else {
+          this.onMessage(data);
+        }
+      } catch (error) {
+        console.error("WebRTCManager: Error processing message:", error);
+        this.onMessage({ type: 'error', message: error.message });
+      }
     };
   }
 
