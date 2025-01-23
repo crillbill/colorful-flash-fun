@@ -14,6 +14,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   isListening
 }) => {
   const chatRef = useRef<RealtimeChat | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
   const handleMessage = (event: any) => {
     console.log('VoiceInterface: Received message:', event);
@@ -68,23 +69,19 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       console.log('VoiceInterface: RealtimeChat initialized successfully');
       
-      // Wait for connection to establish before sending message
-      setTimeout(async () => {
-        try {
-          if (chatRef.current) {
-            console.log('VoiceInterface: Ready to evaluate word:', currentWord);
-            toast.info("Ready to evaluate", {
-              description: `Speak the word "${currentWord}" clearly`,
-            });
-          }
-        } catch (error) {
-          console.error('VoiceInterface: Error sending initial message:', error);
-          toast.error("Failed to start evaluation", {
-            description: error instanceof Error ? error.message : "Unknown error occurred",
-          });
-          onPronunciationResult(false);
+      // Set a timeout to automatically stop recording after 5 seconds
+      timeoutRef.current = setTimeout(() => {
+        console.log('VoiceInterface: Auto-stopping recording after timeout');
+        if (chatRef.current) {
+          chatRef.current.disconnect();
+          chatRef.current = null;
         }
-      }, 1000);
+        onPronunciationResult(false);
+      }, 5000);
+      
+      toast.info("Ready to evaluate", {
+        description: `Speak the word "${currentWord}" clearly`,
+      });
       
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);
@@ -102,6 +99,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     }
 
     return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       if (chatRef.current) {
         console.log('VoiceInterface: Cleaning up recording session on unmount');
         chatRef.current.disconnect();

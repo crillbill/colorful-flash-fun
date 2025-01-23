@@ -4,6 +4,7 @@ export class WebRTCManager {
   private pc: RTCPeerConnection | null = null;
   private dc: RTCDataChannel | null = null;
   private audioEl: HTMLAudioElement;
+  private isConnected: boolean = false;
 
   constructor(private onMessage: (message: any) => void) {
     console.log('WebRTCManager: Initializing');
@@ -55,6 +56,11 @@ export class WebRTCManager {
 
     this.pc.oniceconnectionstatechange = () => {
       console.log('WebRTCManager: ICE connection state changed to:', this.pc?.iceConnectionState);
+      if (this.pc?.iceConnectionState === 'connected') {
+        this.isConnected = true;
+      } else if (this.pc?.iceConnectionState === 'disconnected') {
+        this.isConnected = false;
+      }
     };
 
     this.pc.onicecandidate = event => {
@@ -72,12 +78,21 @@ export class WebRTCManager {
     
     this.dc.onopen = () => {
       console.log("WebRTCManager: Data channel is now open");
+      this.isConnected = true;
       // Send initial message to test connection
       this.sendData({ type: 'init', message: 'Connection established' });
     };
     
-    this.dc.onerror = (error) => console.error("WebRTCManager: Data channel error:", error);
-    this.dc.onclose = () => console.log("WebRTCManager: Data channel closed");
+    this.dc.onerror = (error) => {
+      console.error("WebRTCManager: Data channel error:", error);
+      this.isConnected = false;
+    };
+    
+    this.dc.onclose = () => {
+      console.log("WebRTCManager: Data channel closed");
+      this.isConnected = false;
+    };
+    
     this.dc.onmessage = async (e) => {
       try {
         const data = JSON.parse(e.data);
@@ -108,17 +123,29 @@ export class WebRTCManager {
   }
 
   sendData(data: any) {
-    if (!this.dc || this.dc.readyState !== 'open') {
-      console.warn('WebRTCManager: Data channel not ready');
+    if (!this.dc || this.dc.readyState !== 'open' || !this.isConnected) {
+      console.warn('WebRTCManager: Data channel not ready or not connected');
       return;
     }
     
-    this.dc.send(JSON.stringify(data));
+    try {
+      this.dc.send(JSON.stringify(data));
+    } catch (error) {
+      console.error('WebRTCManager: Error sending data:', error);
+      this.onMessage({ type: 'error', message: 'Failed to send audio data' });
+    }
   }
 
   disconnect() {
-    this.dc?.close();
-    this.pc?.close();
+    this.isConnected = false;
+    if (this.dc) {
+      this.dc.close();
+      this.dc = null;
+    }
+    if (this.pc) {
+      this.pc.close();
+      this.pc = null;
+    }
     console.log('WebRTCManager: Disconnected');
   }
 }
