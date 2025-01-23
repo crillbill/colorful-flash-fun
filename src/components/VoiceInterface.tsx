@@ -46,9 +46,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       });
     } catch (error) {
       console.error('Error starting recording:', error);
-      toast("Error", {
-        description: error instanceof Error ? error.message : 'Failed to start recording',
-        variant: "destructive",
+      toast.error('Failed to start recording', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
       });
     }
   };
