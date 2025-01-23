@@ -39,6 +39,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
           description: event.message.content,
         });
       }
+    } else if (event.type === 'error') {
+      console.error('VoiceInterface: Error event received:', event);
+      toast.error("Error processing pronunciation", {
+        description: event.message || "Please try again",
+      });
+      onPronunciationResult(false);
     }
   };
 
@@ -46,14 +52,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     try {
       console.log('VoiceInterface: Starting new recording session');
       
-      // Cleanup any existing session
       if (chatRef.current) {
         console.log('VoiceInterface: Cleaning up existing session');
         chatRef.current.disconnect();
         chatRef.current = null;
       }
 
-      // Initialize new chat session
       console.log('VoiceInterface: Creating new RealtimeChat instance');
       chatRef.current = new RealtimeChat(handleMessage);
       
@@ -72,16 +76,25 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
             
             await chatRef.current.sendMessage(prompt);
             console.log('VoiceInterface: Initial message sent successfully');
+            
+            toast.info("Ready to evaluate", {
+              description: "Connection established successfully",
+            });
           }
         } catch (error) {
           console.error('VoiceInterface: Error sending initial message:', error);
+          toast.error("Failed to start evaluation", {
+            description: error instanceof Error ? error.message : "Unknown error occurred",
+          });
           onPronunciationResult(false);
         }
       }, 1000);
       
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);
-      toast.error('Failed to start recording');
+      toast.error('Failed to start recording', {
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+      });
       onPronunciationResult(false);
     }
   };
@@ -92,6 +105,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       startRecording();
     }
 
+    // Only cleanup when component unmounts, not when transitioning states
     return () => {
       if (chatRef.current) {
         console.log('VoiceInterface: Cleaning up recording session on unmount');

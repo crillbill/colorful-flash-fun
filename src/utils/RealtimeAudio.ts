@@ -1,5 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
-
 export class AudioRecorder {
   private stream: MediaStream | null = null;
   private audioContext: AudioContext | null = null;
@@ -85,11 +83,13 @@ export class RealtimeChat {
       
       if (error) {
         console.error("RealtimeChat: Supabase function error:", error);
+        this.onMessage({ type: 'error', message: error.message });
         throw error;
       }
 
       if (!data || !data.client_secret?.value) {
         console.error("RealtimeChat: Invalid response data:", data);
+        this.onMessage({ type: 'error', message: "Failed to get ephemeral token" });
         throw new Error("Failed to get ephemeral token");
       }
 
@@ -102,6 +102,13 @@ export class RealtimeChat {
       this.pc.ontrack = e => {
         console.log('RealtimeChat: Received remote track');
         this.audioEl.srcObject = e.streams[0];
+      };
+
+      this.pc.oniceconnectionstatechange = () => {
+        console.log('RealtimeChat: ICE connection state changed to:', this.pc?.iceConnectionState);
+        if (this.pc?.iceConnectionState === 'disconnected') {
+          this.onMessage({ type: 'error', message: "Connection lost" });
+        }
       };
 
       const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -117,6 +124,7 @@ export class RealtimeChat {
       
       this.dc.onerror = (error) => {
         console.error("RealtimeChat: Data channel error:", error);
+        this.onMessage({ type: 'error', message: "Communication error" });
       };
       
       this.dc.onclose = () => {
@@ -149,6 +157,7 @@ export class RealtimeChat {
       if (!sdpResponse.ok) {
         const errorText = await sdpResponse.text();
         console.error("RealtimeChat: OpenAI SDP error:", errorText);
+        this.onMessage({ type: 'error', message: "Failed to establish connection" });
         throw new Error(`OpenAI SDP error: ${sdpResponse.status} ${errorText}`);
       }
 
@@ -168,6 +177,7 @@ export class RealtimeChat {
 
     } catch (error) {
       console.error("RealtimeChat: Error initializing chat:", error);
+      this.onMessage({ type: 'error', message: error instanceof Error ? error.message : "Failed to initialize chat" });
       throw error;
     }
   }
@@ -185,6 +195,7 @@ export class RealtimeChat {
       }));
     } catch (error) {
       console.error('RealtimeChat: Error sending audio data:', error);
+      this.onMessage({ type: 'error', message: "Failed to send audio data" });
     }
   }
 
@@ -244,18 +255,9 @@ export class RealtimeChat {
 
   disconnect() {
     console.log('RealtimeChat: Starting disconnect');
-    if (this.recorder) {
-      this.recorder.stop();
-      this.recorder = null;
-    }
-    if (this.dc) {
-      this.dc.close();
-      this.dc = null;
-    }
-    if (this.pc) {
-      this.pc.close();
-      this.pc = null;
-    }
+    this.recorder?.stop();
+    this.dc?.close();
+    this.pc?.close();
     console.log('RealtimeChat: Disconnect complete');
   }
 }
