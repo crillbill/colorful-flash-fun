@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { toast } from "sonner";
-import { RealtimeChat } from '@/utils/RealtimeAudio';
+import { RealtimeChat } from '@/utils/RealtimeChat';
 
 interface VoiceInterfaceProps {
   currentWord: string;
