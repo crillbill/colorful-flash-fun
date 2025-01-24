@@ -16,15 +16,23 @@ const Greetings = () => {
   const currentWord = "שלום"; // Shalom
   const secondWord = "מה שלומך היום"; // Ma shlomcha hayom
 
+  const getPronunciationTip = (word: string) => {
+    const tips: { [key: string]: string } = {
+      'שלום': "Try saying 'sha-LOHM' with emphasis on the second syllable",
+      'מה שלומך היום': "Break it down: 'ma' (like 'ma' in mama) + 'shlo-m-CHA' + 'ha-YOM'",
+    };
+    return tips[word] || "";
+  };
+
   const handlePronunciationResult = (isCorrect: boolean) => {
     setIsListening(false);
     if (isCorrect) {
-      toast.success("Great pronunciation!");
-      speakWord("Great pronunciation!", false);
+      toast.success(`Wow! You really pronounced '${currentWord}' great!`);
+      speakWord("Excellent pronunciation!", false);
     } else {
-      toast.error("Let's try that again");
-      speakWord("Let's try that again", false).then(() => {
-        // Start a new recording session after feedback
+      const tip = getPronunciationTip(currentWord);
+      toast.error(`Let's try '${currentWord}' again. ${tip}`);
+      speakWord(`Let's try that again. ${tip}`, false).then(() => {
         setTimeout(() => setIsListening(true), 1500);
       });
     }
@@ -33,12 +41,12 @@ const Greetings = () => {
   const handleSecondPronunciationResult = (isCorrect: boolean) => {
     setIsListeningSecond(false);
     if (isCorrect) {
-      toast.success("Excellent!");
-      speakWord("Excellent!", false);
+      toast.success(`Perfect! You pronounced '${secondWord}' beautifully!`);
+      speakWord("Excellent pronunciation!", false);
     } else {
-      toast.error("Keep practicing!");
-      speakWord("Keep practicing!", false).then(() => {
-        // Start a new recording session after feedback
+      const tip = getPronunciationTip(secondWord);
+      toast.error(`Let's practice '${secondWord}' again. ${tip}`);
+      speakWord(`Let's try that again. ${tip}`, false).then(() => {
         setTimeout(() => setIsListeningSecond(true), 1500);
       });
     }
@@ -92,6 +100,8 @@ const Greetings = () => {
       return Promise.resolve();
     }
   };
+
+  // ... keep existing code (JSX for the component's UI)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
