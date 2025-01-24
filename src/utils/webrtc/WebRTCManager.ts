@@ -37,6 +37,8 @@ export class WebRTCManager {
         this.audioEl.srcObject = e.streams[0];
       };
 
+      let audioTrack: MediaStreamTrack;
+
       if (requireMicrophone) {
         const stream = await navigator.mediaDevices.getUserMedia({ 
           audio: {
@@ -45,6 +47,8 @@ export class WebRTCManager {
             autoGainControl: true
           } 
         });
+
+        audioTrack = stream.getTracks()[0];
 
         this.mediaRecorder = new MediaRecorder(stream);
         
@@ -78,10 +82,17 @@ export class WebRTCManager {
             this.isRecording = false;
           }
         };
-
-        // Add local audio track for recording
-        this.pc.addTrack(stream.getTracks()[0]);
+      } else {
+        // Create a silent audio track for text-to-speech
+        const ctx = new AudioContext();
+        const oscillator = ctx.createOscillator();
+        const dst = oscillator.connect(ctx.createMediaStreamDestination());
+        oscillator.start();
+        audioTrack = dst.stream.getAudioTracks()[0];
       }
+
+      // Add audio track to peer connection
+      this.pc.addTrack(audioTrack, new MediaStream([audioTrack]));
 
       // Set up data channel
       this.dc = this.pc.createDataChannel("oai-events");
@@ -106,6 +117,12 @@ export class WebRTCManager {
           "Content-Type": "application/sdp"
         },
       });
+
+      if (!sdpResponse.ok) {
+        const errorText = await sdpResponse.text();
+        console.error('OpenAI API error:', errorText);
+        throw new Error(`OpenAI API error: ${sdpResponse.status} ${errorText}`);
+      }
 
       const answer = {
         type: "answer" as RTCSdpType,
