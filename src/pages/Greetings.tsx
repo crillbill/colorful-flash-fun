@@ -12,14 +12,17 @@ import { supabase } from "@/integrations/supabase/client";
 const Greetings = () => {
   const [isListening, setIsListening] = useState(false);
   const [isListeningSecond, setIsListeningSecond] = useState(false);
+  const [isListeningThird, setIsListeningThird] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const currentWord = "שלום"; // Shalom
   const secondWord = "מה שלומך היום"; // Ma shlomcha hayom
+  const thirdWord = "מתי ארוחת צהריים"; // Matai aruchat tzohorayim
 
   const getPronunciationTip = (word: string) => {
     const tips: { [key: string]: string } = {
       'שלום': "Try saying 'sha-LOHM' with emphasis on the second syllable",
       'מה שלומך היום': "Break it down: 'ma' (like 'ma' in mama) + 'shlo-m-CHA' + 'ha-YOM'",
+      'מתי ארוחת צהריים': "Break it down: 'ma-TAI' + 'a-ru-CHAT' + 'tzo-ho-RA-yim'",
     };
     return tips[word] || "";
   };
@@ -45,6 +48,18 @@ const Greetings = () => {
       const tip = getPronunciationTip(secondWord);
       toast.error(`Almost there! ${tip}`);
       speakWord(`Let's try once more. ${tip}`, false);
+    }
+  };
+
+  const handleThirdPronunciationResult = (isCorrect: boolean) => {
+    setIsListeningThird(false);
+    if (isCorrect) {
+      toast.success("Fantastic! Your pronunciation of this phrase was excellent!");
+      speakWord("Perfect! You're getting really good at this!", false);
+    } else {
+      const tip = getPronunciationTip(thirdWord);
+      toast.error(`Keep practicing! ${tip}`);
+      speakWord(`Let's try again. ${tip}`, false);
     }
   };
 
@@ -135,7 +150,8 @@ const Greetings = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  setIsListeningSecond(false); // Ensure other mic is off
+                  setIsListeningSecond(false);
+                  setIsListeningThird(false);
                   setIsListening(true);
                 }}
                 className={isListening ? "bg-red-100" : ""}
@@ -174,7 +190,8 @@ const Greetings = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  setIsListening(false); // Ensure other mic is off
+                  setIsListening(false);
+                  setIsListeningThird(false);
                   setIsListeningSecond(true);
                 }}
                 className={isListeningSecond ? "bg-red-100" : ""}
@@ -186,6 +203,46 @@ const Greetings = () => {
               currentWord={secondWord}
               onPronunciationResult={handleSecondPronunciationResult}
               isListening={isListeningSecond}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-4xl font-bold text-center text-primary">
+              What time is lunch?
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center space-y-4">
+            <div className="flex items-center gap-4">
+              <span className="text-xl">What time is lunch?</span>
+              <span className="text-xl font-bold">{thirdWord}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => speakWord(thirdWord, true)}
+                disabled={isSpeaking}
+                className={isSpeaking ? "bg-blue-100" : ""}
+              >
+                <Volume2 className="h-6 w-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setIsListening(false);
+                  setIsListeningSecond(false);
+                  setIsListeningThird(true);
+                }}
+                className={isListeningThird ? "bg-red-100" : ""}
+              >
+                <Mic className="h-6 w-6" />
+              </Button>
+            </div>
+            <VoiceInterface
+              currentWord={thirdWord}
+              onPronunciationResult={handleThirdPronunciationResult}
+              isListening={isListeningThird}
             />
           </CardContent>
         </Card>
