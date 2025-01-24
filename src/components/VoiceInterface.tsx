@@ -77,6 +77,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       managerRef.current.disconnect();
       managerRef.current = null;
     }
+    console.log('VoiceInterface: Recording stopped');
   };
 
   const startRecording = async () => {

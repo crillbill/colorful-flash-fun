@@ -32,9 +32,7 @@ const Greetings = () => {
     } else {
       const tip = getPronunciationTip(currentWord);
       toast.error(`Let's try '${currentWord}' again. ${tip}`);
-      speakWord(`Let's try that again. ${tip}`, false).then(() => {
-        setTimeout(() => setIsListening(true), 1500);
-      });
+      speakWord(`Let's try that again. ${tip}`, false);
     }
   };
 
@@ -46,9 +44,7 @@ const Greetings = () => {
     } else {
       const tip = getPronunciationTip(secondWord);
       toast.error(`Let's practice '${secondWord}' again. ${tip}`);
-      speakWord(`Let's try that again. ${tip}`, false).then(() => {
-        setTimeout(() => setIsListeningSecond(true), 1500);
-      });
+      speakWord(`Let's try that again. ${tip}`, false);
     }
   };
 
