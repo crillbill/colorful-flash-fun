@@ -148,11 +148,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       stopRecording();
     }
 
+    // Cleanup function that runs when component unmounts or when dependencies change
     return () => {
       console.log('VoiceInterface: Cleaning up on unmount or deps change');
       stopRecording();
     };
-  }, [isListening, currentWord]);
+  }, [isListening, currentWord]); // Added currentWord as dependency to ensure cleanup between words
 
   return null;
 };

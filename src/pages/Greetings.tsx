@@ -134,7 +134,10 @@ const Greetings = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsListening(true)}
+                onClick={() => {
+                  setIsListeningSecond(false); // Ensure other mic is off
+                  setIsListening(true);
+                }}
                 className={isListening ? "bg-red-100" : ""}
               >
                 <Mic className="h-6 w-6" />
@@ -170,7 +173,10 @@ const Greetings = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsListeningSecond(true)}
+                onClick={() => {
+                  setIsListening(false); // Ensure other mic is off
+                  setIsListeningSecond(true);
+                }}
                 className={isListeningSecond ? "bg-red-100" : ""}
               >
                 <Mic className="h-6 w-6" />
