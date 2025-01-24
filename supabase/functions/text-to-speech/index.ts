@@ -25,9 +25,6 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    // Add SSML tags to slow down speech and add emphasis
-    const processedText = text.includes('<speak>') ? text : `<speak><prosody rate="slow" pitch="+0.5">${text}</prosody></speak>`
-
     // Make request to OpenAI API
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -37,10 +34,9 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'tts-1',
-        input: processedText,
+        input: text,
         voice: voice,
         response_format: 'mp3',
-        speed: 0.8, // Slow down the speech slightly
       }),
     })
 
@@ -63,11 +59,8 @@ serve(async (req) => {
   } catch (error) {
     console.error('Text-to-speech error:', error)
     
-    // Ensure we're not trying to stringify an Error object directly
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-    
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: error.message }),
       {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
