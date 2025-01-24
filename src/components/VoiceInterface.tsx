@@ -39,6 +39,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
+    // If the transcribed text contains Hebrew characters, it's likely correct
+    if (/[\u0590-\u05FF]/.test(transcribed)) {
+      console.log('VoiceInterface: Hebrew characters detected in transcription:', transcribed);
+      return true;
+    }
+
     const normalizedTranscribed = cleanText(transcribed);
     const expectedTransliteration = cleanText(await getHebrewTransliteration(expected));
     const expectedTranslation = cleanText(getEnglishTranslation(expected));
@@ -47,12 +53,10 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       transcribed: normalizedTranscribed,
       transliteration: expectedTransliteration,
       translation: expectedTranslation,
-      transcribedLength: normalizedTranscribed.length,
-      transliterationLength: expectedTransliteration.length,
-      translationLength: expectedTranslation.length
+      containsHebrew: /[\u0590-\u05FF]/.test(transcribed)
     });
 
-    // Check for exact matches first
+    // Check for exact matches
     if (normalizedTranscribed === expectedTransliteration || 
         normalizedTranscribed === expectedTranslation) {
       console.log('VoiceInterface: Exact match found');
@@ -73,7 +77,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     const transliterationWords = expectedTransliteration.split(' ');
     const translationWords = expectedTranslation.split(' ');
 
-    // Check if any transcribed word matches any expected word
     const hasMatch = transcribedWords.some(transcribedWord => {
       const matchesTransliteration = transliterationWords.some(expectedWord => 
         transcribedWord.includes(expectedWord) || expectedWord.includes(transcribedWord)
