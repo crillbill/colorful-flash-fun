@@ -15,6 +15,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 }) => {
   const managerRef = useRef<WebRTCManager | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const isRecordingRef = useRef<boolean>(false);
 
   const getHebrewTransliteration = async (hebrewWord: string): Promise<string> => {
     const transliterations: { [key: string]: string } = {
@@ -118,23 +119,37 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   const stopRecording = () => {
-    console.log('VoiceInterface: Stopping recording');
+    console.log('VoiceInterface: Stopping recording, current state:', { 
+      isRecording: isRecordingRef.current,
+      hasTimeout: !!timeoutRef.current,
+      hasManager: !!managerRef.current
+    });
+
+    isRecordingRef.current = false;
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = undefined;
     }
+
     if (managerRef.current) {
       managerRef.current.sendData({ type: 'stop_recording' });
       managerRef.current.disconnect();
       managerRef.current = null;
     }
+
     console.log('VoiceInterface: Recording stopped');
   };
 
   const startRecording = async () => {
     try {
+      if (isRecordingRef.current) {
+        console.log('VoiceInterface: Already recording, stopping first');
+        stopRecording();
+      }
+
       console.log('VoiceInterface: Starting new recording session');
-      stopRecording(); // Ensure any existing recording is stopped
+      isRecordingRef.current = true;
 
       console.log('VoiceInterface: Creating new WebRTCManager instance');
       managerRef.current = new WebRTCManager(handleMessage);
@@ -144,35 +159,43 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       managerRef.current.sendData({ type: 'start_recording' });
       
-      // Set timeout to stop recording after 2 seconds
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Auto-stopping recording after 2 seconds');
-        stopRecording();
+        if (isRecordingRef.current) {
+          stopRecording();
+        }
       }, 2000);
       
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);
+      isRecordingRef.current = false;
       stopRecording();
       onPronunciationResult(false);
     }
   };
 
-  // Clean up when isListening changes or component unmounts
   useEffect(() => {
-    if (isListening) {
-      console.log('VoiceInterface: isListening changed to true, starting recording');
+    console.log('VoiceInterface: Effect triggered with isListening:', isListening);
+
+    if (isListening && !isRecordingRef.current) {
+      console.log('VoiceInterface: Starting recording due to isListening change');
       startRecording();
-    } else {
-      console.log('VoiceInterface: isListening changed to false, stopping recording');
+    } else if (!isListening && isRecordingRef.current) {
+      console.log('VoiceInterface: Stopping recording due to isListening change');
       stopRecording();
     }
 
-    // Always clean up on unmount or when dependencies change
     return () => {
-      console.log('VoiceInterface: Cleaning up');
-      stopRecording();
+      console.log('VoiceInterface: Cleanup effect running');
+      if (isRecordingRef.current) {
+        stopRecording();
+      }
     };
-  }, [isListening, currentWord]);
+  }, [isListening]);
 
   return null;
 };
