@@ -25,7 +25,7 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    // Make direct request to OpenAI API
+    // Make request to OpenAI API
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
@@ -36,15 +36,14 @@ serve(async (req) => {
         model: 'tts-1',
         input: text,
         voice: voice,
-        speed: 0.9,  // Added speed parameter set to 0.9
         response_format: 'mp3',
       }),
     })
 
     if (!response.ok) {
-      const error = await response.text()
-      console.error('OpenAI API error:', error)
-      throw new Error(`OpenAI API error: ${error}`)
+      const errorData = await response.text()
+      console.error('OpenAI API error:', errorData)
+      throw new Error(`OpenAI API error: ${errorData}`)
     }
 
     // Get audio data and convert to base64
@@ -59,8 +58,12 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Text-to-speech error:', error)
+    
+    // Ensure we're not trying to stringify an Error object directly
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
