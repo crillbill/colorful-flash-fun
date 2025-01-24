@@ -65,12 +65,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         isCorrect
       });
 
-      if (isCorrect) {
-        console.log('VoiceInterface: Correct pronunciation detected');
-      } else {
-        console.log('VoiceInterface: Incorrect pronunciation detected');
-      }
-
       onPronunciationResult(isCorrect);
     } else if (event.type === 'error') {
       console.error('VoiceInterface: Error event received:', event);
@@ -102,7 +96,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         if (managerRef.current) {
           managerRef.current.sendData({ type: 'stop_recording' });
         }
-      }, 2000); // Changed from 3000 to 2000 milliseconds
+      }, 2000);
       
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);

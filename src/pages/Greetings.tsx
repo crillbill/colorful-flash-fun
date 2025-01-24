@@ -5,7 +5,7 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Mic, Volume2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,10 +20,13 @@ const Greetings = () => {
     setIsListening(false);
     if (isCorrect) {
       toast.success("Great pronunciation!");
-      speakWord("Great pronunciation!", false); // Speak feedback in English
+      speakWord("Great pronunciation!", false);
     } else {
       toast.error("Let's try that again");
-      speakWord("Let's try that again", false); // Speak feedback in English
+      speakWord("Let's try that again", false).then(() => {
+        // Start a new recording session after feedback
+        setTimeout(() => setIsListening(true), 1500);
+      });
     }
   };
 
@@ -31,10 +34,13 @@ const Greetings = () => {
     setIsListeningSecond(false);
     if (isCorrect) {
       toast.success("Excellent!");
-      speakWord("Excellent!", false); // Speak feedback in English
+      speakWord("Excellent!", false);
     } else {
       toast.error("Keep practicing!");
-      speakWord("Keep practicing!", false); // Speak feedback in English
+      speakWord("Keep practicing!", false).then(() => {
+        // Start a new recording session after feedback
+        setTimeout(() => setIsListeningSecond(true), 1500);
+      });
     }
   };
 
@@ -48,7 +54,7 @@ const Greetings = () => {
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text: word,
-          voice: isHebrew ? 'alloy' : 'echo' // Use different voices for Hebrew and English
+          voice: isHebrew ? 'alloy' : 'echo'
         }
       });
 
@@ -59,21 +65,31 @@ const Greetings = () => {
       const audioContent = response.data.audioContent;
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
       
-      audio.onended = () => {
-        setIsSpeaking(false);
-      };
+      return new Promise<void>((resolve) => {
+        audio.onended = () => {
+          setIsSpeaking(false);
+          resolve();
+        };
 
-      audio.onerror = () => {
-        console.error('Error playing audio');
-        setIsSpeaking(false);
-        toast.error("Failed to play the word");
-      };
+        audio.onerror = () => {
+          console.error('Error playing audio');
+          setIsSpeaking(false);
+          toast.error("Failed to play the word");
+          resolve();
+        };
 
-      await audio.play();
+        audio.play().catch((error) => {
+          console.error('Error playing audio:', error);
+          setIsSpeaking(false);
+          toast.error("Failed to play the word");
+          resolve();
+        });
+      });
     } catch (error) {
       console.error('Error speaking word:', error);
       toast.error("Failed to speak the word");
       setIsSpeaking(false);
+      return Promise.resolve();
     }
   };
 
