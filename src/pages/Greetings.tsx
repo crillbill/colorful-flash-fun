@@ -27,24 +27,24 @@ const Greetings = () => {
   const handlePronunciationResult = (isCorrect: boolean) => {
     setIsListening(false);
     if (isCorrect) {
-      toast.success(`Wow! You really pronounced '${currentWord}' great!`);
-      speakWord("Excellent pronunciation!", false);
+      toast.success("Perfect pronunciation! You've mastered this word!");
+      speakWord("Excellent! Your pronunciation was perfect.", false);
     } else {
       const tip = getPronunciationTip(currentWord);
-      toast.error(`Let's try '${currentWord}' again. ${tip}`);
-      speakWord(`Let's try that again. ${tip}`, false);
+      toast.error(`Let's try again. ${tip}`);
+      speakWord(`Let's practice once more. ${tip}`, false);
     }
   };
 
   const handleSecondPronunciationResult = (isCorrect: boolean) => {
     setIsListeningSecond(false);
     if (isCorrect) {
-      toast.success(`Perfect! You pronounced '${secondWord}' beautifully!`);
-      speakWord("Excellent pronunciation!", false);
+      toast.success("Excellent! Your pronunciation of this phrase was spot on!");
+      speakWord("Perfect! You pronounced that beautifully!", false);
     } else {
       const tip = getPronunciationTip(secondWord);
-      toast.error(`Let's practice '${secondWord}' again. ${tip}`);
-      speakWord(`Let's try that again. ${tip}`, false);
+      toast.error(`Almost there! ${tip}`);
+      speakWord(`Let's try once more. ${tip}`, false);
     }
   };
 
