@@ -31,46 +31,47 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     return translations[hebrewWord.trim()] || hebrewWord;
   };
 
+  const cleanText = (text: string): string => {
+    return text.toLowerCase()
+      .replace(/[.,!?]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
-    const normalizedTranscribed = transcribed.toLowerCase().trim();
-    const expectedTransliteration = await getHebrewTransliteration(expected);
-    const expectedTranslation = getEnglishTranslation(expected);
+    const normalizedTranscribed = cleanText(transcribed);
+    const expectedTransliteration = cleanText(await getHebrewTransliteration(expected));
+    const expectedTranslation = cleanText(getEnglishTranslation(expected));
     
-    // Split both the transcribed and expected text into words
-    const transcribedWords = normalizedTranscribed.split(' ');
-    const expectedWords = expectedTransliteration.toLowerCase().split(' ');
-    const translationWords = expectedTranslation.toLowerCase().split(' ');
-    
-    // More lenient matching: check against both transliteration and translation
-    const hasMatch = transcribedWords.some(transcribedWord => {
-      // Remove any punctuation and clean the word
-      const cleanTranscribed = transcribedWord.replace(/[.,!?]/g, '').trim();
-      
-      // Check against transliteration
-      const matchesTransliteration = expectedWords.some(expectedWord => {
-        const cleanExpected = expectedWord.replace(/[.,!?]/g, '').trim();
-        return cleanTranscribed.includes(cleanExpected) || 
-               cleanExpected.includes(cleanTranscribed) ||
-               cleanTranscribed === cleanExpected;
-      });
-
-      // Check against English translation
-      const matchesTranslation = translationWords.some(translationWord => {
-        const cleanTranslation = translationWord.replace(/[.,!?]/g, '').trim();
-        return cleanTranscribed.includes(cleanTranslation) || 
-               cleanTranslation.includes(cleanTranscribed) ||
-               cleanTranscribed === cleanTranslation;
-      });
-
-      return matchesTransliteration || matchesTranslation;
-    });
-    
-    console.log('VoiceInterface: Pronunciation evaluation:', {
+    console.log('VoiceInterface: Cleaned text comparison:', {
       transcribed: normalizedTranscribed,
-      expectedTransliteration,
-      expectedTranslation,
+      transliteration: expectedTransliteration,
+      translation: expectedTranslation
+    });
+
+    // Direct matches
+    if (normalizedTranscribed === expectedTransliteration || 
+        normalizedTranscribed === expectedTranslation) {
+      return true;
+    }
+
+    // Split into words for partial matching
+    const transcribedWords = normalizedTranscribed.split(' ');
+    const transliterationWords = expectedTransliteration.split(' ');
+    const translationWords = expectedTranslation.split(' ');
+
+    // Check if any transcribed word matches any expected word
+    const hasMatch = transcribedWords.some(transcribedWord => {
+      return transliterationWords.some(expectedWord => 
+        transcribedWord.includes(expectedWord) || expectedWord.includes(transcribedWord)
+      ) || translationWords.some(translationWord =>
+        transcribedWord.includes(translationWord) || translationWord.includes(transcribedWord)
+      );
+    });
+
+    console.log('VoiceInterface: Word-by-word comparison:', {
       transcribedWords,
-      expectedWords,
+      transliterationWords,
       translationWords,
       hasMatch
     });
@@ -126,11 +127,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       managerRef.current.sendData({ type: 'start_recording' });
       
-      // Set timeout to stop recording after 2 seconds
+      // Set timeout to stop recording after 3 seconds (increased from 2)
       timeoutRef.current = setTimeout(() => {
-        console.log('VoiceInterface: Auto-stopping recording after 2 seconds');
+        console.log('VoiceInterface: Auto-stopping recording after 3 seconds');
         stopRecording();
-      }, 2000);
+      }, 3000);
       
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);
@@ -148,12 +149,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       stopRecording();
     }
 
-    // Cleanup function that runs when component unmounts or when dependencies change
     return () => {
       console.log('VoiceInterface: Cleaning up on unmount or deps change');
       stopRecording();
     };
-  }, [isListening, currentWord]); // Added currentWord as dependency to ensure cleanup between words
+  }, [isListening, currentWord]);
 
   return null;
 };
