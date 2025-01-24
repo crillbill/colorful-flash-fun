@@ -20,6 +20,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     const transliterations: { [key: string]: string } = {
       'שלום': 'shalom',
       'מה שלומך היום': 'ma shlomcha hayom',
+      'מתי ארוחת צהריים': 'matai aruchat tzohorayim',
     };
     return transliterations[hebrewWord.trim()] || hebrewWord;
   };
@@ -28,6 +29,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     const translations: { [key: string]: string } = {
       'שלום': 'hello',
       'מה שלומך היום': 'how are you today',
+      'מתי ארוחת צהריים': 'what time is lunch',
     };
     return translations[hebrewWord.trim()] || hebrewWord;
   };
@@ -40,7 +42,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
-    // If the transcribed text contains Hebrew characters, it's likely correct
     if (/[\u0590-\u05FF]/.test(transcribed)) {
       console.log('VoiceInterface: Hebrew characters detected in transcription:', transcribed);
       return true;
@@ -57,14 +58,12 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       containsHebrew: /[\u0590-\u05FF]/.test(transcribed)
     });
 
-    // Check for exact matches
     if (normalizedTranscribed === expectedTransliteration || 
         normalizedTranscribed === expectedTranslation) {
       console.log('VoiceInterface: Exact match found');
       return true;
     }
 
-    // Check if transcribed text contains the expected text
     if (normalizedTranscribed.includes(expectedTransliteration) || 
         expectedTransliteration.includes(normalizedTranscribed) ||
         normalizedTranscribed.includes(expectedTranslation) ||
@@ -73,7 +72,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       return true;
     }
 
-    // Split into words and check for partial matches
     const transcribedWords = normalizedTranscribed.split(' ');
     const transliterationWords = expectedTransliteration.split(' ');
     const translationWords = expectedTranslation.split(' ');
@@ -150,7 +148,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Auto-stopping recording after 2 seconds');
         stopRecording();
-      }, 2000); // Changed from 8000 to 2000 milliseconds
+      }, 2000);
       
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);
@@ -159,6 +157,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     }
   };
 
+  // Clean up when isListening changes or component unmounts
   useEffect(() => {
     if (isListening) {
       console.log('VoiceInterface: isListening changed to true, starting recording');
@@ -168,8 +167,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       stopRecording();
     }
 
+    // Always clean up on unmount or when dependencies change
     return () => {
-      console.log('VoiceInterface: Cleaning up on unmount or deps change');
+      console.log('VoiceInterface: Cleaning up');
       stopRecording();
     };
   }, [isListening, currentWord]);
