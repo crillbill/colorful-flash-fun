@@ -26,7 +26,11 @@ export const CardFront = ({
     <Card className="flip-card-front p-6 flex flex-col items-center justify-between bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
       <h2 className="text-8xl font-bold text-center">{question}</h2>
       <div className="flex flex-col gap-4 items-center mt-4">
-        <AudioButton isPlaying={isPlaying} onToggle={onPlayAudio} />
+        <AudioButton 
+          isPlaying={isPlaying} 
+          onToggle={onPlayAudio}
+          disabled={isListening || isProcessing} 
+        />
         <div className="relative">
           <Button
             variant={isListening ? "destructive" : isProcessing ? "secondary" : "default"}
@@ -36,7 +40,7 @@ export const CardFront = ({
               e.stopPropagation();
               onStartListening();
             }}
-            disabled={isListening || isProcessing}
+            disabled={isListening || isProcessing || isPlaying}
           >
             <Mic className={isListening ? "animate-pulse" : ""} />
             {isProcessing 
