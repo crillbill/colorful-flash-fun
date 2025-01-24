@@ -100,7 +100,7 @@ export const FlashCard = ({
     
     setIsProcessing(false);
     setIsListening(false);
-    setTimeLeft(3);
+    setTimeLeft(2); // Reset to 2 seconds instead of 3
     handleAnswer(isCorrect);
   };
 
