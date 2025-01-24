@@ -58,7 +58,7 @@ const Greetings = () => {
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text: word,
-          voice: 'echo' // Using 'echo' consistently for all feedback
+          voice: isHebrew ? 'nova' : 'alloy' // Use 'nova' for Hebrew words, 'alloy' for feedback
         }
       });
 
