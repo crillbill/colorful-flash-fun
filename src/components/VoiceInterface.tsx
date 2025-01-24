@@ -16,67 +16,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const timeoutRef = useRef<NodeJS.Timeout>();
   const isRecordingRef = useRef<boolean>(false);
 
-  const getHebrewTransliteration = async (hebrewWord: string): Promise<string> => {
-    const transliterations: { [key: string]: string } = {
-      'שלום': 'shalom',
-      'מה שלומך היום': 'ma shlomcha hayom',
-      'מתי ארוחת צהריים': 'matai aruchat tzohorayim',
-    };
-    return transliterations[hebrewWord.trim()] || hebrewWord;
-  };
-
-  const getEnglishTranslation = (hebrewWord: string): string => {
-    const translations: { [key: string]: string } = {
-      'שלום': 'hello',
-      'מה שלומך היום': 'how are you today',
-      'מתי ארוחת צהריים': 'what time is lunch',
-    };
-    return translations[hebrewWord.trim()] || hebrewWord;
-  };
-
-  const cleanText = (text: string): string => {
-    return text.toLowerCase()
-      .replace(/[.,!?]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
-
-  const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
-    const normalizedTranscribed = cleanText(transcribed);
-    const expectedTransliteration = await getHebrewTransliteration(expected);
-    const isMatch = normalizedTranscribed.includes(expectedTransliteration.toLowerCase());
-
-    console.log('VoiceInterface: Pronunciation evaluation:', {
-      transcribed: normalizedTranscribed,
-      expected: expectedTransliteration,
-      isMatch
-    });
-
-    return isMatch;
-  };
-
-  const handleMessage = async (event: any) => {
-    console.log('VoiceInterface: Received message:', event);
-
-    if (event.text) {
-      const transcribedText = cleanText(event.text);
-      const isCorrect = await evaluatePronunciation(transcribedText, currentWord);
-      const expectedTransliteration = await getHebrewTransliteration(currentWord);
-
-      console.log('VoiceInterface: Speech evaluation result:', {
-        transcribed: transcribedText,
-        expected: currentWord,
-        expectedTransliteration,
-        isCorrect
-      });
-
-      onPronunciationResult(isCorrect);
-    } else if (event.type === 'error') {
-      console.error('VoiceInterface: Error event received:', event);
-      onPronunciationResult(false);
-    }
-  };
-
   const stopRecording = () => {
     console.log('VoiceInterface: Stopping recording');
 
@@ -86,7 +25,19 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     }
 
     if (managerRef.current) {
+      console.log('VoiceInterface: Sending stop_recording command');
       managerRef.current.sendData({ type: 'stop_recording' });
+
+      // Forcefully stop all media tracks
+      const mediaStream = managerRef.current.getMediaStream();
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => {
+          console.log('VoiceInterface: Stopping media track:', track.kind);
+          track.stop();
+        });
+      }
+
+      console.log('VoiceInterface: Disconnecting WebRTCManager');
       managerRef.current.disconnect();
       managerRef.current = null;
     }
@@ -123,6 +74,50 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     }
   };
 
+  const handleMessage = async (event: any) => {
+    console.log('VoiceInterface: Received message:', event);
+
+    if (event.text) {
+      const transcribedText = event.text.toLowerCase().trim();
+      const expectedWord = currentWord;
+      const isCorrect = await evaluatePronunciation(transcribedText, expectedWord);
+      
+      console.log('VoiceInterface: Speech evaluation result:', {
+        transcribed: transcribedText,
+        expected: expectedWord,
+        isCorrect
+      });
+
+      onPronunciationResult(isCorrect);
+    } else if (event.type === 'error') {
+      console.error('VoiceInterface: Error event received:', event);
+      onPronunciationResult(false);
+    }
+  };
+
+  const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
+    const normalizedTranscribed = transcribed.toLowerCase().trim();
+    const expectedTransliteration = await getHebrewTransliteration(expected);
+    const isMatch = normalizedTranscribed.includes(expectedTransliteration.toLowerCase());
+
+    console.log('VoiceInterface: Pronunciation evaluation:', {
+      transcribed: normalizedTranscribed,
+      expected: expectedTransliteration,
+      isMatch
+    });
+
+    return isMatch;
+  };
+
+  const getHebrewTransliteration = async (hebrewWord: string): Promise<string> => {
+    const transliterations: { [key: string]: string } = {
+      'שלום': 'shalom',
+      'מה שלומך היום': 'ma shlomcha hayom',
+      'מתי ארוחת צהריים': 'matai aruchat tzohorayim',
+    };
+    return transliterations[hebrewWord.trim()] || hebrewWord;
+  };
+
   useEffect(() => {
     console.log('VoiceInterface: Effect triggered with isListening:', isListening);
 
@@ -140,16 +135,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       }
     };
   }, [isListening]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      console.log('VoiceInterface: Component unmounting, cleaning up');
-      if (isRecordingRef.current) {
-        stopRecording();
-      }
-    };
-  }, []);
 
   return null;
 };

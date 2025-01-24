@@ -7,6 +7,7 @@ export class WebRTCManager {
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
   private isRecording: boolean = false;
+  private mediaStream: MediaStream | null = null;
 
   constructor(private onMessage: (message: any) => void) {
     console.log('WebRTCManager: Initializing');
@@ -14,11 +15,16 @@ export class WebRTCManager {
     this.audioEl.autoplay = true;
   }
 
+  getMediaStream(): MediaStream | null {
+    return this.mediaStream;
+  }
+
+  // ... keep existing code (initialize method)
+
   async initialize(requireMicrophone: boolean = true) {
     try {
       console.log('WebRTCManager: Starting initialization');
 
-      // Get ephemeral token from our Edge Function
       const tokenResponse = await supabase.functions.invoke("realtime-speech");
       const data = await tokenResponse.data;
       
@@ -28,16 +34,12 @@ export class WebRTCManager {
 
       const EPHEMERAL_KEY = data.client_secret.value;
 
-      // Create peer connection
       this.pc = new RTCPeerConnection();
 
-      // Set up remote audio
       this.pc.ontrack = e => {
         console.log('WebRTCManager: Received audio track');
         this.audioEl.srcObject = e.streams[0];
       };
-
-      let audioTrack: MediaStreamTrack;
 
       if (requireMicrophone) {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -48,7 +50,8 @@ export class WebRTCManager {
           } 
         });
 
-        audioTrack = stream.getTracks()[0];
+        this.mediaStream = stream;
+        const audioTrack = stream.getTracks()[0];
 
         this.mediaRecorder = new MediaRecorder(stream);
         
@@ -82,20 +85,18 @@ export class WebRTCManager {
             this.isRecording = false;
           }
         };
+
+        this.pc.addTrack(audioTrack, stream);
       } else {
-        // Create a silent audio track for text-to-speech
         const ctx = new AudioContext();
         const oscillator = ctx.createOscillator();
         const dest = ctx.createMediaStreamDestination();
         oscillator.connect(dest);
         oscillator.start();
-        audioTrack = dest.stream.getAudioTracks()[0];
+        const audioTrack = dest.stream.getAudioTracks()[0];
+        this.pc.addTrack(audioTrack, new MediaStream([audioTrack]));
       }
 
-      // Add audio track to peer connection
-      this.pc.addTrack(audioTrack, new MediaStream([audioTrack]));
-
-      // Set up data channel
       this.dc = this.pc.createDataChannel("oai-events");
       this.dc.addEventListener("message", (e) => {
         const event = JSON.parse(e.data);
@@ -103,11 +104,9 @@ export class WebRTCManager {
         this.onMessage(event);
       });
 
-      // Create and set local description
       const offer = await this.pc.createOffer();
       await this.pc.setLocalDescription(offer);
 
-      // Connect to OpenAI's Realtime API
       const baseUrl = "https://api.openai.com/v1/realtime";
       const model = "gpt-4o-realtime-preview-2024-12-17";
       const sdpResponse = await fetch(`${baseUrl}?model=${model}`, {
