@@ -34,30 +34,44 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
     const normalizedTranscribed = transcribed.toLowerCase().trim();
     const expectedTransliteration = await getHebrewTransliteration(expected);
+    const expectedTranslation = getEnglishTranslation(expected);
     
     // Split both the transcribed and expected text into words
     const transcribedWords = normalizedTranscribed.split(' ');
     const expectedWords = expectedTransliteration.toLowerCase().split(' ');
+    const translationWords = expectedTranslation.toLowerCase().split(' ');
     
-    // More lenient matching: check if any of the transcribed words match any of the expected words
-    const hasMatch = expectedWords.some(expectedWord => 
-      transcribedWords.some(transcribedWord => {
-        // Remove any punctuation and compare
-        const cleanExpected = expectedWord.replace(/[.,!?]/g, '');
-        const cleanTranscribed = transcribedWord.replace(/[.,!?]/g, '');
-        
-        // Check for exact match or if the transcribed word contains the expected word
-        return cleanTranscribed === cleanExpected || 
-               cleanTranscribed.includes(cleanExpected) ||
-               cleanExpected.includes(cleanTranscribed);
-      })
-    );
+    // More lenient matching: check against both transliteration and translation
+    const hasMatch = transcribedWords.some(transcribedWord => {
+      // Remove any punctuation and clean the word
+      const cleanTranscribed = transcribedWord.replace(/[.,!?]/g, '').trim();
+      
+      // Check against transliteration
+      const matchesTransliteration = expectedWords.some(expectedWord => {
+        const cleanExpected = expectedWord.replace(/[.,!?]/g, '').trim();
+        return cleanTranscribed.includes(cleanExpected) || 
+               cleanExpected.includes(cleanTranscribed) ||
+               cleanTranscribed === cleanExpected;
+      });
+
+      // Check against English translation
+      const matchesTranslation = translationWords.some(translationWord => {
+        const cleanTranslation = translationWord.replace(/[.,!?]/g, '').trim();
+        return cleanTranscribed.includes(cleanTranslation) || 
+               cleanTranslation.includes(cleanTranscribed) ||
+               cleanTranscribed === cleanTranslation;
+      });
+
+      return matchesTransliteration || matchesTranslation;
+    });
     
     console.log('VoiceInterface: Pronunciation evaluation:', {
       transcribed: normalizedTranscribed,
-      expected: expectedTransliteration,
+      expectedTransliteration,
+      expectedTranslation,
       transcribedWords,
       expectedWords,
+      translationWords,
       hasMatch
     });
 
