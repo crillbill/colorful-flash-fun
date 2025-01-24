@@ -97,25 +97,42 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
   const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
     const normalizedTranscribed = transcribed.toLowerCase().trim();
-    const expectedTransliteration = await getHebrewTransliteration(expected);
-    const isMatch = normalizedTranscribed.includes(expectedTransliteration.toLowerCase());
+    const transliterations = await getHebrewTransliteration(expected);
+    
+    // Check if the transcribed text matches any of the acceptable variations
+    const isMatch = transliterations.some(transliteration => {
+      const normalizedTransliteration = transliteration.toLowerCase().trim();
+      return normalizedTranscribed.includes(normalizedTransliteration) || 
+             normalizedTransliteration.includes(normalizedTranscribed);
+    });
 
     console.log('VoiceInterface: Pronunciation evaluation:', {
       transcribed: normalizedTranscribed,
-      expected: expectedTransliteration,
+      expectedVariations: transliterations,
       isMatch
     });
 
     return isMatch;
   };
 
-  const getHebrewTransliteration = async (hebrewWord: string): Promise<string> => {
-    const transliterations: { [key: string]: string } = {
-      'שלום': 'shalom',
-      'מה שלומך היום': 'ma shlomcha hayom',
-      'מתי ארוחת צהריים': 'matai aruchat tzohorayim',
+  const getHebrewTransliteration = async (hebrewWord: string): Promise<string[]> => {
+    // Map of Hebrew words to their acceptable pronunciation variations
+    const transliterations: { [key: string]: string[] } = {
+      'שלום': ['shalom', 'shalum', 'shalem', 'shulem'],
+      'מה שלומך היום': [
+        'ma shlomcha hayom',
+        'mah shlomcha hayom',
+        'ma shlomha hayom',
+        'ma schlomcha hayom'
+      ],
+      'מתי ארוחת צהריים': [
+        'matai aruchat tzohorayim',
+        'matay aruhat tzohorayim',
+        'matai aruhat zohorayim',
+        'matai aruchat tsohorayim'
+      ],
     };
-    return transliterations[hebrewWord.trim()] || hebrewWord;
+    return transliterations[hebrewWord.trim()] || [hebrewWord];
   };
 
   useEffect(() => {
