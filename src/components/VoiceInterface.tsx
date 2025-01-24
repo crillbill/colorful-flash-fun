@@ -72,14 +72,22 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     }
   };
 
+  const stopRecording = () => {
+    console.log('VoiceInterface: Stopping recording');
+    if (managerRef.current) {
+      managerRef.current.sendData({ type: 'stop_recording' });
+      managerRef.current.disconnect();
+      managerRef.current = null;
+    }
+  };
+
   const startRecording = async () => {
     try {
       console.log('VoiceInterface: Starting new recording session');
       
       if (managerRef.current) {
         console.log('VoiceInterface: Cleaning up existing session');
-        managerRef.current.disconnect();
-        managerRef.current = null;
+        stopRecording();
       }
 
       console.log('VoiceInterface: Creating new WebRTCManager instance');
@@ -90,12 +98,10 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       managerRef.current.sendData({ type: 'start_recording' });
       
-      // Changed to 2-second timeout for recording
+      // Set timeout to stop recording after 2 seconds
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Auto-stopping recording after 2 seconds');
-        if (managerRef.current) {
-          managerRef.current.sendData({ type: 'stop_recording' });
-        }
+        stopRecording();
       }, 2000);
       
     } catch (error) {
@@ -116,8 +122,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       }
       if (managerRef.current) {
         console.log('VoiceInterface: Cleaning up recording session on unmount');
-        managerRef.current.disconnect();
-        managerRef.current = null;
+        stopRecording();
       }
     };
   }, [isListening, currentWord]);
