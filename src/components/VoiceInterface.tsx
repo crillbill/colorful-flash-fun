@@ -60,7 +60,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       await managerRef.current.initialize();
       managerRef.current.sendData({ type: 'start_recording' });
 
-      // Set a strict timeout to stop recording after 2 seconds
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Recording timeout reached');
         stopRecording();
@@ -99,11 +98,23 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     const normalizedTranscribed = transcribed.toLowerCase().trim();
     const transliterations = await getHebrewTransliteration(expected);
     
-    // Check if the transcribed text matches any of the acceptable variations
+    // More lenient matching logic
     const isMatch = transliterations.some(transliteration => {
       const normalizedTransliteration = transliteration.toLowerCase().trim();
-      return normalizedTranscribed.includes(normalizedTransliteration) || 
-             normalizedTransliteration.includes(normalizedTranscribed);
+      
+      // Split into words for partial matching
+      const transcribedWords = normalizedTranscribed.split(/\s+/);
+      const transliterationWords = normalizedTransliteration.split(/\s+/);
+      
+      // Check for partial matches in either direction
+      return transcribedWords.some(word => 
+        transliterationWords.some(expectedWord => 
+          word.includes(expectedWord) || 
+          expectedWord.includes(word) ||
+          // Levenshtein distance for fuzzy matching
+          levenshteinDistance(word, expectedWord) <= 2
+        )
+      );
     });
 
     console.log('VoiceInterface: Pronunciation evaluation:', {
@@ -115,21 +126,50 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     return isMatch;
   };
 
+  // Helper function for fuzzy matching
+  const levenshteinDistance = (a: string, b: string): number => {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+
+    const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+
+    for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
+    for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
+
+    for (let j = 1; j <= b.length; j++) {
+      for (let i = 1; i <= a.length; i++) {
+        const substitutionCost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[j][i] = Math.min(
+          matrix[j][i - 1] + 1,
+          matrix[j - 1][i] + 1,
+          matrix[j - 1][i - 1] + substitutionCost
+        );
+      }
+    }
+
+    return matrix[b.length][a.length];
+  };
+
   const getHebrewTransliteration = async (hebrewWord: string): Promise<string[]> => {
     // Map of Hebrew words to their acceptable pronunciation variations
     const transliterations: { [key: string]: string[] } = {
-      'שלום': ['shalom', 'shalum', 'shalem', 'shulem'],
+      'שלום': [
+        'shalom', 'shalum', 'shalem', 'shulem', 
+        'shallom', 'shallum', 'sholom', 'sholum',
+        'sha lom', 'sha lum', 'sho lom', 'sho lum'
+      ],
       'מה שלומך היום': [
-        'ma shlomcha hayom',
-        'mah shlomcha hayom',
-        'ma shlomha hayom',
-        'ma schlomcha hayom'
+        'ma shlomcha hayom', 'mah shlomcha hayom',
+        'ma shlomha hayom', 'ma schlomcha hayom',
+        'ma shalom hayom', 'mah shalom hayom',
+        'ma shlomech hayom', 'ma shlomha',
+        'ma schlom', 'ma shalom'
       ],
       'מתי ארוחת צהריים': [
-        'matai aruchat tzohorayim',
-        'matay aruhat tzohorayim',
-        'matai aruhat zohorayim',
-        'matai aruchat tsohorayim'
+        'matai aruchat tzohorayim', 'matay aruhat tzohorayim',
+        'matai aruhat zohorayim', 'matai aruchat tsohorayim',
+        'matai aruha', 'matai tzohorayim', 'matai lunch',
+        'matai aruchat', 'matai tsohoraim', 'mata aruchat'
       ],
     };
     return transliterations[hebrewWord.trim()] || [hebrewWord];
@@ -144,7 +184,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       stopRecording();
     }
 
-    // Cleanup function to ensure recording is stopped when component unmounts
     return () => {
       console.log('VoiceInterface: Cleanup effect running');
       if (isRecordingRef.current) {
