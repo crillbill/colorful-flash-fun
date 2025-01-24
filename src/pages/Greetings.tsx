@@ -5,7 +5,7 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Mic, Volume2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -62,7 +62,7 @@ const Greetings = () => {
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text: word,
-          voice: isHebrew ? 'alloy' : 'echo'
+          voice: 'echo' // Using 'echo' consistently for all feedback
         }
       });
 
@@ -100,8 +100,6 @@ const Greetings = () => {
       return Promise.resolve();
     }
   };
-
-  // ... keep existing code (JSX for the component's UI)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">

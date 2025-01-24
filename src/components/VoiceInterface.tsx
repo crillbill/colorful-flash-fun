@@ -14,11 +14,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 }) => {
   const managerRef = useRef<WebRTCManager | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
-  const feedbackInProgressRef = useRef<boolean>(false);
-  const feedbackQueueRef = useRef<string[]>([]);
 
   const getHebrewTransliteration = async (hebrewWord: string): Promise<string> => {
-    // Replace with a dynamic transliteration API or a more comprehensive mapping
     const transliterations: { [key: string]: string } = {
       'שלום': 'shalom',
       'מה שלומך היום': 'ma shlomcha hayom',
@@ -55,13 +52,10 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const transcribedText = event.text.toLowerCase().trim();
       const expectedWord = currentWord;
       const isCorrect = await evaluatePronunciation(transcribedText, expectedWord);
-      const expectedTransliteration = await getHebrewTransliteration(expectedWord);
-      const englishTranslation = getEnglishTranslation(expectedWord);
       
       console.log('VoiceInterface: Speech evaluation result:', {
         transcribed: transcribedText,
         expected: expectedWord,
-        expectedTransliteration,
         isCorrect
       });
 
