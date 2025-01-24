@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { WebRTCManager } from '@/utils/webrtc/WebRTCManager';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 interface VoiceInterfaceProps {
   currentWord: string;
@@ -38,35 +37,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       .replace(/[.,!?]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
-  };
-
-  const speakFeedback = async (text: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { 
-          text,
-          voice: 'alloy' // Use alloy voice for feedback
-        }
-      });
-
-      if (error) throw error;
-
-      const audioContent = data.audioContent;
-      const audioBlob = new Blob(
-        [Uint8Array.from(atob(audioContent), c => c.charCodeAt(0))],
-        { type: 'audio/mp3' }
-      );
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      
-      await audio.play();
-      
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-      };
-    } catch (error) {
-      console.error('Error playing feedback:', error);
-    }
   };
 
   const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
@@ -141,13 +111,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         expected: expectedWord,
         isCorrect
       });
-
-      // Provide audio feedback
-      if (isCorrect) {
-        await speakFeedback("Excellent! Your pronunciation was perfect!");
-      } else {
-        await speakFeedback("Let's try that again. Listen carefully to the pronunciation.");
-      }
 
       onPronunciationResult(isCorrect);
     } else if (event.type === 'error') {
