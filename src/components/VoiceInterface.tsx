@@ -183,11 +183,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       managerRef.current.sendData({ type: 'start_recording' });
       
-      // Set timeout to stop recording after 3 seconds (reduced from 5)
+      // Set timeout to stop recording after 2 seconds (reduced from 3)
       timeoutRef.current = setTimeout(() => {
-        console.log('VoiceInterface: Auto-stopping recording after 3 seconds');
+        console.log('VoiceInterface: Auto-stopping recording after 2 seconds');
         stopRecording();
-      }, 3000);
+      }, 2000);
       
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);
