@@ -34,21 +34,34 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
     const normalizedTranscribed = transcribed.toLowerCase().trim();
     const expectedTransliteration = await getHebrewTransliteration(expected);
+    
+    // Split both the transcribed and expected text into words
+    const transcribedWords = normalizedTranscribed.split(' ');
     const expectedWords = expectedTransliteration.toLowerCase().split(' ');
     
-    // Check if all expected words are present in the transcribed text
-    const isMatch = expectedWords.every(word => 
-      normalizedTranscribed.includes(word)
+    // More lenient matching: check if any of the transcribed words match any of the expected words
+    const hasMatch = expectedWords.some(expectedWord => 
+      transcribedWords.some(transcribedWord => {
+        // Remove any punctuation and compare
+        const cleanExpected = expectedWord.replace(/[.,!?]/g, '');
+        const cleanTranscribed = transcribedWord.replace(/[.,!?]/g, '');
+        
+        // Check for exact match or if the transcribed word contains the expected word
+        return cleanTranscribed === cleanExpected || 
+               cleanTranscribed.includes(cleanExpected) ||
+               cleanExpected.includes(cleanTranscribed);
+      })
     );
     
     console.log('VoiceInterface: Pronunciation evaluation:', {
       transcribed: normalizedTranscribed,
       expected: expectedTransliteration,
+      transcribedWords,
       expectedWords,
-      isMatch
+      hasMatch
     });
 
-    return isMatch;
+    return hasMatch;
   };
 
   const handleMessage = async (event: any) => {
