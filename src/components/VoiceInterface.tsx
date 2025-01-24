@@ -43,33 +43,48 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     const expectedTransliteration = cleanText(await getHebrewTransliteration(expected));
     const expectedTranslation = cleanText(getEnglishTranslation(expected));
     
-    console.log('VoiceInterface: Cleaned text comparison:', {
+    console.log('VoiceInterface: Detailed comparison:', {
       transcribed: normalizedTranscribed,
       transliteration: expectedTransliteration,
-      translation: expectedTranslation
+      translation: expectedTranslation,
+      transcribedLength: normalizedTranscribed.length,
+      transliterationLength: expectedTransliteration.length,
+      translationLength: expectedTranslation.length
     });
 
-    // Direct matches
+    // Check for exact matches first
     if (normalizedTranscribed === expectedTransliteration || 
         normalizedTranscribed === expectedTranslation) {
+      console.log('VoiceInterface: Exact match found');
       return true;
     }
 
-    // Split into words for partial matching
+    // Check if transcribed text contains the expected text
+    if (normalizedTranscribed.includes(expectedTransliteration) || 
+        expectedTransliteration.includes(normalizedTranscribed) ||
+        normalizedTranscribed.includes(expectedTranslation) ||
+        expectedTranslation.includes(normalizedTranscribed)) {
+      console.log('VoiceInterface: Partial match found');
+      return true;
+    }
+
+    // Split into words and check for partial matches
     const transcribedWords = normalizedTranscribed.split(' ');
     const transliterationWords = expectedTransliteration.split(' ');
     const translationWords = expectedTranslation.split(' ');
 
     // Check if any transcribed word matches any expected word
     const hasMatch = transcribedWords.some(transcribedWord => {
-      return transliterationWords.some(expectedWord => 
+      const matchesTransliteration = transliterationWords.some(expectedWord => 
         transcribedWord.includes(expectedWord) || expectedWord.includes(transcribedWord)
-      ) || translationWords.some(translationWord =>
+      );
+      const matchesTranslation = translationWords.some(translationWord =>
         transcribedWord.includes(translationWord) || translationWord.includes(transcribedWord)
       );
+      return matchesTransliteration || matchesTranslation;
     });
 
-    console.log('VoiceInterface: Word-by-word comparison:', {
+    console.log('VoiceInterface: Word-by-word comparison result:', {
       transcribedWords,
       transliterationWords,
       translationWords,
@@ -127,11 +142,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       
       managerRef.current.sendData({ type: 'start_recording' });
       
-      // Set timeout to stop recording after 3 seconds (increased from 2)
+      // Set timeout to stop recording after 5 seconds (increased from 3)
       timeoutRef.current = setTimeout(() => {
-        console.log('VoiceInterface: Auto-stopping recording after 3 seconds');
+        console.log('VoiceInterface: Auto-stopping recording after 5 seconds');
         stopRecording();
-      }, 3000);
+      }, 5000);
       
     } catch (error) {
       console.error('VoiceInterface: Error starting recording:', error);
