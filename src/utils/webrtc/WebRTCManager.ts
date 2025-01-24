@@ -86,9 +86,10 @@ export class WebRTCManager {
         // Create a silent audio track for text-to-speech
         const ctx = new AudioContext();
         const oscillator = ctx.createOscillator();
-        const dst = oscillator.connect(ctx.createMediaStreamDestination());
+        const dest = ctx.createMediaStreamDestination();
+        oscillator.connect(dest);
         oscillator.start();
-        audioTrack = dst.stream.getAudioTracks()[0];
+        audioTrack = dest.stream.getAudioTracks()[0];
       }
 
       // Add audio track to peer connection
