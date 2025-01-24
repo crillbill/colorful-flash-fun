@@ -18,7 +18,7 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const { text, voice = 'alloy' } = await req.json()
+    const { text, voice = 'nova' } = await req.json()
     console.log('Text-to-speech request:', { text, voice })
 
     if (!text) {

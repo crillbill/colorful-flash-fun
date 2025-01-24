@@ -115,7 +115,10 @@ export const FlashCard = ({
 
       console.log("FlashCard: Initiating audio playback for text:", text);
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text },
+        body: { 
+          text,
+          voice: 'nova' // Using Nova voice which is better for Hebrew pronunciation
+        },
       });
 
       if (error) {
