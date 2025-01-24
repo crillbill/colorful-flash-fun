@@ -60,6 +60,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       await managerRef.current.initialize();
       managerRef.current.sendData({ type: 'start_recording' });
 
+      // Set a timeout to automatically stop recording after 2 seconds
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Recording timeout reached');
         stopRecording();
