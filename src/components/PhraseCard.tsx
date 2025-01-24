@@ -33,9 +33,12 @@ const PhraseCard = ({ phrase, isActive, onListen, onSpeak }: PhraseCardProps) =>
               variant={isActive ? "default" : "ghost"}
               size="icon"
               onClick={onListen}
-              className={isActive ? "bg-green-500 hover:bg-green-600" : "hover:bg-accent"}
+              className={`relative ${isActive ? "bg-green-500 hover:bg-green-600" : "hover:bg-accent"}`}
             >
               <Mic className="h-6 w-6" />
+              {isActive && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+              )}
             </Button>
           </div>
         </CardTitle>

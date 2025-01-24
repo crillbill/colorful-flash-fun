@@ -39,11 +39,17 @@ const Greetings = () => {
   const handlePronunciationResult = (word: string, isCorrect: boolean) => {
     setActiveListening(null);
     if (isCorrect) {
-      toast.success("Perfect pronunciation!");
+      toast.success("Perfect pronunciation!", {
+        description: "Great job! You pronounced it correctly.",
+        duration: 3000
+      });
       speakWord("Excellent! Your pronunciation was perfect.", false);
     } else {
       const tip = getPronunciationTip(word);
-      toast.error(`Let's try again. ${tip}`);
+      toast.error("Let's try again", {
+        description: tip,
+        duration: 5000
+      });
       speakWord(`Let's practice once more. ${tip}`, false);
     }
   };
@@ -62,6 +68,8 @@ const Greetings = () => {
 
     try {
       setIsSpeaking(true);
+      toast.info("Speaking...", { duration: 1000 });
+      
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text: word,
@@ -119,16 +127,32 @@ const Greetings = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
-        <h2 className="text-2xl font-semibold text-center text-primary">
-          from trae.ai
-        </h2>
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-semibold text-primary">
+            Hebrew Greetings Practice
+          </h2>
+          <p className="text-muted-foreground">
+            Click the microphone icon to practice pronunciation. 
+            The red dot indicates when the microphone is listening.
+          </p>
+        </div>
 
         {phrases.map((phrase) => (
           <PhraseCard
             key={phrase.hebrew}
             phrase={phrase}
             isActive={activeListening === phrase.hebrew}
-            onListen={() => setActiveListening(phrase.hebrew)}
+            onListen={() => {
+              if (activeListening === phrase.hebrew) {
+                setActiveListening(null);
+              } else {
+                setActiveListening(phrase.hebrew);
+                toast.info("Listening...", {
+                  description: "Speak now! I'm listening for your pronunciation.",
+                  duration: 2000
+                });
+              }
+            }}
             onSpeak={() => speakWord(phrase.hebrew, true)}
           />
         ))}
