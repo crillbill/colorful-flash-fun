@@ -20,8 +20,10 @@ const Greetings = () => {
     setIsListening(false);
     if (isCorrect) {
       toast.success("Great pronunciation!");
+      speakWord("Great pronunciation!", false); // Speak feedback in English
     } else {
       toast.error("Let's try that again");
+      speakWord("Let's try that again", false); // Speak feedback in English
     }
   };
 
@@ -29,12 +31,14 @@ const Greetings = () => {
     setIsListeningSecond(false);
     if (isCorrect) {
       toast.success("Excellent!");
+      speakWord("Excellent!", false); // Speak feedback in English
     } else {
       toast.error("Keep practicing!");
+      speakWord("Keep practicing!", false); // Speak feedback in English
     }
   };
 
-  const speakWord = async (word: string) => {
+  const speakWord = async (word: string, isHebrew = true) => {
     if (isSpeaking) {
       return;
     }
@@ -42,7 +46,10 @@ const Greetings = () => {
     try {
       setIsSpeaking(true);
       const response = await supabase.functions.invoke('text-to-speech', {
-        body: { text: word }
+        body: { 
+          text: word,
+          voice: isHebrew ? 'alloy' : 'echo' // Use different voices for Hebrew and English
+        }
       });
 
       if (response.error) {
@@ -98,7 +105,7 @@ const Greetings = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => speakWord(currentWord)}
+                onClick={() => speakWord(currentWord, true)}
                 disabled={isSpeaking}
                 className={isSpeaking ? "bg-blue-100" : ""}
               >
@@ -134,7 +141,7 @@ const Greetings = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => speakWord(secondWord)}
+                onClick={() => speakWord(secondWord, true)}
                 disabled={isSpeaking}
                 className={isSpeaking ? "bg-blue-100" : ""}
               >

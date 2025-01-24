@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text } = await req.json()
+    const { text, voice } = await req.json()
 
     if (!text) {
       console.error('Text-to-speech: Text is required but was not provided')
@@ -25,7 +25,7 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY is not set in environment variables')
     }
 
-    console.log('Text-to-speech: Generating speech for text:', text)
+    console.log('Text-to-speech: Generating speech for text:', text, 'with voice:', voice || 'alloy')
 
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -36,7 +36,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'tts-1',
         input: text,
-        voice: 'alloy',
+        voice: voice || 'alloy',
         response_format: 'mp3',
       }),
     })
