@@ -8,7 +8,7 @@ const corsHeaders = {
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
@@ -37,7 +37,7 @@ serve(async (req) => {
         model: 'tts-1',
         input: text,
         voice: voice || 'alloy',
-        speed: 0.85, // Updated speed parameter from 0.7 to 0.85 for slightly faster speech
+        speed: 0.85,
         response_format: 'mp3',
       }),
     })
