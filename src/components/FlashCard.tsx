@@ -28,7 +28,7 @@ export const FlashCard = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(3);
+  const [timeLeft, setTimeLeft] = useState(2); // Changed from 3 to 2 seconds
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export const FlashCard = ({
       console.log("FlashCard: Countdown finished, transitioning to processing state");
       setIsListening(false);
       setIsProcessing(true);
-      setTimeLeft(3);
+      setTimeLeft(2); // Reset to 2 seconds instead of 3
     }
 
     return () => {
