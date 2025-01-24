@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Mic, Volume2 } from "lucide-react";
 import { useState } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
-import { WebRTCManager } from "@/utils/webrtc/WebRTCManager";
+import { supabase } from "@/integrations/supabase/client";
 
 const Greetings = () => {
   const [isListening, setIsListening] = useState(false);
@@ -35,39 +35,34 @@ const Greetings = () => {
   };
 
   const speakWord = async (word: string) => {
-    console.log('Speaking word:', word);
     if (isSpeaking) {
-      console.log('Already speaking, returning early');
       return;
     }
-    
+
     try {
       setIsSpeaking(true);
-      console.log('Creating new WebRTCManager instance');
-      const manager = new WebRTCManager((message) => {
-        console.log("Received WebRTC message:", message);
-        if (message.type === 'response.audio.done') {
-          console.log('Audio playback complete');
-          setIsSpeaking(false);
-          manager.disconnect();
-        }
+      const response = await supabase.functions.invoke('text-to-speech', {
+        body: { text: word }
       });
 
-      console.log('Initializing WebRTCManager');
-      await manager.initialize(false); // Don't require microphone for speaking
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      const audioContent = response.data.audioContent;
+      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
       
-      console.log('Sending conversation item');
-      await manager.sendData({
-        type: 'conversation.item.create',
-        item: {
-          type: 'message',
-          role: 'user',
-          content: [{ type: 'input_text', text: word }]
-        }
-      });
-      
-      console.log('Requesting response creation');
-      manager.sendData({ type: 'response.create' });
+      audio.onended = () => {
+        setIsSpeaking(false);
+      };
+
+      audio.onerror = () => {
+        console.error('Error playing audio');
+        setIsSpeaking(false);
+        toast.error("Failed to play the word");
+      };
+
+      await audio.play();
     } catch (error) {
       console.error('Error speaking word:', error);
       toast.error("Failed to speak the word");
