@@ -42,71 +42,31 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   };
 
   const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
-    if (/[\u0590-\u05FF]/.test(transcribed)) {
-      console.log('VoiceInterface: Hebrew characters detected in transcription:', transcribed);
-      return true;
-    }
-
     const normalizedTranscribed = cleanText(transcribed);
-    const expectedTransliteration = cleanText(await getHebrewTransliteration(expected));
-    const expectedTranslation = cleanText(getEnglishTranslation(expected));
-    
-    console.log('VoiceInterface: Detailed comparison:', {
+    const expectedTransliteration = await getHebrewTransliteration(expected);
+    const isMatch = normalizedTranscribed.includes(expectedTransliteration.toLowerCase());
+
+    console.log('VoiceInterface: Pronunciation evaluation:', {
       transcribed: normalizedTranscribed,
-      transliteration: expectedTransliteration,
-      translation: expectedTranslation,
-      containsHebrew: /[\u0590-\u05FF]/.test(transcribed)
+      expected: expectedTransliteration,
+      isMatch
     });
 
-    if (normalizedTranscribed === expectedTransliteration || 
-        normalizedTranscribed === expectedTranslation) {
-      console.log('VoiceInterface: Exact match found');
-      return true;
-    }
-
-    if (normalizedTranscribed.includes(expectedTransliteration) || 
-        expectedTransliteration.includes(normalizedTranscribed) ||
-        normalizedTranscribed.includes(expectedTranslation) ||
-        expectedTranslation.includes(normalizedTranscribed)) {
-      console.log('VoiceInterface: Partial match found');
-      return true;
-    }
-
-    const transcribedWords = normalizedTranscribed.split(' ');
-    const transliterationWords = expectedTransliteration.split(' ');
-    const translationWords = expectedTranslation.split(' ');
-
-    const hasMatch = transcribedWords.some(transcribedWord => {
-      const matchesTransliteration = transliterationWords.some(expectedWord => 
-        transcribedWord.includes(expectedWord) || expectedWord.includes(transcribedWord)
-      );
-      const matchesTranslation = translationWords.some(translationWord =>
-        transcribedWord.includes(translationWord) || translationWord.includes(transcribedWord)
-      );
-      return matchesTransliteration || matchesTranslation;
-    });
-
-    console.log('VoiceInterface: Word-by-word comparison result:', {
-      transcribedWords,
-      transliterationWords,
-      translationWords,
-      hasMatch
-    });
-
-    return hasMatch;
+    return isMatch;
   };
 
   const handleMessage = async (event: any) => {
     console.log('VoiceInterface: Received message:', event);
-    
+
     if (event.text) {
-      const transcribedText = event.text.toLowerCase().trim();
-      const expectedWord = currentWord;
-      const isCorrect = await evaluatePronunciation(transcribedText, expectedWord);
-      
+      const transcribedText = cleanText(event.text);
+      const isCorrect = await evaluatePronunciation(transcribedText, currentWord);
+      const expectedTransliteration = await getHebrewTransliteration(currentWord);
+
       console.log('VoiceInterface: Speech evaluation result:', {
         transcribed: transcribedText,
-        expected: expectedWord,
+        expected: currentWord,
+        expectedTransliteration,
         isCorrect
       });
 
@@ -119,7 +79,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
   const stopRecording = () => {
     console.log('VoiceInterface: Stopping recording');
-    
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = undefined;
@@ -152,9 +112,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       // Set a strict timeout to stop recording after 2 seconds
       timeoutRef.current = setTimeout(() => {
         console.log('VoiceInterface: Recording timeout reached');
-        if (isRecordingRef.current) {
-          stopRecording();
-        }
+        stopRecording();
       }, 2000);
 
     } catch (error) {
