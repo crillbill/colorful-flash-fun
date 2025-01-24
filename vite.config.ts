@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => ({
       '/api': {
         target: 'https://tbtcuxqergxanwgxnpmy.functions.supabase.co',
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
