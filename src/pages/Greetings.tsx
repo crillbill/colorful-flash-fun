@@ -1,22 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { Mic, Volume2 } from "lucide-react";
 import { useState } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
 import { supabase } from "@/integrations/supabase/client";
+import PhraseCard from "@/components/PhraseCard";
 
 interface PhraseData {
   english: string;
   hebrew: string;
   pronunciation: string;
-}
-
-interface Tips {
-  [key: string]: string;
 }
 
 const Greetings = () => {
@@ -40,9 +35,18 @@ const Greetings = () => {
       pronunciation: "ma-TAI a-ru-CHAT tzo-ho-RA-yim"
     }
   ];
-  const currentWord = "שלום"; // Shalom
-  const secondWord = "מה שלומך היום"; // Ma shlomcha hayom
-  const thirdWord = "מתי ארוחת צהריים"; // Matai aruchat tzohorayim
+
+  const handlePronunciationResult = (word: string, isCorrect: boolean) => {
+    setActiveListening(null);
+    if (isCorrect) {
+      toast.success("Perfect pronunciation!");
+      speakWord("Excellent! Your pronunciation was perfect.", false);
+    } else {
+      const tip = getPronunciationTip(word);
+      toast.error(`Let's try again. ${tip}`);
+      speakWord(`Let's practice once more. ${tip}`, false);
+    }
+  };
 
   const getPronunciationTip = (word: string) => {
     const tips: { [key: string]: string } = {
@@ -53,53 +57,15 @@ const Greetings = () => {
     return tips[word] || "";
   };
 
-  const handlePronunciationResult = (word: string, isCorrect: boolean) => {
-      setActiveListening(null);
-      if (isCorrect) {
-        toast.success("Perfect pronunciation!");
-        speakWord("Excellent! Your pronunciation was perfect.", false);
-      } else {
-        const tip = getPronunciationTip(word);
-        toast.error(`Let's try again. ${tip}`);
-        speakWord(`Let's practice once more. ${tip}`, false);
-      }
-    };
-
-  const handleSecondPronunciationResult = (isCorrect: boolean) => {
-    setIsListeningSecond(false);
-    if (isCorrect) {
-      toast.success("Excellent! Your pronunciation of this phrase was spot on!");
-      speakWord("Perfect! You pronounced that beautifully!", false);
-    } else {
-      const tip = getPronunciationTip(secondWord);
-      toast.error(`Almost there! ${tip}`);
-      speakWord(`Let's try once more. ${tip}`, false);
-    }
-  };
-
-  const handleThirdPronunciationResult = (isCorrect: boolean) => {
-    setIsListeningThird(false);
-    if (isCorrect) {
-      toast.success("Fantastic! Your pronunciation of this phrase was excellent!");
-      speakWord("Perfect! You're getting really good at this!", false);
-    } else {
-      const tip = getPronunciationTip(thirdWord);
-      toast.error(`Keep practicing! ${tip}`);
-      speakWord(`Let's try again. ${tip}`, false);
-    }
-  };
-
   const speakWord = async (word: string, isHebrew = true) => {
-    if (isSpeaking) {
-      return;
-    }
+    if (isSpeaking) return;
 
     try {
       setIsSpeaking(true);
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text: word,
-          voice: isHebrew ? 'nova' : 'alloy' // Use 'nova' for Hebrew words, 'alloy' for feedback
+          voice: isHebrew ? 'nova' : 'alloy'
         }
       });
 
@@ -153,17 +119,23 @@ const Greetings = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
-        {phrases.map((phrase, index) => (
+        {phrases.map((phrase) => (
           <PhraseCard
             key={phrase.hebrew}
             phrase={phrase}
             isActive={activeListening === phrase.hebrew}
-            onListen={() => {
-              setActiveListening(phrase.hebrew);
-            }}
+            onListen={() => setActiveListening(phrase.hebrew)}
             onSpeak={() => speakWord(phrase.hebrew, true)}
           />
         ))}
+
+        {activeListening && (
+          <VoiceInterface
+            currentWord={activeListening}
+            onPronunciationResult={(isCorrect) => handlePronunciationResult(activeListening, isCorrect)}
+            isListening={!!activeListening}
+          />
+        )}
       </div>
     </div>
   );
