@@ -25,6 +25,9 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
+    // Add SSML tags to slow down speech and add emphasis
+    const processedText = text.includes('<speak>') ? text : `<speak><prosody rate="slow" pitch="+0.5">${text}</prosody></speak>`
+
     // Make request to OpenAI API
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -34,9 +37,10 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'tts-1',
-        input: text,
+        input: processedText,
         voice: voice,
         response_format: 'mp3',
+        speed: 0.8, // Slow down the speech slightly
       }),
     })
 
