@@ -9,11 +9,37 @@ import { useState } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
 import { supabase } from "@/integrations/supabase/client";
 
+interface PhraseData {
+  english: string;
+  hebrew: string;
+  pronunciation: string;
+}
+
+interface Tips {
+  [key: string]: string;
+}
+
 const Greetings = () => {
-  const [isListening, setIsListening] = useState(false);
-  const [isListeningSecond, setIsListeningSecond] = useState(false);
-  const [isListeningThird, setIsListeningThird] = useState(false);
+  const [activeListening, setActiveListening] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const phrases: PhraseData[] = [
+    {
+      english: "Hello",
+      hebrew: "שלום",
+      pronunciation: "sha-LOHM"
+    },
+    {
+      english: "How are you today?",
+      hebrew: "מה שלומך היום",
+      pronunciation: "ma shlo-m-CHA ha-YOM"
+    },
+    {
+      english: "What time is lunch?",
+      hebrew: "מתי ארוחת צהריים",
+      pronunciation: "ma-TAI a-ru-CHAT tzo-ho-RA-yim"
+    }
+  ];
   const currentWord = "שלום"; // Shalom
   const secondWord = "מה שלומך היום"; // Ma shlomcha hayom
   const thirdWord = "מתי ארוחת צהריים"; // Matai aruchat tzohorayim
@@ -27,17 +53,17 @@ const Greetings = () => {
     return tips[word] || "";
   };
 
-  const handlePronunciationResult = (isCorrect: boolean) => {
-    setIsListening(false);
-    if (isCorrect) {
-      toast.success("Perfect pronunciation! You've mastered this word!");
-      speakWord("Excellent! Your pronunciation was perfect.", false);
-    } else {
-      const tip = getPronunciationTip(currentWord);
-      toast.error(`Let's try again. ${tip}`);
-      speakWord(`Let's practice once more. ${tip}`, false);
-    }
-  };
+  const handlePronunciationResult = (word: string, isCorrect: boolean) => {
+      setActiveListening(null);
+      if (isCorrect) {
+        toast.success("Perfect pronunciation!");
+        speakWord("Excellent! Your pronunciation was perfect.", false);
+      } else {
+        const tip = getPronunciationTip(word);
+        toast.error(`Let's try again. ${tip}`);
+        speakWord(`Let's practice once more. ${tip}`, false);
+      }
+    };
 
   const handleSecondPronunciationResult = (isCorrect: boolean) => {
     setIsListeningSecond(false);
@@ -127,125 +153,17 @@ const Greetings = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-4xl font-bold text-center text-primary">
-              Welcome to Greetings
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center space-y-4">
-            <div className="flex items-center gap-4">
-              <span className="text-xl">Hello</span>
-              <span className="text-xl font-bold">{currentWord}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => speakWord(currentWord, true)}
-                disabled={isSpeaking}
-                className={isSpeaking ? "bg-blue-100" : ""}
-              >
-                <Volume2 className="h-6 w-6" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setIsListeningSecond(false);
-                  setIsListeningThird(false);
-                  setIsListening(true);
-                }}
-                className={isListening ? "bg-red-100" : ""}
-              >
-                <Mic className="h-6 w-6" />
-              </Button>
-            </div>
-            <VoiceInterface
-              currentWord={currentWord}
-              onPronunciationResult={handlePronunciationResult}
-              isListening={isListening}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-4xl font-bold text-center text-primary">
-              How are you today?
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center space-y-4">
-            <div className="flex items-center gap-4">
-              <span className="text-xl">How are you today?</span>
-              <span className="text-xl font-bold">{secondWord}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => speakWord(secondWord, true)}
-                disabled={isSpeaking}
-                className={isSpeaking ? "bg-blue-100" : ""}
-              >
-                <Volume2 className="h-6 w-6" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setIsListening(false);
-                  setIsListeningThird(false);
-                  setIsListeningSecond(true);
-                }}
-                className={isListeningSecond ? "bg-red-100" : ""}
-              >
-                <Mic className="h-6 w-6" />
-              </Button>
-            </div>
-            <VoiceInterface
-              currentWord={secondWord}
-              onPronunciationResult={handleSecondPronunciationResult}
-              isListening={isListeningSecond}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-4xl font-bold text-center text-primary">
-              What time is lunch?
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center space-y-4">
-            <div className="flex items-center gap-4">
-              <span className="text-xl">What time is lunch?</span>
-              <span className="text-xl font-bold">{thirdWord}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => speakWord(thirdWord, true)}
-                disabled={isSpeaking}
-                className={isSpeaking ? "bg-blue-100" : ""}
-              >
-                <Volume2 className="h-6 w-6" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  setIsListening(false);
-                  setIsListeningSecond(false);
-                  setIsListeningThird(true);
-                }}
-                className={isListeningThird ? "bg-red-100" : ""}
-              >
-                <Mic className="h-6 w-6" />
-              </Button>
-            </div>
-            <VoiceInterface
-              currentWord={thirdWord}
-              onPronunciationResult={handleThirdPronunciationResult}
-              isListening={isListeningThird}
-            />
-          </CardContent>
-        </Card>
+        {phrases.map((phrase, index) => (
+          <PhraseCard
+            key={phrase.hebrew}
+            phrase={phrase}
+            isActive={activeListening === phrase.hebrew}
+            onListen={() => {
+              setActiveListening(phrase.hebrew);
+            }}
+            onSpeak={() => speakWord(phrase.hebrew, true)}
+          />
+        ))}
       </div>
     </div>
   );
