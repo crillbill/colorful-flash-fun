@@ -119,6 +119,10 @@ const Greetings = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
+        <h2 className="text-2xl font-semibold text-center text-primary">
+          from trae.ai
+        </h2>
+
         {phrases.map((phrase) => (
           <PhraseCard
             key={phrase.hebrew}
