@@ -4,7 +4,7 @@ import { Smile, Puzzle, Library, Search, Skull, ListChecks, GripHorizontal } fro
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E5DEFF] to-[#FDE1D3] p-8">
+    <div className="min-h-screen bg-white p-8">
       <div className="max-w-2xl mx-auto space-y-12">
         <div className="text-center space-y-4">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#F97316] text-transparent bg-clip-text">
