@@ -6,6 +6,7 @@ import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Header1 } from "@/components/ui/header";
+import { useNavigate } from "react-router-dom";
 
 interface Word {
   hebrew: string;
@@ -22,21 +23,48 @@ const PronunciationChallenge = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [totalAttempts, setTotalAttempts] = useState(0);
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check authentication status
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in to save your scores", {
+          description: "You'll be redirected to the login page"
+        });
+        navigate("/login");
+        return;
+      }
+      setUser(user);
+    };
+    
+    checkAuth();
+  }, [navigate]);
 
   const handleCorrect = async () => {
+    if (!user) {
+      toast.error("Please sign in to save your scores");
+      return;
+    }
+
     const score = 100; // Perfect score for correct pronunciation
     try {
       const { error } = await supabase
         .from('pronunciation_scores')
         .insert([
           {
-            user_id: (await supabase.auth.getUser()).data.user?.id,
+            user_id: user.id,
             word: words[currentWordIndex].hebrew,
             score: score
           }
         ]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving score:', error);
+        throw error;
+      }
       
       setCorrectCount(prev => prev + 1);
       toast.success("Perfect pronunciation!", {
@@ -49,19 +77,27 @@ const PronunciationChallenge = () => {
   };
 
   const handleIncorrect = async () => {
+    if (!user) {
+      toast.error("Please sign in to save your scores");
+      return;
+    }
+
     const score = 50; // Partial score for incorrect pronunciation
     try {
       const { error } = await supabase
         .from('pronunciation_scores')
         .insert([
           {
-            user_id: (await supabase.auth.getUser()).data.user?.id,
+            user_id: user.id,
             word: words[currentWordIndex].hebrew,
             score: score
           }
         ]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving score:', error);
+        throw error;
+      }
       
       toast.error("Keep practicing!", {
         description: "Try again to improve your pronunciation."
@@ -76,6 +112,10 @@ const PronunciationChallenge = () => {
     setTotalAttempts(prev => prev + 1);
     setCurrentWordIndex(prev => (prev + 1) % words.length);
   };
+
+  if (!user) {
+    return null; // Don't render anything while checking authentication
+  }
 
   return (
     <>
