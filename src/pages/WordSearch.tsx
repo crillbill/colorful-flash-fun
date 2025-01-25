@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
-import { Undo2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
 
 type WordLocation = {
@@ -175,78 +174,71 @@ const WordSearch = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
-        <Link to="/">
-          <Button variant="ghost" size="icon">
-            <Undo2 className="h-6 w-6 text-white" />
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold text-white">Hebrew Word Search</h1>
-        <div className="w-10" /> {/* Spacer for alignment */}
-      </div>
-
-      <div className="max-w-4xl mx-auto space-y-8 pt-24">
-        <h1 className="text-4xl font-bold text-center">Hebrew Word Search</h1>
-        
-        <div className="flex justify-between items-center">
-          <ScoreDisplay correct={score.found} total={score.total} />
-          <div className="text-lg font-semibold">
-            Time: {formatTime(timeLeft)}
+    <>
+      <Header1 />
+      <div className="min-h-screen bg-white p-8 pt-24">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <h1 className="text-4xl font-bold text-center">Hebrew Word Search</h1>
+          
+          <div className="flex justify-between items-center">
+            <ScoreDisplay correct={score.found} total={score.total} />
+            <div className="text-lg font-semibold">
+              Time: {formatTime(timeLeft)}
+            </div>
           </div>
-        </div>
 
-        <ProgressBar current={score.found} total={score.total} />
+          <ProgressBar current={score.found} total={score.total} />
 
-        <div className="grid grid-cols-10 gap-1 bg-accent p-4 rounded-lg">
-          {grid.map((row, rowIndex) => (
-            row.map((letter, colIndex) => (
-              <button
-                key={`${rowIndex}-${colIndex}`}
-                className={`w-10 h-10 text-lg font-bold rounded flex items-center justify-center transition-colors
-                  ${isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 
-                    isCellFound(rowIndex, colIndex) ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent-foreground/10'}`}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
-              >
-                {letter}
-              </button>
-            ))
-          ))}
-        </div>
-
-        <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Words to Find:</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {WORDS.map(({ hebrew, translation }) => {
-              const isFound = wordLocations.find(wl => wl.word === hebrew)?.found;
-              return (
-                <div
-                  key={hebrew}
-                  className={`p-4 rounded-lg ${
-                    isFound ? 'bg-green-500 text-white' : 'bg-card'
-                  }`}
+          <div className="grid grid-cols-10 gap-1 bg-accent p-4 rounded-lg">
+            {grid.map((row, rowIndex) => (
+              row.map((letter, colIndex) => (
+                <button
+                  key={`${rowIndex}-${colIndex}`}
+                  className={`w-10 h-10 text-lg font-bold rounded flex items-center justify-center transition-colors
+                    ${isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 
+                      isCellFound(rowIndex, colIndex) ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent-foreground/10'}`}
+                  onClick={() => handleCellClick(rowIndex, colIndex)}
                 >
-                  <div className="text-lg font-bold">{hebrew}</div>
-                  <div className="text-sm">{translation}</div>
-                </div>
-              );
-            })}
+                  {letter}
+                </button>
+              ))
+            ))}
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold">Words to Find:</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {WORDS.map(({ hebrew, translation }) => {
+                const isFound = wordLocations.find(wl => wl.word === hebrew)?.found;
+                return (
+                  <div
+                    key={hebrew}
+                    className={`p-4 rounded-lg ${
+                      isFound ? 'bg-green-500 text-white' : 'bg-card'
+                    }`}
+                  >
+                    <div className="text-lg font-bold">{hebrew}</div>
+                    <div className="text-sm">{translation}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <Button
+              onClick={() => {
+                setTimeLeft(300);
+                setScore({ found: 0, total: WORDS.length });
+                generateGrid();
+              }}
+            >
+              New Game
+            </Button>
           </div>
         </div>
-
-        <div className="flex justify-center">
-          <Button
-            onClick={() => {
-              setTimeLeft(300);
-              setScore({ found: 0, total: WORDS.length });
-              generateGrid();
-            }}
-          >
-            New Game
-          </Button>
-        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Puzzle, Shuffle, Check, X, Undo2 } from "lucide-react";
+import { Puzzle, Shuffle, Check, X } from "lucide-react";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { toast } from "sonner";
 import { useColors } from "@/contexts/ColorContext";
-import { Link } from "react-router-dom";
+import { Header1 } from "@/components/ui/header";
 
 interface HebrewLetter {
   letter: string;
@@ -24,7 +24,6 @@ const hebrewLetters: HebrewLetter[] = [
 
 const LetterMatching = () => {
   const colors = useColors();
-  
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [currentRound, setCurrentRound] = useState(1);
   const [currentLetter, setCurrentLetter] = useState<HebrewLetter | null>(null);
@@ -94,24 +93,11 @@ const LetterMatching = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen p-8"
-      style={{ 
-        background: `linear-gradient(to bottom right, ${colors.softPurple}, ${colors.softBlue})`
-      }}
-    >
-      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
-        <Link to="/">
-          <Button variant="ghost" size="icon">
-            <Undo2 className="h-6 w-6 text-white" />
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold text-white">Letter Matching</h1>
-        <div className="w-10" /> {/* Spacer for alignment */}
-      </div>
-
-      <div className="max-w-2xl mx-auto space-y-8 pt-24">
-        <Card className="border-2" style={{ borderColor: colors.primaryPurple }}>
+    <>
+      <Header1 />
+      <div className="min-h-screen bg-white p-8 pt-24">
+        <div className="max-w-2xl mx-auto space-y-8">
+          <Card className="border-2" style={{ borderColor: colors.primaryPurple }}>
           <CardHeader>
             <CardTitle className="text-center" style={{ color: colors.darkPurple }}>
               Letter Matching Game
@@ -185,9 +171,10 @@ const LetterMatching = () => {
               </Button>
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

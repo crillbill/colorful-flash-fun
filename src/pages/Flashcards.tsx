@@ -2,9 +2,7 @@ import { useState } from "react";
 import FlashCard from "@/components/FlashCard";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
-import { Button } from "@/components/ui/button";
-import { Undo2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
 
 const flashcardsData = [
@@ -48,42 +46,35 @@ const Flashcards = () => {
   const isGameComplete = currentCardIndex === flashcardsData.length - 1 && totalAnswered === flashcardsData.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
-      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
-        <Link to="/">
-          <Button variant="ghost" size="icon">
-            <Undo2 className="h-6 w-6 text-white" />
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold text-white">Hebrew Flashcards</h1>
-        <div className="w-10" /> {/* Spacer for alignment */}
-      </div>
+    <>
+      <Header1 />
+      <div className="min-h-screen bg-white p-8 pt-24">
+        <div className="max-w-2xl mx-auto space-y-8">
+          <ScoreDisplay correct={correctAnswers} total={totalAnswered} />
+          <ProgressBar current={currentCardIndex + 1} total={flashcardsData.length} />
 
-      <div className="max-w-2xl mx-auto space-y-8 pt-24">
-        <ScoreDisplay correct={correctAnswers} total={totalAnswered} />
-        <ProgressBar current={currentCardIndex + 1} total={flashcardsData.length} />
-
-        {!isGameComplete ? (
-          <FlashCard
-            question={flashcardsData[currentCardIndex].question}
-            answer={flashcardsData[currentCardIndex].answer}
-            onNext={handleNext}
-            onCorrect={handleCorrect}
-            onIncorrect={handleIncorrect}
-          />
-        ) : (
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold">Game Complete!</h2>
-            <p className="text-lg">
-              You got {correctAnswers} out of {totalAnswered} correct!
-            </p>
-            <Button onClick={resetGame} size="lg">
-              Play Again
-            </Button>
-          </div>
-        )}
+          {!isGameComplete ? (
+            <FlashCard
+              question={flashcardsData[currentCardIndex].question}
+              answer={flashcardsData[currentCardIndex].answer}
+              onNext={handleNext}
+              onCorrect={handleCorrect}
+              onIncorrect={handleIncorrect}
+            />
+          ) : (
+            <div className="text-center space-y-4">
+              <h2 className="text-2xl font-bold">Game Complete!</h2>
+              <p className="text-lg">
+                You got {correctAnswers} out of {totalAnswered} correct!
+              </p>
+              <Button onClick={resetGame} size="lg">
+                Play Again
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

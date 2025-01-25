@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
-import { Link } from "react-router-dom";
-import { Undo2 } from "lucide-react";
+import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
 
 type Category = "animals" | "food" | "places" | "objects";
@@ -96,65 +95,58 @@ const Hangman = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
-      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
-        <Link to="/">
-          <Button variant="ghost" size="icon">
-            <Undo2 className="h-6 w-6 text-white" />
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold text-white">Hebrew Hangman</h1>
-        <div className="w-10" /> {/* Spacer for alignment */}
-      </div>
+    <>
+      <Header1 />
+      <div className="min-h-screen bg-white p-8 pt-24">
+        <div className="max-w-2xl mx-auto space-y-8">
+          <ScoreDisplay correct={score.correct} total={score.total} />
+          <ProgressBar current={wrongGuesses} total={MAX_TRIES} />
 
-      <div className="max-w-2xl mx-auto space-y-8 pt-24">
-        <ScoreDisplay correct={score.correct} total={score.total} />
-        <ProgressBar current={wrongGuesses} total={MAX_TRIES} />
-
-        <div className="text-center space-y-4">
-          <div className="text-4xl font-bold mb-8">{displayWord}</div>
-          
-          <div className="mb-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowHint(true)}
-              disabled={showHint}
-            >
-              Show Hint
-            </Button>
-            {showHint && (
-              <p className="mt-2 text-muted-foreground">
-                Hint: {currentWord.hint}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-8 gap-2 md:grid-cols-11">
-            {hebrewAlphabet.split("").map((letter) => (
-              <Button
-                key={letter}
-                onClick={() => handleGuess(letter)}
-                disabled={guessedLetters.has(letter)}
-                variant={
-                  guessedLetters.has(letter)
-                    ? currentWord.hebrew.includes(letter)
-                      ? "default"
-                      : "destructive"
-                    : "outline"
-                }
-                className="w-10 h-10"
+          <div className="text-center space-y-4">
+            <div className="text-4xl font-bold mb-8">{displayWord}</div>
+            
+            <div className="mb-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowHint(true)}
+                disabled={showHint}
               >
-                {letter}
+                Show Hint
               </Button>
-            ))}
+              {showHint && (
+                <p className="mt-2 text-muted-foreground">
+                  Hint: {currentWord.hint}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-8 gap-2 md:grid-cols-11">
+              {hebrewAlphabet.split("").map((letter) => (
+                <Button
+                  key={letter}
+                  onClick={() => handleGuess(letter)}
+                  disabled={guessedLetters.has(letter)}
+                  variant={
+                    guessedLetters.has(letter)
+                      ? currentWord.hebrew.includes(letter)
+                        ? "default"
+                        : "destructive"
+                      : "outline"
+                  }
+                  className="w-10 h-10"
+                >
+                  {letter}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center text-sm text-muted-foreground">
+            Category: {currentWord.category}
           </div>
         </div>
-
-        <div className="text-center text-sm text-muted-foreground">
-          Category: {currentWord.category}
-        </div>
       </div>
-    </div>
+    </>
   );
 };
 

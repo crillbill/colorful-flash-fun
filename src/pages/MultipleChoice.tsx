@@ -6,9 +6,7 @@ import { AudioButton } from "@/components/AudioButton";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Undo2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
 
 interface Question {
@@ -119,70 +117,63 @@ const MultipleChoice = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
-      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
-        <Link to="/">
-          <Button variant="ghost" size="icon">
-            <Undo2 className="h-6 w-6 text-white" />
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold text-white">Multiple Choice Quiz</h1>
-        <div className="w-10" /> {/* Spacer for alignment */}
-      </div>
+    <>
+      <Header1 />
+      <div className="min-h-screen bg-white p-8 pt-24">
+        <div className="max-w-2xl mx-auto space-y-8">
+          <ScoreDisplay correct={score.correct} total={score.total} />
+          <ProgressBar current={currentQuestion + 1} total={questions.length} />
 
-      <div className="max-w-2xl mx-auto space-y-8 pt-24">
-        <ScoreDisplay correct={score.correct} total={score.total} />
-        <ProgressBar current={currentQuestion + 1} total={questions.length} />
+          <Card>
+            <CardContent className="p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold text-center">
+                  {questions[currentQuestion].word}
+                </h2>
+                <AudioButton
+                  isPlaying={isPlaying}
+                  onToggle={playAudio}
+                  disabled={isPlaying}
+                />
+              </div>
 
-        <Card>
-          <CardContent className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-center">
-                {questions[currentQuestion].word}
-              </h2>
-              <AudioButton
-                isPlaying={isPlaying}
-                onToggle={playAudio}
-                disabled={isPlaying}
-              />
-            </div>
-
-            <RadioGroup
-              value={selectedAnswer}
-              onValueChange={setSelectedAnswer}
-              className="space-y-4"
-            >
-              {questions[currentQuestion].options.map((option) => (
-                <div
-                  key={option}
-                  className="flex items-center space-x-2 border rounded-lg p-4 hover:bg-accent cursor-pointer"
-                  onClick={() => setSelectedAnswer(option)}
-                >
-                  <RadioGroupItem value={option} id={option} />
-                  <label
-                    htmlFor={option}
-                    className="text-lg cursor-pointer flex-grow"
+              <RadioGroup
+                value={selectedAnswer}
+                onValueChange={setSelectedAnswer}
+                className="space-y-4"
+              >
+                {questions[currentQuestion].options.map((option) => (
+                  <div
+                    key={option}
+                    className="flex items-center space-x-2 border rounded-lg p-4 hover:bg-accent cursor-pointer"
+                    onClick={() => setSelectedAnswer(option)}
                   >
-                    {option}
-                  </label>
-                </div>
-              ))}
-            </RadioGroup>
+                    <RadioGroupItem value={option} id={option} />
+                    <label
+                      htmlFor={option}
+                      className="text-lg cursor-pointer flex-grow"
+                    >
+                      {option}
+                    </label>
+                  </div>
+                ))}
+              </RadioGroup>
 
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={resetQuiz}>
-                Reset Quiz
-              </Button>
-              <Button onClick={handleAnswer}>
-                {currentQuestion === questions.length - 1
-                  ? "Finish Quiz"
-                  : "Next Question"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="flex justify-between pt-4">
+                <Button variant="outline" onClick={resetQuiz}>
+                  Reset Quiz
+                </Button>
+                <Button onClick={handleAnswer}>
+                  {currentQuestion === questions.length - 1
+                    ? "Finish Quiz"
+                    : "Next Question"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
