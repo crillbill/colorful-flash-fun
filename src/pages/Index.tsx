@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Smile, Puzzle, Library, Search, Skull, ListChecks } from "lucide-react";
+import { Smile, Puzzle, Library, Search, Skull, ListChecks, GripHorizontal } from "lucide-react";
 
 const Index = () => {
   return (
@@ -42,6 +42,12 @@ const Index = () => {
             <Button className="w-full h-16 text-lg" variant="outline">
               <ListChecks className="mr-2 h-6 w-6" />
               Multiple Choice Quiz
+            </Button>
+          </Link>
+          <Link to="/sentence-builder">
+            <Button className="w-full h-16 text-lg" variant="outline">
+              <GripHorizontal className="mr-2 h-6 w-6" />
+              Sentence Builder
             </Button>
           </Link>
         </div>

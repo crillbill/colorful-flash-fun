@@ -6,6 +6,7 @@ import Flashcards from "@/pages/Flashcards";
 import WordSearch from "@/pages/WordSearch";
 import Hangman from "@/pages/Hangman";
 import MultipleChoice from "@/pages/MultipleChoice";
+import SentenceBuilder from "@/pages/SentenceBuilder";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/word-search" element={<WordSearch />} />
         <Route path="/hangman" element={<Hangman />} />
         <Route path="/multiple-choice" element={<MultipleChoice />} />
+        <Route path="/sentence-builder" element={<SentenceBuilder />} />
       </Routes>
     </Router>
   );
