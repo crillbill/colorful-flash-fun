@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Smile, Puzzle, Cards } from "lucide-react";
+import { Smile, Puzzle, Library } from "lucide-react";
 
 const Index = () => {
   return (
@@ -22,7 +22,7 @@ const Index = () => {
           </Link>
           <Link to="/flashcards">
             <Button className="w-full h-16 text-lg" variant="outline">
-              <Cards className="mr-2 h-6 w-6" />
+              <Library className="mr-2 h-6 w-6" />
               Flashcards
             </Button>
           </Link>
