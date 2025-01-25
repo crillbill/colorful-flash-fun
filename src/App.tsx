@@ -3,6 +3,7 @@ import Index from "@/pages/Index";
 import Greetings from "@/pages/Greetings";
 import LetterMatching from "@/pages/LetterMatching";
 import Flashcards from "@/pages/Flashcards";
+import WordSearch from "@/pages/WordSearch";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/greetings" element={<Greetings />} />
         <Route path="/letter-matching" element={<LetterMatching />} />
         <Route path="/flashcards" element={<Flashcards />} />
+        <Route path="/word-search" element={<WordSearch />} />
       </Routes>
     </Router>
   );
