@@ -7,7 +7,7 @@ const Index = () => {
     <div className="min-h-screen bg-white p-8">
       <div className="max-w-2xl mx-auto space-y-12">
         <div className="text-center space-y-4">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#F97316] text-transparent bg-clip-text">
+          <h1 className="text-5xl font-bold text-[#221F26]">
             Learn Hebrew
           </h1>
           <p className="text-lg text-gray-600">Choose your learning adventure</p>
