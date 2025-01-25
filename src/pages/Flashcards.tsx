@@ -4,6 +4,7 @@ import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
+import { Button } from "@/components/ui/button";
 
 const flashcardsData = [
   { question: "כלב", answer: "Dog" },

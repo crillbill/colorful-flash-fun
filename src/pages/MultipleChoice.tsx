@@ -8,6 +8,7 @@ import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { useToast } from "@/hooks/use-toast";
 import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Question {
   word: string;
