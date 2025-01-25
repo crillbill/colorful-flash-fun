@@ -5,6 +5,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { Button } from "@/components/ui/button";
 import { Undo2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useColors } from "@/contexts/ColorContext";
 
 const flashcardsData = [
   { question: "כלב", answer: "Dog" },
@@ -16,6 +17,7 @@ const flashcardsData = [
 ];
 
 const Flashcards = () => {
+  const colors = useColors();
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
@@ -47,17 +49,17 @@ const Flashcards = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-          <Link to="/">
-            <Button variant="outline" size="icon">
-              <Undo2 className="h-4 w-4" />
-            </Button>
-          </Link>
-          <h1 className="text-4xl font-bold text-center">Hebrew Flashcards</h1>
-          <div className="w-10" /> {/* Spacer for alignment */}
-        </div>
+      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
+        <Link to="/">
+          <Button variant="ghost" size="icon">
+            <Undo2 className="h-6 w-6 text-white" />
+          </Button>
+        </Link>
+        <h1 className="text-3xl font-bold text-white">Hebrew Flashcards</h1>
+        <div className="w-10" /> {/* Spacer for alignment */}
+      </div>
 
+      <div className="max-w-2xl mx-auto space-y-8 pt-24">
         <ScoreDisplay correct={correctAnswers} total={totalAnswered} />
         <ProgressBar current={currentCardIndex + 1} total={flashcardsData.length} />
 

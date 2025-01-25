@@ -7,6 +7,9 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Undo2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useColors } from "@/contexts/ColorContext";
 
 interface Question {
   word: string;
@@ -43,6 +46,7 @@ const questions: Question[] = [
 ];
 
 const MultipleChoice = () => {
+  const colors = useColors();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [score, setScore] = useState({ correct: 0, total: 0 });
@@ -116,9 +120,17 @@ const MultipleChoice = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-center mb-8">Multiple Choice Quiz</h1>
+      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
+        <Link to="/">
+          <Button variant="ghost" size="icon">
+            <Undo2 className="h-6 w-6 text-white" />
+          </Button>
+        </Link>
+        <h1 className="text-3xl font-bold text-white">Multiple Choice Quiz</h1>
+        <div className="w-10" /> {/* Spacer for alignment */}
+      </div>
 
+      <div className="max-w-2xl mx-auto space-y-8 pt-24">
         <ScoreDisplay correct={score.correct} total={score.total} />
         <ProgressBar current={currentQuestion + 1} total={questions.length} />
 

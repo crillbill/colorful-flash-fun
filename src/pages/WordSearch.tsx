@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
+import { Undo2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useColors } from "@/contexts/ColorContext";
 
 type WordLocation = {
   word: string;
@@ -24,6 +27,7 @@ const HEBREW_LETTERS = [
 ];
 
 const WordSearch = () => {
+  const colors = useColors();
   const [grid, setGrid] = useState<string[][]>([]);
   const [wordLocations, setWordLocations] = useState<WordLocation[]>([]);
   const [selectedCells, setSelectedCells] = useState<{ row: number; col: number }[]>([]);
@@ -172,7 +176,17 @@ const WordSearch = () => {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
+        <Link to="/">
+          <Button variant="ghost" size="icon">
+            <Undo2 className="h-6 w-6 text-white" />
+          </Button>
+        </Link>
+        <h1 className="text-3xl font-bold text-white">Hebrew Word Search</h1>
+        <div className="w-10" /> {/* Spacer for alignment */}
+      </div>
+
+      <div className="max-w-4xl mx-auto space-y-8 pt-24">
         <h1 className="text-4xl font-bold text-center">Hebrew Word Search</h1>
         
         <div className="flex justify-between items-center">

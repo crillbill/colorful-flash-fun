@@ -7,6 +7,8 @@ import { useState } from "react";
 import VoiceInterface from "@/components/VoiceInterface";
 import { supabase } from "@/integrations/supabase/client";
 import PhraseCard from "@/components/PhraseCard";
+import { Undo2 } from "lucide-react";
+import { useColors } from "@/contexts/ColorContext";
 
 interface PhraseData {
   english: string;
@@ -15,6 +17,7 @@ interface PhraseData {
 }
 
 const Greetings = () => {
+  const colors = useColors();
   const [activeListening, setActiveListening] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -114,29 +117,17 @@ const Greetings = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <Link to="/">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Back to Hebrew Letters
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
+        <Link to="/">
+          <Button variant="ghost" size="icon">
+            <Undo2 className="h-6 w-6 text-white" />
+          </Button>
+        </Link>
+        <h1 className="text-3xl font-bold text-white">Hebrew Greetings</h1>
+        <div className="w-10" /> {/* Spacer for alignment */}
+      </div>
 
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-semibold text-primary">
-            Hebrew Greetings Practice
-          </h2>
-          <p className="text-muted-foreground">
-            Click the microphone icon to practice pronunciation. 
-            The red dot indicates when the microphone is listening.
-          </p>
-        </div>
-
+      <div className="max-w-2xl mx-auto space-y-8 pt-24">
         {phrases.map((phrase) => (
           <PhraseCard
             key={phrase.hebrew}

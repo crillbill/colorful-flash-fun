@@ -4,6 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { Link } from "react-router-dom";
+import { Undo2 } from "lucide-react";
+import { useColors } from "@/contexts/ColorContext";
 
 type Category = "animals" | "food" | "places" | "objects";
 
@@ -25,6 +27,7 @@ const WORDS: Word[] = [
 const MAX_TRIES = 6;
 
 const Hangman = () => {
+  const colors = useColors();
   const { toast } = useToast();
   const [currentWord, setCurrentWord] = useState<Word>(WORDS[0]);
   const [guessedLetters, setGuessedLetters] = useState<Set<string>>(new Set());
@@ -94,14 +97,17 @@ const Hangman = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-          <Link to="/">
-            <Button variant="outline">Back to Menu</Button>
-          </Link>
-          <Button onClick={getNewWord}>New Word</Button>
-        </div>
+      <div className="fixed top-0 left-0 right-0 h-24 bg-darkCharcoal z-50 flex items-center justify-between px-8">
+        <Link to="/">
+          <Button variant="ghost" size="icon">
+            <Undo2 className="h-6 w-6 text-white" />
+          </Button>
+        </Link>
+        <h1 className="text-3xl font-bold text-white">Hebrew Hangman</h1>
+        <div className="w-10" /> {/* Spacer for alignment */}
+      </div>
 
+      <div className="max-w-2xl mx-auto space-y-8 pt-24">
         <ScoreDisplay correct={score.correct} total={score.total} />
         <ProgressBar current={wrongGuesses} total={MAX_TRIES} />
 
