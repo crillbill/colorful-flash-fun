@@ -7,7 +7,7 @@ const Index = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-gradient-to-br from-softPurple via-white to-softPeach p-8 pt-24">
-        <div className="max-w-2xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold gradient-text animate-float">
               Learn Hebrew
@@ -17,51 +17,51 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link to="/greetings" className="transform transition-all duration-300 hover:scale-105">
-              <Button className="w-full h-16 text-xl bg-[#F97316] hover:bg-[#F97316]/90 text-white">
+              <Button className="w-full h-32 text-xl bg-[#F97316] hover:bg-[#F97316]/90 text-white shadow-lg hover:shadow-xl">
                 Practice Greetings
               </Button>
             </Link>
             
             <Link to="/letter-matching" className="transform transition-all duration-300 hover:scale-105">
-              <Button className="w-full h-16 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white">
+              <Button className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl">
                 Letter Matching Game
               </Button>
             </Link>
             
             <Link to="/flashcards" className="transform transition-all duration-300 hover:scale-105">
-              <Button className="w-full h-16 text-xl bg-[#22C55E] hover:bg-[#22C55E]/90 text-white">
+              <Button className="w-full h-32 text-xl bg-[#22C55E] hover:bg-[#22C55E]/90 text-white shadow-lg hover:shadow-xl">
                 Flashcards
               </Button>
             </Link>
             
             <Link to="/word-search" className="transform transition-all duration-300 hover:scale-105">
-              <Button className="w-full h-16 text-xl bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white">
+              <Button className="w-full h-32 text-xl bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white shadow-lg hover:shadow-xl">
                 Word Search
               </Button>
             </Link>
             
             <Link to="/hangman" className="transform transition-all duration-300 hover:scale-105">
-              <Button className="w-full h-16 text-xl bg-[#D946EF] hover:bg-[#D946EF]/90 text-white">
+              <Button className="w-full h-32 text-xl bg-[#D946EF] hover:bg-[#D946EF]/90 text-white shadow-lg hover:shadow-xl">
                 Hangman
               </Button>
             </Link>
             
             <Link to="/sentence-builder" className="transform transition-all duration-300 hover:scale-105">
-              <Button className="w-full h-16 text-xl bg-[#6366F1] hover:bg-[#6366F1]/90 text-white">
+              <Button className="w-full h-32 text-xl bg-[#6366F1] hover:bg-[#6366F1]/90 text-white shadow-lg hover:shadow-xl">
                 Sentence Builder
               </Button>
             </Link>
             
             <Link to="/multiple-choice" className="transform transition-all duration-300 hover:scale-105">
-              <Button className="w-full h-16 text-xl bg-[#EC4899] hover:bg-[#EC4899]/90 text-white">
+              <Button className="w-full h-32 text-xl bg-[#EC4899] hover:bg-[#EC4899]/90 text-white shadow-lg hover:shadow-xl">
                 Multiple Choice
               </Button>
             </Link>
             
             <Link to="/pronunciation" className="transform transition-all duration-300 hover:scale-105">
-              <Button className="w-full h-16 text-xl bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-white">
+              <Button className="w-full h-32 text-xl bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-white shadow-lg hover:shadow-xl">
                 Pronunciation Challenge
               </Button>
             </Link>
