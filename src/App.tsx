@@ -4,6 +4,7 @@ import Greetings from "@/pages/Greetings";
 import LetterMatching from "@/pages/LetterMatching";
 import Flashcards from "@/pages/Flashcards";
 import WordSearch from "@/pages/WordSearch";
+import Hangman from "@/pages/Hangman";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/letter-matching" element={<LetterMatching />} />
         <Route path="/flashcards" element={<Flashcards />} />
         <Route path="/word-search" element={<WordSearch />} />
+        <Route path="/hangman" element={<Hangman />} />
       </Routes>
     </Router>
   );

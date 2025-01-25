@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Smile, Puzzle, Library, Search } from "lucide-react";
+import { Smile, Puzzle, Library, Search, Skull } from "lucide-react";
 
 const Index = () => {
   return (
@@ -30,6 +30,12 @@ const Index = () => {
             <Button className="w-full h-16 text-lg" variant="outline">
               <Search className="mr-2 h-6 w-6" />
               Word Search
+            </Button>
+          </Link>
+          <Link to="/hangman">
+            <Button className="w-full h-16 text-lg" variant="outline">
+              <Skull className="mr-2 h-6 w-6" />
+              Hangman
             </Button>
           </Link>
         </div>
