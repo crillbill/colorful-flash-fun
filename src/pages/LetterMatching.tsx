@@ -5,6 +5,7 @@ import { Puzzle, Shuffle, Check, X } from "lucide-react";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { toast } from "sonner";
+import { useColors } from "@/contexts/ColorContext";
 
 interface HebrewLetter {
   letter: string;
@@ -21,6 +22,7 @@ const hebrewLetters: HebrewLetter[] = [
 ];
 
 const LetterMatching = () => {
+  const colors = useColors();
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [currentRound, setCurrentRound] = useState(1);
   const [currentLetter, setCurrentLetter] = useState<HebrewLetter | null>(null);
@@ -90,11 +92,18 @@ const LetterMatching = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent to-background p-8">
+    <div 
+      className="min-h-screen p-8"
+      style={{ 
+        background: `linear-gradient(to bottom right, ${colors.softPurple}, ${colors.softBlue})`
+      }}
+    >
       <div className="max-w-2xl mx-auto space-y-8">
-        <Card>
+        <Card className="border-2" style={{ borderColor: colors.primaryPurple }}>
           <CardHeader>
-            <CardTitle className="text-center">Letter Matching Game</CardTitle>
+            <CardTitle className="text-center" style={{ color: colors.darkPurple }}>
+              Letter Matching Game
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <ScoreDisplay correct={score.correct} total={score.total} />
@@ -103,8 +112,18 @@ const LetterMatching = () => {
             {gameActive && currentLetter && (
               <div className="space-y-6">
                 <div className="text-center">
-                  <div className="text-8xl font-bold mb-4">{currentLetter.letter}</div>
-                  <div className="text-xl text-muted-foreground">{currentLetter.name}</div>
+                  <div 
+                    className="text-8xl font-bold mb-4"
+                    style={{ color: colors.vividPurple }}
+                  >
+                    {currentLetter.letter}
+                  </div>
+                  <div 
+                    className="text-xl"
+                    style={{ color: colors.secondaryPurple }}
+                  >
+                    {currentLetter.name}
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -114,6 +133,10 @@ const LetterMatching = () => {
                       variant="outline"
                       className="h-16 text-lg hover:bg-accent"
                       onClick={() => handleOptionClick(option)}
+                      style={{ 
+                        borderColor: colors.primaryPurple,
+                        color: colors.darkPurple
+                      }}
                     >
                       {option}
                     </Button>
@@ -127,6 +150,10 @@ const LetterMatching = () => {
                 variant="outline"
                 className="h-16 text-lg"
                 onClick={startNewGame}
+                style={{ 
+                  borderColor: colors.primaryPurple,
+                  color: colors.darkPurple
+                }}
               >
                 <Puzzle className="mr-2 h-6 w-6" />
                 Start New Game
@@ -136,6 +163,10 @@ const LetterMatching = () => {
                 className="h-16 text-lg"
                 onClick={shuffleOptions}
                 disabled={!gameActive}
+                style={{ 
+                  borderColor: colors.primaryPurple,
+                  color: colors.darkPurple
+                }}
               >
                 <Shuffle className="mr-2 h-6 w-6" />
                 Shuffle Options
