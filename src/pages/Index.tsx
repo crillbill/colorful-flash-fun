@@ -16,7 +16,7 @@ const Index = () => {
         <div className="grid gap-6">
           <Link to="/greetings" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#F97316] hover:bg-[#F97316]/90 border-none shadow-lg"
             >
               <Smile className="mr-3 h-8 w-8" />
               Practice Greetings
@@ -25,7 +25,7 @@ const Index = () => {
           
           <Link to="/letter-matching" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-[#9b87f5] hover:bg-[#9b87f5]/90 border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 border-none shadow-lg"
             >
               <Puzzle className="mr-3 h-8 w-8" />
               Letter Matching Game
@@ -34,7 +34,7 @@ const Index = () => {
           
           <Link to="/flashcards" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-[#F2FCE2] hover:bg-[#F2FCE2]/90 border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#84cc16] hover:bg-[#84cc16]/90 border-none shadow-lg"
             >
               <Library className="mr-3 h-8 w-8" />
               Flashcards
@@ -43,7 +43,7 @@ const Index = () => {
           
           <Link to="/word-search" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-[#D3E4FD] hover:bg-[#D3E4FD]/90 border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 border-none shadow-lg"
             >
               <Search className="mr-3 h-8 w-8" />
               Word Search
@@ -52,7 +52,7 @@ const Index = () => {
           
           <Link to="/hangman" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-[#FFDEE2] hover:bg-[#FFDEE2]/90 border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#D946EF] hover:bg-[#D946EF]/90 border-none shadow-lg"
             >
               <Skull className="mr-3 h-8 w-8" />
               Hangman
@@ -61,7 +61,7 @@ const Index = () => {
           
           <Link to="/multiple-choice" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-[#FEF7CD] hover:bg-[#FEF7CD]/90 border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#eab308] hover:bg-[#eab308]/90 border-none shadow-lg"
             >
               <ListChecks className="mr-3 h-8 w-8" />
               Multiple Choice Quiz
@@ -70,7 +70,7 @@ const Index = () => {
           
           <Link to="/sentence-builder" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-[#accbee] hover:bg-[#accbee]/90 border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#1EAEDB] hover:bg-[#1EAEDB]/90 border-none shadow-lg"
             >
               <GripHorizontal className="mr-3 h-8 w-8" />
               Sentence Builder
