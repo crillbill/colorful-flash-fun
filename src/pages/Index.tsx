@@ -16,7 +16,7 @@ const Index = () => {
         <div className="grid gap-6">
           <Link to="/greetings" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-gradient-to-r from-[#FEC6A1] to-[#F97316] hover:from-[#F97316] hover:to-[#FEC6A1] border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#FEC6A1] hover:bg-[#FEC6A1]/90 border-none shadow-lg"
             >
               <Smile className="mr-3 h-8 w-8" />
               Practice Greetings
@@ -25,7 +25,7 @@ const Index = () => {
           
           <Link to="/letter-matching" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-gradient-to-r from-[#9b87f5] to-[#E5DEFF] hover:from-[#E5DEFF] hover:to-[#9b87f5] border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#9b87f5] hover:bg-[#9b87f5]/90 border-none shadow-lg"
             >
               <Puzzle className="mr-3 h-8 w-8" />
               Letter Matching Game
@@ -34,7 +34,7 @@ const Index = () => {
           
           <Link to="/flashcards" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-gradient-to-r from-[#F2FCE2] to-[#c1c161] hover:from-[#c1c161] hover:to-[#F2FCE2] border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#F2FCE2] hover:bg-[#F2FCE2]/90 border-none shadow-lg"
             >
               <Library className="mr-3 h-8 w-8" />
               Flashcards
@@ -43,7 +43,7 @@ const Index = () => {
           
           <Link to="/word-search" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-gradient-to-r from-[#D3E4FD] to-[#0EA5E9] hover:from-[#0EA5E9] hover:to-[#D3E4FD] border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#D3E4FD] hover:bg-[#D3E4FD]/90 border-none shadow-lg"
             >
               <Search className="mr-3 h-8 w-8" />
               Word Search
@@ -52,7 +52,7 @@ const Index = () => {
           
           <Link to="/hangman" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-gradient-to-r from-[#FFDEE2] to-[#d299c2] hover:from-[#d299c2] hover:to-[#FFDEE2] border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#FFDEE2] hover:bg-[#FFDEE2]/90 border-none shadow-lg"
             >
               <Skull className="mr-3 h-8 w-8" />
               Hangman
@@ -61,7 +61,7 @@ const Index = () => {
           
           <Link to="/multiple-choice" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-gradient-to-r from-[#FEF7CD] to-[#e6b980] hover:from-[#e6b980] hover:to-[#FEF7CD] border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#FEF7CD] hover:bg-[#FEF7CD]/90 border-none shadow-lg"
             >
               <ListChecks className="mr-3 h-8 w-8" />
               Multiple Choice Quiz
@@ -70,7 +70,7 @@ const Index = () => {
           
           <Link to="/sentence-builder" className="transform transition-transform hover:scale-105">
             <Button 
-              className="w-full h-20 text-2xl font-bold text-white bg-gradient-to-r from-[#accbee] to-[#e7f0fd] hover:from-[#e7f0fd] hover:to-[#accbee] border-none shadow-lg"
+              className="w-full h-20 text-2xl font-bold text-white bg-[#accbee] hover:bg-[#accbee]/90 border-none shadow-lg"
             >
               <GripHorizontal className="mr-3 h-8 w-8" />
               Sentence Builder
