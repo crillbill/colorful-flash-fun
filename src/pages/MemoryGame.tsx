@@ -86,11 +86,11 @@ const MemoryGame = () => {
 
   const shuffleCards = () => {
     // Create pairs of cards, ensuring one Hebrew and one image for each pair
-    const cardPairs = [...initialCards].flatMap((card) => {
+    const cardPairs = [...initialCards].flatMap((card, index) => {
       // First card of the pair shows Hebrew
       const hebrewCard = {
         ...card,
-        id: card.english.length * 2 + 1, // Using length to generate unique IDs
+        id: index * 2, // Using index to ensure unique IDs
         isFlipped: false,
         isMatched: false,
         showHebrew: true,
@@ -99,7 +99,7 @@ const MemoryGame = () => {
       // Second card of the pair shows image
       const imageCard = {
         ...card,
-        id: card.english.length * 2 + 2,
+        id: index * 2 + 1,
         isFlipped: false,
         isMatched: false,
         showHebrew: false,
@@ -193,6 +193,7 @@ const MemoryGame = () => {
               >
                 <Card className="w-full h-40 cursor-pointer">
                   <div className="flip-card-inner w-full h-full">
+                    {/* Front of card */}
                     {card.showHebrew ? (
                       <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
                         {card.hebrew}
@@ -211,6 +212,7 @@ const MemoryGame = () => {
                         </div>
                       </div>
                     )}
+                    {/* Back of card */}
                     <div className="flip-card-back w-full h-full relative">
                       {!card.showHebrew ? (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
