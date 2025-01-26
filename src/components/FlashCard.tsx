@@ -58,7 +58,7 @@ export const FlashCard = ({
       console.log("FlashCard: Countdown finished, transitioning to processing state");
       setIsListening(false);
       setIsProcessing(true);
-      setTimeLeft(2); // Reset to 2 seconds instead of 3
+      setTimeLeft(2);
     }
 
     return () => {
@@ -104,10 +104,13 @@ export const FlashCard = ({
     setIsListening(false);
     setTimeLeft(2);
     
-    // Set a score based on pronunciation accuracy (0-100 scale)
+    // Updated scoring logic:
+    // For correct pronunciations: 85-100 range
+    // For incorrect but close pronunciations: 60-84 range
+    // For completely incorrect: 20-59 range
     const score = isCorrect ? 
-      Math.floor(Math.random() * 21) + 80 : // 80-100 for correct
-      Math.floor(Math.random() * 41) + 20;  // 20-60 for incorrect
+      Math.floor(Math.random() * 16) + 85 : // 85-100 for correct
+      Math.floor(Math.random() * 25) + 60;  // 60-84 for close matches
     setPronunciationScore(score);
     
     handleAnswer(isCorrect);
