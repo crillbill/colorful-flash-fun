@@ -36,12 +36,12 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         text,
-        model_id: "eleven_multilingual_v2", // Using the standard multilingual model
+        model_id: "eleven_multilingual_v2",
         voice_settings: {
-          stability: 0.3, // Lower stability for more natural variations
-          similarity_boost: 0.95, // Higher similarity for consistent voice
-          style: 0.5, // Moderate style for expressive speech
-          speed: 0.8 // Slightly slower for clearer pronunciation
+          stability: 0.3,
+          similarity_boost: 0.95,
+          style: 0.5,
+          speed: 0.8
         }
       }),
     })
