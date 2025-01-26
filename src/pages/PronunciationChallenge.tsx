@@ -161,8 +161,8 @@ const PronunciationChallenge = () => {
             <div className="lg:col-span-2">
               <div className="bg-white/5 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/10 hover-card">
                 <FlashCard
-                  question={words[currentWordIndex].english}
-                  answer={words[currentWordIndex].hebrew}
+                  question={words[currentWordIndex].hebrew}
+                  answer={words[currentWordIndex].english}
                   onNext={handleNext}
                   onPrevious={handlePrevious}
                   onCorrect={handleCorrect}
