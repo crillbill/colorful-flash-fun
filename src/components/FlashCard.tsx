@@ -61,13 +61,16 @@ export const FlashCard = ({
     
     // Updated scoring logic: start at 80 for correct matches
     const score = isCorrect ? 
-      Math.floor(Math.random() * 21) + 80 : // 80-100 for correct (unchanged)
+      Math.floor(Math.random() * 21) + 80 : // 80-100 for correct
       Math.floor(Math.random() * 20) + 60;  // 60-79 for incorrect
     
     setPronunciationScore(score);
     console.log('FlashCard: Pronunciation score:', { isCorrect, score });
     
-    handleAnswer(isCorrect);
+    // Add a slight delay before handling the answer to allow the meter to update
+    setTimeout(() => {
+      handleAnswer(isCorrect);
+    }, 1500);
   };
 
   const getPhoneticPronunciation = (word: string) => {
