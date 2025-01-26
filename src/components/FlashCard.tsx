@@ -63,6 +63,16 @@ export const FlashCard = ({
     handleAnswer(isCorrect);
   };
 
+  const getPhoneticPronunciation = (word: string) => {
+    // Map of Hebrew words to their phonetic pronunciations
+    const pronunciations: { [key: string]: string } = {
+      'שלום': '/sha-ˈlom/',
+      'מה שלומך היום': '/ma shlo-ˈmekh ha-ˈyom/',
+      'מתי ארוחת צהריים': '/ma-ˈtai a-ru-ˈkhat tso-ho-ra-ˈyim/',
+    };
+    return pronunciations[word] || '/pronunciation not available/';
+  };
+
   return (
     <div className="flex flex-col items-center gap-4">
       <motion.div
@@ -112,7 +122,7 @@ export const FlashCard = ({
               showHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
-            <span className="text-black">/hə-ˈbrü/</span>
+            <span className="text-black">{getPhoneticPronunciation(question)}</span>
           </div>
         </div>
 
