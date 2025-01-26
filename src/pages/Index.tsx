@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
-import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic } from "lucide-react";
+import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3 } from "lucide-react";
 
 const Index = () => {
   return (
@@ -72,6 +72,13 @@ const Index = () => {
               <Button className="w-full h-32 text-xl bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
                 <Mic className="w-6 h-6" />
                 Pronunciation Challenge
+              </Button>
+            </Link>
+
+            <Link to="/memory-game" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#14B8A6] hover:bg-[#14B8A6]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Grid3X3 className="w-6 h-6" />
+                Memory Game
               </Button>
             </Link>
           </div>
