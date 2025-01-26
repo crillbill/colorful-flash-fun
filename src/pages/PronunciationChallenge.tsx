@@ -118,14 +118,11 @@ const PronunciationChallenge = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-darkPurple to-charcoalGray">
       <Header1 />
-      <div className="container mx-auto px-4 pt-16">
+      <div className="container mx-auto px-4 pt-8">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-5xl font-bold text-center mb-2 text-white gradient-text">
+          <h1 className="text-5xl font-bold text-center mb-8 text-white gradient-text">
             Learn Hebrew
           </h1>
-          <p className="text-xl text-center mb-6 text-white/80">
-            Practice your pronunciation skills
-          </p>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
