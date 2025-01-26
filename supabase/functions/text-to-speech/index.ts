@@ -25,6 +25,13 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
+    // Add SSML tags for slower, more pronounced speech
+    const ssmlText = `<speak>
+      <prosody rate="slow" volume="loud">
+        ${text.split('').join(' ')}
+      </prosody>
+    </speak>`
+
     // Make request to OpenAI API
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -37,6 +44,9 @@ serve(async (req) => {
         input: text,
         voice: voice,
         response_format: 'mp3',
+        speed: 0.7, // Slower speed
+        stability: 0.8, // More stable pronunciation
+        similarity_boost: 0.8 // Clearer enunciation
       }),
     })
 
