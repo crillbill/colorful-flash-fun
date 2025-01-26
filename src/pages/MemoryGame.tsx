@@ -12,88 +12,59 @@ interface MemoryCard {
   imageUrl: string;
   isFlipped: boolean;
   isMatched: boolean;
+  showHebrew: boolean; // New property to determine which side to show
 }
 
-const initialCards: MemoryCard[] = [
+const initialCards: Omit<MemoryCard, 'id' | 'isFlipped' | 'isMatched' | 'showHebrew'>[] = [
   {
-    id: 1,
     hebrew: "כלב",
     english: "dog",
     imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1",
-    isFlipped: false,
-    isMatched: false,
   },
   {
-    id: 2,
     hebrew: "חתול",
     english: "cat",
     imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba",
-    isFlipped: false,
-    isMatched: false,
   },
   {
-    id: 3,
     hebrew: "ציפור",
     english: "bird",
     imageUrl: "https://images.unsplash.com/photo-1444464666168-49d633b86797",
-    isFlipped: false,
-    isMatched: false,
   },
   {
-    id: 4,
     hebrew: "דג",
     english: "fish",
     imageUrl: "https://images.unsplash.com/photo-1524704654690-b56c05c78a00",
-    isFlipped: false,
-    isMatched: false,
   },
   {
-    id: 5,
     hebrew: "סוס",
     english: "horse",
     imageUrl: "https://images.unsplash.com/photo-1534073737927-85f1ebff1f5d",
-    isFlipped: false,
-    isMatched: false,
   },
   {
-    id: 6,
     hebrew: "פרה",
     english: "cow",
     imageUrl: "https://images.unsplash.com/photo-1546445317-29f4545e9d53",
-    isFlipped: false,
-    isMatched: false,
   },
   {
-    id: 7,
     hebrew: "ארנב",
     english: "rabbit",
     imageUrl: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308",
-    isFlipped: false,
-    isMatched: false,
   },
   {
-    id: 8,
     hebrew: "אריה",
     english: "lion",
     imageUrl: "https://images.unsplash.com/photo-1546182990-dffeafbe841d",
-    isFlipped: false,
-    isMatched: false,
   },
   {
-    id: 9,
     hebrew: "פיל",
     english: "elephant",
     imageUrl: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46",
-    isFlipped: false,
-    isMatched: false,
   },
   {
-    id: 10,
     hebrew: "קוף",
     english: "monkey",
     imageUrl: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9",
-    isFlipped: false,
-    isMatched: false,
   },
 ];
 
@@ -114,12 +85,26 @@ const MemoryGame = () => {
   }, [isGameStarted]);
 
   const shuffleCards = () => {
-    const shuffledCards = [...initialCards, ...initialCards].map((card, index) => ({
-      ...card,
-      id: index + 1,
-      isFlipped: false,
-      isMatched: false,
-    })).sort(() => Math.random() - 0.5);
+    // Create pairs of cards, one showing Hebrew and one showing image
+    const cardPairs = [...initialCards].flatMap((card, index) => [
+      {
+        ...card,
+        id: index * 2 + 1,
+        isFlipped: false,
+        isMatched: false,
+        showHebrew: true,
+      },
+      {
+        ...card,
+        id: index * 2 + 2,
+        isFlipped: false,
+        isMatched: false,
+        showHebrew: false,
+      },
+    ]);
+
+    // Shuffle the cards
+    const shuffledCards = cardPairs.sort(() => Math.random() - 0.5);
     setCards(shuffledCards);
     setFlippedCards([]);
     setMatchedPairs(0);
@@ -203,20 +188,43 @@ const MemoryGame = () => {
               >
                 <Card className="w-full h-40 cursor-pointer">
                   <div className="flip-card-inner w-full h-full">
-                    <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
-                      {card.hebrew}
-                    </div>
-                    <div className="flip-card-back w-full h-full relative">
-                      <img
-                        src={card.imageUrl}
-                        alt={card.english}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <span className="text-white text-xl font-bold">
-                          {card.english}
-                        </span>
+                    {card.showHebrew ? (
+                      <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
+                        {card.hebrew}
                       </div>
+                    ) : (
+                      <div className="flip-card-front w-full h-full relative">
+                        <img
+                          src={card.imageUrl}
+                          alt={card.english}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <span className="text-white text-xl font-bold">
+                            {card.english}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flip-card-back w-full h-full relative">
+                      {!card.showHebrew ? (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
+                          {card.hebrew}
+                        </div>
+                      ) : (
+                        <>
+                          <img
+                            src={card.imageUrl}
+                            alt={card.english}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <span className="text-white text-xl font-bold">
+                              {card.english}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </Card>
