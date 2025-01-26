@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { CardFront } from "./CardFront";
-import { CardBack } from "./CardBack";
 import { MeterChart } from "./MeterChart";
 import { VoiceRecordButton } from "./VoiceRecordButton";
 import VoiceInterface from "./VoiceInterface";
@@ -13,18 +12,23 @@ interface FlashCardProps {
   question: string;
   answer: string;
   onNext: () => void;
+  onPrevious: () => void;
   onCorrect: () => void;
   onIncorrect: () => void;
+  showPrevious?: boolean;
+  showNext?: boolean;
 }
 
 export const FlashCard = ({
   question,
   answer,
   onNext,
+  onPrevious,
   onCorrect,
   onIncorrect,
+  showPrevious = true,
+  showNext = true,
 }: FlashCardProps) => {
-  const [isFlipped, setIsFlipped] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [pronunciationScore, setPronunciationScore] = useState(0);
   const { isPlaying, playAudio } = useAudioPlayback();
@@ -36,10 +40,6 @@ export const FlashCard = ({
     stopProcessing 
   } = useVoiceRecording();
 
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-  };
-
   const handleAnswer = (correct: boolean) => {
     if (correct) {
       onCorrect();
@@ -48,7 +48,6 @@ export const FlashCard = ({
     }
     
     // Reset states before moving to next word
-    setIsFlipped(false);
     setShowHint(false);
     setPronunciationScore(0);
     stopProcessing();
@@ -93,30 +92,21 @@ export const FlashCard = ({
         className="w-full max-w-sm mx-auto"
       >
         <MeterChart score={pronunciationScore} />
-        <div
-          className={`flip-card h-[250px] w-full cursor-pointer ${
-            isFlipped ? "flipped" : ""
-          }`}
-          onClick={handleFlip}
-        >
-          <div className="flip-card-inner">
-            <CardFront
-              question={question}
-              english={answer}
-              isPlaying={isPlaying}
-              isListening={isListening}
-              isProcessing={isProcessing}
-              timeLeft={timeLeft}
-              onPlayAudio={() => playAudio(question)}
-              onStartListening={startListening}
-            />
-            <CardBack
-              answer={answer}
-              isPlaying={isPlaying}
-              onPlayAudio={() => playAudio(answer)}
-              onAnswer={handleAnswer}
-            />
-          </div>
+        <div className="w-full h-[250px]">
+          <CardFront
+            question={question}
+            english={answer}
+            isPlaying={isPlaying}
+            isListening={isListening}
+            isProcessing={isProcessing}
+            timeLeft={timeLeft}
+            onPlayAudio={() => playAudio(question)}
+            onStartListening={startListening}
+            onPrevious={onPrevious}
+            onNext={onNext}
+            showPrevious={showPrevious}
+            showNext={showNext}
+          />
         </div>
 
         {/* Hint Section */}
