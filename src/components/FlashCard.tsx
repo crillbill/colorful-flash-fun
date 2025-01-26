@@ -56,7 +56,7 @@ export const FlashCard = ({
     
     const score = isCorrect ? 
       Math.floor(Math.random() * 21) + 80 : // 80-100 for correct
-      Math.floor(Math.random() * 20) + 40;  // 40-59 for incorrect
+      Math.floor(Math.random() * 20) + 60;  // 60-79 for incorrect (changed from 40-59)
     setPronunciationScore(score);
     
     handleAnswer(isCorrect);
