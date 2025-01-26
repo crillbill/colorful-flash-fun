@@ -76,9 +76,18 @@ export const FlashCard = ({
     // Map of Hebrew words to their phonetic pronunciations
     const pronunciations: { [key: string]: string } = {
       'שלום': 'sha-LOM',
+      'מה שלומך': 'ma shlo-MECH',
       'מה שלומך היום': 'ma shlo-MECH ha-YOM',
+      'בוקר טוב': 'BO-ker tov',
+      'ערב טוב': 'E-rev tov',
+      'לילה טוב': 'LAI-la tov',
+      'תודה': 'to-DA',
+      'בבקשה': 'be-va-ka-SHA',
+      'סליחה': 'sli-CHA',
       'מתי ארוחת צהריים': 'ma-TAI a-ru-CHAT tzo-ho-RA-yim',
-      // Add more Hebrew words and their phonetic pronunciations as needed
+      'אני רעב': 'a-NI ra-EV',
+      'אני צמא': 'a-NI tza-ME',
+      'להתראות': 'le-hit-ra-OT',
     };
     return pronunciations[word] || word;
   };
@@ -111,20 +120,24 @@ export const FlashCard = ({
 
         {/* Hint Section */}
         <div className="relative my-4 text-center">
-          <div 
-            className={`bg-gray-700/80 backdrop-blur-sm rounded-lg p-4 cursor-pointer transition-all duration-300 ${
+          <button 
+            className={`w-full bg-gray-700/80 backdrop-blur-sm rounded-lg p-4 cursor-pointer transition-all duration-300 ${
               showHint ? 'opacity-0 pointer-events-none' : 'opacity-100'
             }`}
             onClick={() => setShowHint(true)}
           >
             <span className="text-white font-medium">Reveal Pronunciation</span>
-          </div>
+          </button>
           <div 
-            className={`absolute inset-0 rounded-lg p-4 transition-all duration-300 ${
+            className={`absolute inset-0 bg-white rounded-lg p-4 transition-all duration-300 ${
               showHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
-            <span className="text-black font-medium">{getPhoneticPronunciation(question)}</span>
+            <div className="flex flex-col gap-2">
+              <span className="text-gray-600 text-sm">How to pronounce:</span>
+              <span className="text-black font-medium text-lg">{getPhoneticPronunciation(question)}</span>
+              <span className="text-gray-500 text-xs">Capitalized syllables are stressed</span>
+            </div>
           </div>
         </div>
 
