@@ -52,11 +52,23 @@ const ImportWords = () => {
     navigate("/login");
   };
 
+  const validateHebrewText = (text: string): boolean => {
+    // Hebrew characters range from \u0590 to \u05FF
+    const hebrewRegex = /[\u0590-\u05FF]/;
+    return hebrewRegex.test(text);
+  };
+
+  const validateEnglishText = (text: string): boolean => {
+    // English text should not contain Hebrew characters
+    const hebrewRegex = /[\u0590-\u05FF]/;
+    return !hebrewRegex.test(text);
+  };
+
   const parseInput = (text: string) => {
     // Split by newlines and filter out empty lines
     const lines = text.split('\n').filter(line => line.trim());
     
-    return lines.map(line => {
+    const parsedEntries = lines.map(line => {
       // Match content between tabs or multiple spaces, preserving content within quotes
       const matches = line.match(/(?:[^\t\s"]+|"[^"]*")+/g) || [];
       
@@ -72,6 +84,11 @@ const ImportWords = () => {
 
       if (selectedTable === "hebrew_alphabet") {
         const [letter, name, transliteration] = processedParts;
+        
+        if (!validateHebrewText(letter)) {
+          throw new Error(`Invalid Hebrew letter: ${letter}`);
+        }
+        
         return {
           letter: letter?.trim(),
           name: name?.trim(),
@@ -79,6 +96,14 @@ const ImportWords = () => {
         };
       } else if (selectedTable === "hebrew_verbs") {
         const [hebrew, english, transliteration, root, tense, conjugation] = processedParts;
+        
+        if (!validateHebrewText(hebrew)) {
+          throw new Error(`Invalid Hebrew text: ${hebrew}`);
+        }
+        if (!validateEnglishText(english)) {
+          throw new Error(`Invalid English text: ${english}`);
+        }
+        
         return {
           hebrew: hebrew?.trim(),
           english: english?.trim(),
@@ -89,6 +114,14 @@ const ImportWords = () => {
         };
       } else {
         const [hebrew, english, transliteration] = processedParts;
+        
+        if (!validateHebrewText(hebrew)) {
+          throw new Error(`Invalid Hebrew text: ${hebrew}`);
+        }
+        if (!validateEnglishText(english)) {
+          throw new Error(`Invalid English text: ${english}`);
+        }
+        
         return {
           hebrew: hebrew?.trim(),
           english: english?.trim(),
@@ -96,6 +129,8 @@ const ImportWords = () => {
         };
       }
     });
+
+    return parsedEntries;
   };
 
   const handleImport = async () => {
@@ -121,9 +156,9 @@ const ImportWords = () => {
 
       toast.success(`Successfully imported ${entries.length} entries`);
       setInputText("");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Import error:', error);
-      toast.error("Failed to import entries");
+      toast.error(error.message || "Failed to import entries");
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +171,7 @@ const ImportWords = () => {
       case "hebrew_verbs":
         return 'ללכת\tto walk\tla-le-chet\tה.ל.כ\tpresent\tsingular masculine';
       default:
-        return 'שלום\tHello\tsha-LOM\nמה שלומך?\tHow are you?\tma shlo-MECH';
+        return 'שלום\tHello\tsha-LOM\nמה שלומך\tHow are you\tma-shlo-MECH';
     }
   };
 
@@ -191,8 +226,7 @@ const ImportWords = () => {
               </label>
               <p className="text-sm text-muted-foreground">
                 Each entry on a new line. Separate fields with a tab or multiple spaces.
-                You can include special characters like question marks (?) and quotes.
-                Use quotes around fields containing spaces or special characters.
+                Hebrew text must contain Hebrew characters, and English text must not contain Hebrew characters.
               </p>
               <Textarea
                 value={inputText}
