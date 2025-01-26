@@ -27,11 +27,24 @@ const ImportWords = () => {
   }, []);
 
   const checkAuthorization = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user?.email === 'crillbill@gmail.com') {
-      setIsAuthorized(true);
-    } else {
-      toast.error("You are not authorized to import data");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setIsAuthorized(false);
+        toast.error("Please log in to import data");
+        return;
+      }
+      
+      if (session.user.email === 'crillbill@gmail.com') {
+        setIsAuthorized(true);
+      } else {
+        setIsAuthorized(false);
+        toast.error("You are not authorized to import data");
+      }
+    } catch (error) {
+      console.error('Authorization check error:', error);
+      setIsAuthorized(false);
+      toast.error("Error checking authorization");
     }
   };
 
