@@ -74,11 +74,12 @@ export const FlashCard = ({
   };
 
   const getPhoneticPronunciation = (word: string) => {
-    // Map of Hebrew words to their phonetic pronunciations of the English translation
+    // Map of Hebrew words to their phonetic pronunciations
     const pronunciations: { [key: string]: string } = {
-      'שלום': 'heh-LOH',
-      'מה שלומך היום': 'how ARE you to-DAY',
-      'מתי ארוחת צהריים': 'what TIME is LUNCH',
+      'שלום': 'sha-LOM',
+      'מה שלומך היום': 'ma shlo-MECH ha-YOM',
+      'מתי ארוחת צהריים': 'ma-TAI a-ru-CHAT tzo-ho-RA-yim',
+      // Add more Hebrew words and their phonetic pronunciations as needed
     };
     return pronunciations[word] || word;
   };
@@ -126,14 +127,14 @@ export const FlashCard = ({
             }`}
             onClick={() => setShowHint(true)}
           >
-            <span className="text-white font-medium">Reveal Hint</span>
+            <span className="text-white font-medium">Reveal Pronunciation</span>
           </div>
           <div 
             className={`absolute inset-0 rounded-lg p-4 transition-all duration-300 ${
               showHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
-            <span className="text-black">{getPhoneticPronunciation(question)}</span>
+            <span className="text-black font-medium">{getPhoneticPronunciation(question)}</span>
           </div>
         </div>
 
