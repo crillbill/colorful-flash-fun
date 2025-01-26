@@ -15,7 +15,7 @@ export const MeterChart = ({ score, maxScore = 100 }: MeterChartProps) => {
         {/* Background bar with complete gradient from red to yellow to green */}
         <div 
           className={cn(
-            "absolute inset-0 rounded-full bg-gradient-to-r from-[#ea384c] via-[#FEF7CD] to-[#F2FCE2] shadow-sm",
+            "absolute inset-0 rounded-full bg-gradient-to-r from-[#ea384c] via-[#FEF7CD] to-[#4ade80] shadow-sm",
             percentage > 90 && "animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
           )}
         />
