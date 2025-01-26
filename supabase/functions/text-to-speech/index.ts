@@ -12,18 +12,8 @@ serve(async (req) => {
   }
 
   try {
-    const { 
-      text, 
-      voice_id = 'EXAVITQu4vr4xnSDxMaL',
-      model_id = 'eleven_multilingual_v2',
-      voice_settings = {
-        stability: 0.85,
-        similarity_boost: 0.75,
-        style: 0.5,
-        speed: 0.85
-      }
-    } = await req.json()
-
+    const { text, voice_id = "EXAVITQu4vr4xnSDxMaL", model_id = "eleven_multilingual_v2", voice_settings } = await req.json()
+    
     console.log('Text-to-speech request:', { text, voice_id, model_id, voice_settings })
 
     if (!text) {
@@ -41,7 +31,12 @@ serve(async (req) => {
       body: JSON.stringify({
         text: text.trim(),
         model_id,
-        voice_settings
+        voice_settings: voice_settings || {
+          stability: 0.85,
+          similarity_boost: 0.75,
+          style: 0.5,
+          speed: 0.85
+        }
       }),
     })
 
@@ -52,23 +47,22 @@ serve(async (req) => {
     }
 
     // Get audio data and convert to base64
-    const audioData = await response.arrayBuffer()
-    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioData)))
+    const arrayBuffer = await response.arrayBuffer()
+    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+
+    console.log('Successfully generated audio for text:', text)
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
     console.error('Text-to-speech error:', error)
-    
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
+      { 
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )
   }
