@@ -9,6 +9,7 @@ import MultipleChoice from "./pages/MultipleChoice";
 import SentenceBuilder from "./pages/SentenceBuilder";
 import WordSearch from "./pages/WordSearch";
 import Index from "./pages/Index";
+import ImportWords from "./pages/ImportWords";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -29,6 +30,7 @@ function App() {
           <Route path="/multiple-choice" element={<MultipleChoice />} />
           <Route path="/sentence-builder" element={<SentenceBuilder />} />
           <Route path="/word-search" element={<WordSearch />} />
+          <Route path="/import" element={<ImportWords />} />
           <Route path="/" element={<Index />} />
         </Routes>
         <Toaster />
