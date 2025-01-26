@@ -111,6 +111,10 @@ const PronunciationChallenge = () => {
     setCurrentWordIndex(prev => (prev + 1) % words.length);
   };
 
+  const handlePrevious = () => {
+    setCurrentWordIndex(prev => (prev > 0 ? prev - 1 : prev));
+  };
+
   if (!user) {
     return null;
   }
@@ -131,8 +135,11 @@ const PronunciationChallenge = () => {
                   question={words[currentWordIndex].hebrew}
                   answer={words[currentWordIndex].english}
                   onNext={handleNext}
+                  onPrevious={handlePrevious}
                   onCorrect={handleCorrect}
                   onIncorrect={handleIncorrect}
+                  showPrevious={currentWordIndex > 0}
+                  showNext={currentWordIndex < words.length - 1}
                 />
               </div>
             </div>

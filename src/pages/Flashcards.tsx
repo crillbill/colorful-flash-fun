@@ -27,6 +27,12 @@ const Flashcards = () => {
     }
   };
 
+  const handlePrevious = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
+    }
+  };
+
   const handleCorrect = () => {
     setCorrectAnswers(correctAnswers + 1);
     setTotalAnswered(totalAnswered + 1);
@@ -59,8 +65,11 @@ const Flashcards = () => {
               question={flashcardsData[currentCardIndex].question}
               answer={flashcardsData[currentCardIndex].answer}
               onNext={handleNext}
+              onPrevious={handlePrevious}
               onCorrect={handleCorrect}
               onIncorrect={handleIncorrect}
+              showPrevious={currentCardIndex > 0}
+              showNext={currentCardIndex < flashcardsData.length - 1}
             />
           ) : (
             <div className="text-center space-y-4">
