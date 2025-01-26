@@ -26,30 +26,25 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    // Make request to ElevenLabs API
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM`, {
+    // Make request to OpenAI TTS API
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        'Accept': 'audio/mpeg',
+        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
         'Content-Type': 'application/json',
-        'xi-api-key': Deno.env.get('ELEVEN_LABS_API_KEY') || '',
       },
       body: JSON.stringify({
-        text: text,
-        model_id: "eleven_multilingual_v2",  // Switched back to multilingual v2 which has better Hebrew support
-        voice_settings: {
-          stability: 0.3,
-          similarity_boost: 0.95,
-          style: 0.5,
-          speed: 0.8
-        }
+        model: 'tts-1',
+        input: text,
+        voice: 'nova', // Using Nova voice which has good multilingual support
+        response_format: 'mp3'
       }),
-    })
+    });
 
     if (!response.ok) {
       const errorData = await response.text()
-      console.error('ElevenLabs API error:', errorData)
-      throw new Error(`ElevenLabs API error: ${response.status} ${errorData}`)
+      console.error('OpenAI TTS API error:', errorData)
+      throw new Error(`OpenAI TTS API error: ${response.status} ${errorData}`)
     }
 
     // Get audio data and convert to base64
@@ -59,14 +54,8 @@ serve(async (req) => {
     console.log('Successfully generated audio for Hebrew text:', {
       text,
       audioLength: arrayBuffer.byteLength,
-      voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice - better for Hebrew
-      model: "eleven_multilingual_v2",
-      settings: {
-        stability: 0.3,
-        similarity_boost: 0.95,
-        style: 0.5,
-        speed: 0.8
-      }
+      model: 'tts-1',
+      voice: 'nova'
     })
 
     return new Response(
