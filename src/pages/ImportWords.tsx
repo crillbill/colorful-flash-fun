@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -15,6 +16,7 @@ import { Header1 } from "@/components/ui/header";
 type TableOption = "hebrew_words" | "hebrew_phrases" | "hebrew_alphabet";
 
 const ImportWords = () => {
+  const navigate = useNavigate();
   const [selectedTable, setSelectedTable] = useState<TableOption>("hebrew_words");
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -31,6 +33,10 @@ const ImportWords = () => {
     } else {
       toast.error("You are not authorized to import data");
     }
+  };
+
+  const handleSignIn = () => {
+    navigate("/login");
   };
 
   const parseInput = (text: string) => {
@@ -109,8 +115,11 @@ const ImportWords = () => {
             <h2 className="text-2xl font-bold">Import Hebrew Content</h2>
             
             {!isAuthorized && (
-              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 space-y-4" role="alert">
                 <p>You must be authorized to import data. Please log in with the correct account.</p>
+                <Button onClick={handleSignIn} variant="outline">
+                  Sign In
+                </Button>
               </div>
             )}
             
