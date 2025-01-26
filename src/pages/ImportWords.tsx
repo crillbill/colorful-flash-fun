@@ -57,12 +57,12 @@ const ImportWords = () => {
     const lines = text.split('\n').filter(line => line.trim());
     
     return lines.map(line => {
-      // Split by tab or multiple spaces, handling quotes appropriately
-      const parts = line.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+      // Match content between tabs or multiple spaces, preserving content within quotes
+      const matches = line.match(/(?:[^\t\s"]+|"[^"]*")+/g) || [];
       
-      // Process each part to handle quotes
-      const processedParts = parts.map(part => {
-        // Remove surrounding quotes (both single and double)
+      // Process each part to handle quotes and preserve special characters
+      const processedParts = matches.map(part => {
+        // Remove surrounding quotes if present, but preserve content exactly as is
         if ((part.startsWith('"') && part.endsWith('"')) || 
             (part.startsWith("'") && part.endsWith("'"))) {
           return part.slice(1, -1);
@@ -74,15 +74,15 @@ const ImportWords = () => {
       
       if (selectedTable === "hebrew_alphabet") {
         return {
-          letter: hebrew,
-          name: english,
-          transliteration: transliteration || null,
+          letter: hebrew?.trim(),
+          name: english?.trim(),
+          transliteration: transliteration?.trim() || null,
         };
       } else {
         return {
-          hebrew,
-          english,
-          transliteration: transliteration || null,
+          hebrew: hebrew?.trim(),
+          english: english?.trim(),
+          transliteration: transliteration?.trim() || null,
         };
       }
     });
@@ -159,7 +159,8 @@ const ImportWords = () => {
               </label>
               <p className="text-sm text-muted-foreground">
                 Each entry on a new line. Separate fields with a tab or multiple spaces.
-                You can include words with quotes without any special formatting.
+                You can include special characters like question marks (?) and quotes.
+                Use quotes around fields containing spaces or special characters.
                 Transliteration is optional.
               </p>
               <Textarea
@@ -168,7 +169,7 @@ const ImportWords = () => {
                 placeholder={
                   selectedTable === "hebrew_alphabet"
                     ? 'א\tAlef\tal-ef\nב\tBet\tbet'
-                    : 'שלום\tHello\tsha-LOM\nמה שלומך\tHow are you?\tma shlo-MECH'
+                    : 'שלום\tHello\tsha-LOM\nמה שלומך?\tHow are you?\tma shlo-MECH'
                 }
                 className="min-h-[200px] font-mono"
               />
