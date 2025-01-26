@@ -66,6 +66,42 @@ export type Database = {
         }
         Relationships: []
       }
+      hebrew_verbs: {
+        Row: {
+          conjugation: string | null
+          created_at: string
+          english: string
+          hebrew: string
+          id: string
+          root: string | null
+          tense: string | null
+          transliteration: string | null
+          updated_at: string
+        }
+        Insert: {
+          conjugation?: string | null
+          created_at?: string
+          english: string
+          hebrew: string
+          id?: string
+          root?: string | null
+          tense?: string | null
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Update: {
+          conjugation?: string | null
+          created_at?: string
+          english?: string
+          hebrew?: string
+          id?: string
+          root?: string | null
+          tense?: string | null
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hebrew_words: {
         Row: {
           created_at: string

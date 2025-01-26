@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Header1 } from "@/components/ui/header";
 
-type TableOption = "hebrew_words" | "hebrew_phrases" | "hebrew_alphabet";
+type TableOption = "hebrew_words" | "hebrew_phrases" | "hebrew_alphabet" | "hebrew_verbs";
 
 const ImportWords = () => {
   const navigate = useNavigate();
@@ -70,15 +70,25 @@ const ImportWords = () => {
         return part;
       });
 
-      const [hebrew, english, transliteration] = processedParts;
-      
       if (selectedTable === "hebrew_alphabet") {
+        const [letter, name, transliteration] = processedParts;
         return {
-          letter: hebrew?.trim(),
-          name: english?.trim(),
+          letter: letter?.trim(),
+          name: name?.trim(),
           transliteration: transliteration?.trim() || null,
         };
+      } else if (selectedTable === "hebrew_verbs") {
+        const [hebrew, english, transliteration, root, tense, conjugation] = processedParts;
+        return {
+          hebrew: hebrew?.trim(),
+          english: english?.trim(),
+          transliteration: transliteration?.trim() || null,
+          root: root?.trim() || null,
+          tense: tense?.trim() || null,
+          conjugation: conjugation?.trim() || null,
+        };
       } else {
+        const [hebrew, english, transliteration] = processedParts;
         return {
           hebrew: hebrew?.trim(),
           english: english?.trim(),
@@ -119,6 +129,27 @@ const ImportWords = () => {
     }
   };
 
+  const getPlaceholderText = () => {
+    switch (selectedTable) {
+      case "hebrew_alphabet":
+        return 'א\tAlef\tal-ef\nב\tBet\tbet';
+      case "hebrew_verbs":
+        return 'ללכת\tto walk\tla-le-chet\tה.ל.כ\tpresent\tsingular masculine';
+      default:
+        return 'שלום\tHello\tsha-LOM\nמה שלומך?\tHow are you?\tma shlo-MECH';
+    }
+  };
+
+  const getInstructions = () => {
+    if (selectedTable === "hebrew_verbs") {
+      return "Format: Hebrew[tab]English[tab]Transliteration[tab]Root[tab]Tense[tab]Conjugation";
+    } else if (selectedTable === "hebrew_alphabet") {
+      return "Format: Letter[tab]Name[tab]Transliteration";
+    } else {
+      return "Format: Hebrew[tab]English[tab]Transliteration";
+    }
+  };
+
   return (
     <>
       <Header1 />
@@ -149,28 +180,24 @@ const ImportWords = () => {
                   <SelectItem value="hebrew_words">Words</SelectItem>
                   <SelectItem value="hebrew_phrases">Phrases</SelectItem>
                   <SelectItem value="hebrew_alphabet">Alphabet</SelectItem>
+                  <SelectItem value="hebrew_verbs">Verbs</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                Paste your content (format: Hebrew[tab]English[tab]Transliteration)
+                Paste your content ({getInstructions()})
               </label>
               <p className="text-sm text-muted-foreground">
                 Each entry on a new line. Separate fields with a tab or multiple spaces.
                 You can include special characters like question marks (?) and quotes.
                 Use quotes around fields containing spaces or special characters.
-                Transliteration is optional.
               </p>
               <Textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder={
-                  selectedTable === "hebrew_alphabet"
-                    ? 'א\tAlef\tal-ef\nב\tBet\tbet'
-                    : 'שלום\tHello\tsha-LOM\nמה שלומך?\tHow are you?\tma shlo-MECH'
-                }
+                placeholder={getPlaceholderText()}
                 className="min-h-[200px] font-mono"
               />
             </div>
