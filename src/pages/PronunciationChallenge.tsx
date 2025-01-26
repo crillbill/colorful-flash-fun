@@ -116,20 +116,20 @@ const PronunciationChallenge = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-softGray">
+    <div className="min-h-screen bg-gradient-to-b from-darkPurple to-charcoalGray">
       <Header1 />
       <div className="container mx-auto px-4 pt-24">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-5xl font-bold text-center mb-2 text-darkCharcoal gradient-text">
+          <h1 className="text-5xl font-bold text-center mb-2 text-white gradient-text">
             Learn Hebrew
           </h1>
-          <p className="text-xl text-center mb-12 text-mediumGray">
+          <p className="text-xl text-center mb-12 text-white/80">
             Practice your pronunciation skills
           </p>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <div className="bg-white/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20 hover-card">
+              <div className="bg-white/5 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/10 hover-card">
                 <FlashCard
                   question={words[currentWordIndex].hebrew}
                   answer={words[currentWordIndex].english}
@@ -140,8 +140,8 @@ const PronunciationChallenge = () => {
               </div>
             </div>
             
-            <div className="bg-white/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20 hover-card">
-              <h2 className="text-2xl font-semibold mb-6 gradient-text">Leaderboard</h2>
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/10 hover-card">
+              <h2 className="text-2xl font-semibold mb-6 text-white">Leaderboard</h2>
               <Leaderboard />
             </div>
           </div>

@@ -16,7 +16,7 @@ export const CardBack = ({
   onAnswer,
 }: CardBackProps) => {
   return (
-    <Card className="flip-card-back p-8 flex flex-col items-center justify-between bg-gradient-to-br from-oceanBlue to-softBlue text-white shadow-lg rounded-xl border-0">
+    <Card className="flip-card-back p-8 flex flex-col items-center justify-between bg-gradient-to-br from-brightOrange to-oceanBlue text-white shadow-lg rounded-xl border-2 border-white/20">
       <h3 className="text-2xl font-semibold text-center">{answer}</h3>
       <div className="flex flex-col gap-4 items-center">
         <AudioButton isPlaying={isPlaying} onToggle={onPlayAudio} />
