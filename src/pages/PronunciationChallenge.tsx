@@ -10,12 +10,13 @@ import { useQuery } from "@tanstack/react-query";
 interface Word {
   hebrew: string;
   english: string;
+  transliteration?: string;
 }
 
 const fetchPhrases = async () => {
   const { data, error } = await supabase
     .from('hebrew_phrases')
-    .select('hebrew, english');
+    .select('hebrew, english, transliteration');
 
   if (error) {
     console.error('Error fetching phrases:', error);
@@ -38,7 +39,6 @@ const PronunciationChallenge = () => {
   });
 
   useEffect(() => {
-    // Check authentication status
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -163,6 +163,7 @@ const PronunciationChallenge = () => {
                 <FlashCard
                   question={words[currentWordIndex].hebrew}
                   answer={words[currentWordIndex].english}
+                  transliteration={words[currentWordIndex].transliteration}
                   onNext={handleNext}
                   onPrevious={handlePrevious}
                   onCorrect={handleCorrect}

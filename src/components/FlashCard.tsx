@@ -11,6 +11,7 @@ import { useVoiceRecording } from "@/hooks/useVoiceRecording";
 interface FlashCardProps {
   question: string;
   answer: string;
+  transliteration?: string;
   onNext: () => void;
   onPrevious: () => void;
   onCorrect: () => void;
@@ -22,6 +23,7 @@ interface FlashCardProps {
 export const FlashCard = ({
   question,
   answer,
+  transliteration,
   onNext,
   onPrevious,
   onCorrect,
@@ -68,25 +70,6 @@ export const FlashCard = ({
     }, 1500);
   };
 
-  const getPhoneticPronunciation = (word: string) => {
-    const pronunciations: { [key: string]: string } = {
-      'שלום': 'sha - LOM',
-      'מה שלומך': 'ma - shlo - MECH',
-      'מה שלומך היום': 'ma - shlo - MECH - ha - YOM',
-      'בוקר טוב': 'BO - ker - tov',
-      'ערב טוב': 'E - rev - tov',
-      'לילה טוב': 'LAI - la - tov',
-      'תודה': 'to - DA',
-      'בבקשה': 'be - va - ka - SHA',
-      'סליחה': 'sli - CHA',
-      'מתי ארוחת צהריים': 'ma - TAI - a - ru - CHAT - tzo - ho - RA - yim',
-      'אני רעב': 'a - NI - ra - EV',
-      'אני צמא': 'a - NI - tza - ME',
-      'להתראות': 'le - hit - ra - OT',
-    };
-    return pronunciations[word] || word;
-  };
-
   return (
     <div className="flex flex-col items-center gap-4">
       <motion.div
@@ -128,8 +111,8 @@ export const FlashCard = ({
             }`}
           >
             <div className="flex flex-col gap-2">
-              <span className="text-black font-medium text-lg">{getPhoneticPronunciation(question)}</span>
-              <span className="text-gray-500 text-xs">Capitalized syllables are stressed</span>
+              <span className="text-black font-medium text-lg">{transliteration || "Pronunciation guide not available"}</span>
+              <span className="text-gray-500 text-xs">How to pronounce this word in English</span>
             </div>
           </div>
         </div>
