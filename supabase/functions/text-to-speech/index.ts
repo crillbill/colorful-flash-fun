@@ -37,6 +37,7 @@ serve(async (req) => {
         model: 'tts-1-hd',  // Using HD model for higher quality audio
         input: text,
         voice: 'nova', // Using Nova voice which has good multilingual support
+        speed: 0.85,  // Setting speed to 85% of normal speed
         response_format: 'mp3'
       }),
     });
@@ -55,7 +56,8 @@ serve(async (req) => {
       text,
       audioLength: arrayBuffer.byteLength,
       model: 'tts-1-hd',
-      voice: 'nova'
+      voice: 'nova',
+      speed: 0.85
     })
 
     return new Response(
