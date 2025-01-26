@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Mic, Volume2 } from "lucide-react";
+import { Volume2 } from "lucide-react";
 
 interface CardFrontProps {
   question: string;
@@ -37,27 +37,6 @@ export const CardFront = ({
           className="hover:bg-white/20 bg-white/10 border-white/30"
         >
           <Volume2 className="h-6 w-6 text-white" />
-        </Button>
-        <Button
-          variant={isListening ? "default" : "outline"}
-          size="icon"
-          onClick={onStartListening}
-          disabled={isProcessing}
-          className={`relative ${
-            isListening 
-              ? "bg-green-500 hover:bg-green-600" 
-              : "hover:bg-white/20 bg-white/10 border-white/30"
-          }`}
-        >
-          <Mic className="h-6 w-6 text-white" />
-          {isProcessing && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-          )}
-          {isListening && timeLeft > 0 && (
-            <div className="absolute -bottom-8 text-sm font-medium text-white">
-              {timeLeft}s
-            </div>
-          )}
         </Button>
       </div>
     </div>
