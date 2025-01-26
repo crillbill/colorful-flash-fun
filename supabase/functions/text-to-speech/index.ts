@@ -36,7 +36,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         text,
-        model_id: "eleven_multilingual_sts_v2", // Using Speech-to-Speech model for better pronunciation
+        model_id: "eleven_multilingual_v2", // Using the standard multilingual model
         voice_settings: {
           stability: 0.3, // Lower stability for more natural variations
           similarity_boost: 0.95, // Higher similarity for consistent voice
@@ -60,7 +60,7 @@ serve(async (req) => {
       text,
       audioLength: arrayBuffer.byteLength,
       voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice - better for Hebrew
-      model: "eleven_multilingual_sts_v2",
+      model: "eleven_multilingual_v2",
       settings: {
         stability: 0.3,
         similarity_boost: 0.95,
