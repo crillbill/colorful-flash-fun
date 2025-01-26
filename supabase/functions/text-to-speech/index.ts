@@ -12,16 +12,16 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voice_id = "EXAVITQu4vr4xnSDxMaL", model_id = "eleven_multilingual_v2" } = await req.json()
+    const { text } = await req.json()
     
-    console.log('Text-to-speech request:', { text, voice_id, model_id })
+    console.log('Text-to-speech request received:', { text })
 
     if (!text) {
       throw new Error('Text is required')
     }
 
     // Make request to ElevenLabs API
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`, {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL`, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
@@ -29,13 +29,13 @@ serve(async (req) => {
         'xi-api-key': Deno.env.get('ELEVEN_LABS_API_KEY') || '',
       },
       body: JSON.stringify({
-        text: text.trim(),
-        model_id,
+        text: text,
+        model_id: "eleven_multilingual_v2",
         voice_settings: {
-          stability: 0.85,
+          stability: 1, // Maximum stability for clearer pronunciation
           similarity_boost: 0.75,
-          style: 0.5,
-          speed: 0.85
+          style: 0, // Neutral style for better accuracy
+          speed: 0.7 // Slower speed for clearer pronunciation
         }
       }),
     })
