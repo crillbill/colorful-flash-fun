@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Volume2, VolumeX, Mic } from "lucide-react";
+import { Mic } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import VoiceInterface from "./VoiceInterface";
 import { toast } from "sonner";
@@ -233,12 +232,16 @@ export const FlashCard = ({
             />
           </div>
         </div>
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-6">
           <div className="relative">
             <Button
               variant={isListening ? "destructive" : isProcessing ? "secondary" : "default"}
               size="lg"
-              className="gap-2"
+              className={`gap-2 shadow-md hover:shadow-lg transition-all ${
+                !isListening && !isProcessing 
+                  ? "bg-gradient-to-r from-primaryPurple to-vividPurple text-white border-0" 
+                  : ""
+              }`}
               onClick={(e) => {
                 e.stopPropagation();
                 handleStartListening();
@@ -252,7 +255,7 @@ export const FlashCard = ({
                   ? `Speak now... (${timeLeft}s)` 
                   : `Say "${question}"`}
             </Button>
-            <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-muted-foreground">
+            <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-mediumGray">
               {isListening && `${timeLeft} seconds remaining...`}
               {isProcessing && "Analyzing your pronunciation..."}
             </div>
