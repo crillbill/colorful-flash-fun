@@ -44,7 +44,7 @@ serve(async (req) => {
         input: text,
         voice: voice,
         response_format: 'mp3',
-        speed: 0.7, // Slower speed
+        speed: 0.83, // Updated speed parameter
         stability: 0.8, // More stable pronunciation
         similarity_boost: 0.8 // Clearer enunciation
       }),
