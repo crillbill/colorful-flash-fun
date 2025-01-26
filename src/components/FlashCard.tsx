@@ -54,10 +54,13 @@ export const FlashCard = ({
   const handlePronunciationResult = (isCorrect: boolean) => {
     stopProcessing();
     
+    // Updated scoring logic: start at 80 for correct matches
     const score = isCorrect ? 
-      Math.floor(Math.random() * 21) + 80 : // 80-100 for correct
-      Math.floor(Math.random() * 20) + 60;  // 60-79 for incorrect (changed from 40-59)
+      Math.floor(Math.random() * 21) + 80 : // 80-100 for correct (unchanged)
+      Math.floor(Math.random() * 20) + 60;  // 60-79 for incorrect
+    
     setPronunciationScore(score);
+    console.log('FlashCard: Pronunciation score:', { isCorrect, score });
     
     handleAnswer(isCorrect);
   };

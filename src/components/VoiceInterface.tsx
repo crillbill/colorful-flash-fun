@@ -108,7 +108,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       const transliterationWords = normalizedTransliteration.split(/\s+/);
       
       // Check for partial matches in either direction
-      return transcribedWords.some(word => 
+      const hasMatch = transcribedWords.some(word => 
         transliterationWords.some(expectedWord => 
           word.includes(expectedWord) || 
           expectedWord.includes(word) ||
@@ -116,6 +116,15 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
           levenshteinDistance(word, expectedWord) <= 2
         )
       );
+
+      // Log the matching process for debugging
+      console.log('VoiceInterface: Matching details:', {
+        transcribed: transcribedWords,
+        expected: transliterationWords,
+        hasMatch
+      });
+
+      return hasMatch;
     });
 
     console.log('VoiceInterface: Pronunciation evaluation:', {
