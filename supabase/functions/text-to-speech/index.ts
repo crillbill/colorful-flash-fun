@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voice_id = "EXAVITQu4vr4xnSDxMaL", model_id = "eleven_multilingual_v2", voice_settings } = await req.json()
+    const { text, voice_id = "EXAVITQu4vr4xnSDxMaL", model_id = "eleven_multilingual_v2" } = await req.json()
     
-    console.log('Text-to-speech request:', { text, voice_id, model_id, voice_settings })
+    console.log('Text-to-speech request:', { text, voice_id, model_id })
 
     if (!text) {
       throw new Error('Text is required')
@@ -31,7 +31,7 @@ serve(async (req) => {
       body: JSON.stringify({
         text: text.trim(),
         model_id,
-        voice_settings: voice_settings || {
+        voice_settings: {
           stability: 0.85,
           similarity_boost: 0.75,
           style: 0.5,
