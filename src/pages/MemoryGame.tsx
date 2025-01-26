@@ -12,7 +12,7 @@ interface MemoryCard {
   imageUrl: string;
   isFlipped: boolean;
   isMatched: boolean;
-  showHebrew: boolean; // New property to determine which side to show
+  showHebrew: boolean;
 }
 
 const initialCards: Omit<MemoryCard, 'id' | 'isFlipped' | 'isMatched' | 'showHebrew'>[] = [
@@ -85,23 +85,28 @@ const MemoryGame = () => {
   }, [isGameStarted]);
 
   const shuffleCards = () => {
-    // Create pairs of cards, one showing Hebrew and one showing image
-    const cardPairs = [...initialCards].flatMap((card, index) => [
-      {
+    // Create pairs of cards, ensuring one Hebrew and one image for each pair
+    const cardPairs = [...initialCards].flatMap((card) => {
+      // First card of the pair shows Hebrew
+      const hebrewCard = {
         ...card,
-        id: index * 2 + 1,
+        id: card.english.length * 2 + 1, // Using length to generate unique IDs
         isFlipped: false,
         isMatched: false,
         showHebrew: true,
-      },
-      {
+      };
+      
+      // Second card of the pair shows image
+      const imageCard = {
         ...card,
-        id: index * 2 + 2,
+        id: card.english.length * 2 + 2,
         isFlipped: false,
         isMatched: false,
         showHebrew: false,
-      },
-    ]);
+      };
+      
+      return [hebrewCard, imageCard];
+    });
 
     // Shuffle the cards
     const shuffledCards = cardPairs.sort(() => Math.random() - 0.5);
