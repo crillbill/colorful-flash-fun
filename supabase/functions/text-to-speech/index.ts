@@ -34,7 +34,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'tts-1',
+        model: 'tts-1-hd',  // Using HD model for higher quality audio
         input: text,
         voice: 'nova', // Using Nova voice which has good multilingual support
         response_format: 'mp3'
@@ -54,7 +54,7 @@ serve(async (req) => {
     console.log('Successfully generated audio for Hebrew text:', {
       text,
       audioLength: arrayBuffer.byteLength,
-      model: 'tts-1',
+      model: 'tts-1-hd',
       voice: 'nova'
     })
 
