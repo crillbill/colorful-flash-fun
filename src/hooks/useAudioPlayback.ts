@@ -15,7 +15,12 @@ export const useAudioPlayback = () => {
         return;
       }
 
-      console.log("AudioPlayback: Initiating audio playback for text:", text);
+      console.log("AudioPlayback: Initiating audio playback for Hebrew text:", {
+        text,
+        textLength: text.length,
+        // Log each character's code point to verify Hebrew characters
+        codePoints: Array.from(text).map(char => char.codePointAt(0))
+      });
       
       // Call the Supabase Edge Function for text-to-speech
       const { data, error } = await supabase.functions.invoke('text-to-speech', {

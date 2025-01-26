@@ -14,7 +14,13 @@ serve(async (req) => {
   try {
     const { text } = await req.json()
     
-    console.log('Text-to-speech request received:', { text })
+    console.log('Text-to-speech request received for Hebrew text:', { 
+      text,
+      textLength: text.length,
+      encoding: 'UTF-8',
+      // Log each character's code point to verify Hebrew characters
+      codePoints: Array.from(text).map(char => char.codePointAt(0))
+    })
 
     if (!text) {
       throw new Error('Text is required')
@@ -29,13 +35,13 @@ serve(async (req) => {
         'xi-api-key': Deno.env.get('ELEVEN_LABS_API_KEY') || '',
       },
       body: JSON.stringify({
-        text: text,
+        text,
         model_id: "eleven_multilingual_v2",
         voice_settings: {
-          stability: 1, // Maximum stability for clearer pronunciation
+          stability: 1,
           similarity_boost: 0.75,
-          style: 0, // Neutral style for better accuracy
-          speed: 0.7 // Slower speed for clearer pronunciation
+          style: 0,
+          speed: 0.7
         }
       }),
     })
@@ -43,14 +49,17 @@ serve(async (req) => {
     if (!response.ok) {
       const errorData = await response.text()
       console.error('ElevenLabs API error:', errorData)
-      throw new Error(`ElevenLabs API error: ${errorData}`)
+      throw new Error(`ElevenLabs API error: ${response.status} ${errorData}`)
     }
 
     // Get audio data and convert to base64
     const arrayBuffer = await response.arrayBuffer()
     const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
 
-    console.log('Successfully generated audio for text:', text)
+    console.log('Successfully generated audio for Hebrew text:', {
+      text,
+      audioLength: arrayBuffer.byteLength
+    })
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),
