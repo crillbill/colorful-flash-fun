@@ -3,7 +3,7 @@ import { Mic, Volume2 } from "lucide-react";
 
 interface CardFrontProps {
   question: string;
-  english: string;  // Add English prop
+  english: string;
   isPlaying: boolean;
   isListening: boolean;
   isProcessing: boolean;
@@ -14,7 +14,7 @@ interface CardFrontProps {
 
 export const CardFront = ({
   question,
-  english,  // Add English prop
+  english,
   isPlaying,
   isListening,
   isProcessing,
@@ -23,10 +23,10 @@ export const CardFront = ({
   onStartListening,
 }: CardFrontProps) => {
   return (
-    <div className="flip-card-front bg-white rounded-lg shadow-lg p-8 flex flex-col items-center justify-between h-full">
+    <div className="flip-card-front bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] rounded-lg shadow-lg p-8 flex flex-col items-center justify-between h-full">
       <div className="text-center space-y-2">
-        <h2 className="text-4xl font-bold mb-2">{question}</h2>
-        <p className="text-sm text-gray-600">{english}</p>
+        <h2 className="text-4xl font-bold mb-2 text-white">{question}</h2>
+        <p className="text-sm text-white/80">{english}</p>
       </div>
       <div className="flex gap-4">
         <Button
@@ -34,23 +34,27 @@ export const CardFront = ({
           size="icon"
           onClick={onPlayAudio}
           disabled={isPlaying}
-          className="hover:bg-accent"
+          className="hover:bg-white/20 bg-white/10 border-white/30"
         >
-          <Volume2 className="h-6 w-6" />
+          <Volume2 className="h-6 w-6 text-white" />
         </Button>
         <Button
           variant={isListening ? "default" : "outline"}
           size="icon"
           onClick={onStartListening}
           disabled={isProcessing}
-          className={`relative ${isListening ? "bg-green-500 hover:bg-green-600" : "hover:bg-accent"}`}
+          className={`relative ${
+            isListening 
+              ? "bg-green-500 hover:bg-green-600" 
+              : "hover:bg-white/20 bg-white/10 border-white/30"
+          }`}
         >
-          <Mic className="h-6 w-6" />
+          <Mic className="h-6 w-6 text-white" />
           {isProcessing && (
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
           )}
           {isListening && timeLeft > 0 && (
-            <div className="absolute -bottom-8 text-sm font-medium">
+            <div className="absolute -bottom-8 text-sm font-medium text-white">
               {timeLeft}s
             </div>
           )}
