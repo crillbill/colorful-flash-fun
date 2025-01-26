@@ -5,17 +5,26 @@ import { FlashCard } from "@/components/FlashCard";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Header1 } from "@/components/ui/header";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 interface Word {
   hebrew: string;
   english: string;
 }
 
-const words: Word[] = [
-  { hebrew: "שלום", english: "Hello" },
-  { hebrew: "מה שלומך היום", english: "How are you today?" },
-  { hebrew: "מתי ארוחת צהריים", english: "What time is lunch?" },
-];
+const fetchPhrases = async () => {
+  const { data, error } = await supabase
+    .from('hebrew_content')
+    .select('hebrew, english')
+    .eq('category', 'phrase');
+
+  if (error) {
+    console.error('Error fetching phrases:', error);
+    throw error;
+  }
+
+  return data as Word[];
+};
 
 const PronunciationChallenge = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -23,6 +32,11 @@ const PronunciationChallenge = () => {
   const [totalAttempts, setTotalAttempts] = useState(0);
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
+
+  const { data: words = [], isLoading, error } = useQuery({
+    queryKey: ['phrases'],
+    queryFn: fetchPhrases,
+  });
 
   useEffect(() => {
     // Check authentication status
@@ -115,8 +129,24 @@ const PronunciationChallenge = () => {
     setCurrentWordIndex(prev => (prev > 0 ? prev - 1 : prev));
   };
 
-  if (!user) {
+  if (!user || isLoading) {
     return null;
+  }
+
+  if (error) {
+    toast.error("Failed to load phrases");
+    return null;
+  }
+
+  if (words.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-darkPurple to-charcoalGray flex items-center justify-center">
+        <div className="text-white text-center">
+          <h1 className="text-2xl font-bold mb-4">No phrases available</h1>
+          <p>Please try again later</p>
+        </div>
+      </div>
+    );
   }
 
   return (
