@@ -14,9 +14,8 @@ interface Word {
 
 const fetchPhrases = async () => {
   const { data, error } = await supabase
-    .from('hebrew_content')
-    .select('hebrew, english')
-    .eq('category', 'phrase');
+    .from('hebrew_phrases')
+    .select('hebrew, english');
 
   if (error) {
     console.error('Error fetching phrases:', error);
