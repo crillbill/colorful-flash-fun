@@ -12,8 +12,13 @@ export const MeterChart = ({ score, maxScore = 100 }: MeterChartProps) => {
   return (
     <div className="w-full max-w-[300px] mx-auto mb-6">
       <div className="relative h-4">
-        {/* Background bar */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#ea384c] via-[#FEC6A1] via-[#FEF7CD] to-[#F2FCE2] shadow-sm" />
+        {/* Background bar with complete gradient from red to yellow to green */}
+        <div 
+          className={cn(
+            "absolute inset-0 rounded-full bg-gradient-to-r from-[#ea384c] via-[#FEF7CD] to-[#F2FCE2] shadow-sm",
+            percentage > 90 && "animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
+          )}
+        />
         
         {/* White overlay that covers the unfilled portion */}
         <div 
@@ -30,7 +35,10 @@ export const MeterChart = ({ score, maxScore = 100 }: MeterChartProps) => {
       
       {/* Score display */}
       <div className="text-center mt-2">
-        <span className="text-sm font-medium text-gray-600">
+        <span className={cn(
+          "text-sm font-medium text-gray-600",
+          percentage > 90 && "font-bold"
+        )}>
           Score: {score}
         </span>
       </div>
