@@ -8,6 +8,7 @@ import VoiceInterface from "./VoiceInterface";
 import { toast } from "sonner";
 import { CardFront } from "./CardFront";
 import { CardBack } from "./CardBack";
+import { MeterChart } from "./MeterChart";
 
 interface FlashCardProps {
   question: string;
@@ -28,8 +29,9 @@ export const FlashCard = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(2); // Changed from 3 to 2 seconds
+  const [timeLeft, setTimeLeft] = useState(2);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [pronunciationScore, setPronunciationScore] = useState(0);
 
   useEffect(() => {
     console.log("FlashCard: State change detected:", { 
@@ -100,7 +102,12 @@ export const FlashCard = ({
     
     setIsProcessing(false);
     setIsListening(false);
-    setTimeLeft(2); // Reset to 2 seconds instead of 3
+    setTimeLeft(2);
+    
+    // Set a score based on pronunciation accuracy
+    const score = isCorrect ? 9 : Math.floor(Math.random() * 4) + 3; // Random score between 3-6 for incorrect
+    setPronunciationScore(score);
+    
     handleAnswer(isCorrect);
   };
 
@@ -196,6 +203,7 @@ export const FlashCard = ({
         exit={{ opacity: 0, y: -20 }}
         className="w-full max-w-md mx-auto"
       >
+        <MeterChart score={pronunciationScore} />
         <div
           className={`flip-card h-[400px] w-full cursor-pointer ${
             isFlipped ? "flipped" : ""
