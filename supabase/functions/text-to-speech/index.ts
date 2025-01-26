@@ -27,7 +27,7 @@ serve(async (req) => {
     }
 
     // Make request to ElevenLabs API
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL`, {
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM`, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
@@ -38,10 +38,10 @@ serve(async (req) => {
         text,
         model_id: "eleven_multilingual_v2",
         voice_settings: {
-          stability: 1,
-          similarity_boost: 0.75,
-          style: 0,
-          speed: 0.7
+          stability: 0.5, // Reduced for more natural speech
+          similarity_boost: 0.85, // Increased for better voice consistency
+          style: 0.35, // Added some style for more expressive speech
+          speed: 0.85 // Slightly faster but still clear
         }
       }),
     })
@@ -58,7 +58,14 @@ serve(async (req) => {
 
     console.log('Successfully generated audio for Hebrew text:', {
       text,
-      audioLength: arrayBuffer.byteLength
+      audioLength: arrayBuffer.byteLength,
+      voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice - better for Hebrew
+      settings: {
+        stability: 0.5,
+        similarity_boost: 0.85,
+        style: 0.35,
+        speed: 0.85
+      }
     })
 
     return new Response(
