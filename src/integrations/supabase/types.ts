@@ -9,29 +9,86 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      hebrew_content: {
+      hebrew_alphabet: {
         Row: {
-          category: Database["public"]["Enums"]["word_category"]
+          created_at: string
+          id: string
+          letter: string
+          name: string
+          sound_description: string | null
+          transliteration: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          letter: string
+          name: string
+          sound_description?: string | null
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          letter?: string
+          name?: string
+          sound_description?: string | null
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hebrew_phrases: {
+        Row: {
           created_at: string
           english: string
           hebrew: string
           id: string
+          transliteration: string | null
           updated_at: string
         }
         Insert: {
-          category: Database["public"]["Enums"]["word_category"]
           created_at?: string
           english: string
           hebrew: string
           id?: string
+          transliteration?: string | null
           updated_at?: string
         }
         Update: {
-          category?: Database["public"]["Enums"]["word_category"]
           created_at?: string
           english?: string
           hebrew?: string
           id?: string
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hebrew_words: {
+        Row: {
+          created_at: string
+          english: string
+          hebrew: string
+          id: string
+          transliteration: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          english: string
+          hebrew: string
+          id?: string
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          english?: string
+          hebrew?: string
+          id?: string
+          transliteration?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -95,7 +152,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      word_category: "word" | "phrase" | "alphabet"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
