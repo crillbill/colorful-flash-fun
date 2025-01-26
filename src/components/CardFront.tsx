@@ -34,7 +34,7 @@ export const CardFront = ({
     <div className="bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] rounded-lg shadow-lg p-8 flex flex-col items-center justify-between h-full">
       <div className="text-center space-y-4">
         <p className="text-lg text-white/90">How to say "{english}"</p>
-        <h2 className="text-4xl font-bold text-white mb-2">{question}</h2>
+        <h2 className="text-4xl font-bold text-white mb-2" dir="rtl">{question}</h2>
       </div>
       <div className="flex items-center gap-4">
         {showPrevious && (
