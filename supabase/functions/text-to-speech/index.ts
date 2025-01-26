@@ -35,8 +35,8 @@ serve(async (req) => {
         'xi-api-key': Deno.env.get('ELEVEN_LABS_API_KEY') || '',
       },
       body: JSON.stringify({
-        text,
-        model_id: "eleven_turbo_v2_5",  // Changed to Turbo v2.5 for better non-English support
+        text: text,
+        model_id: "eleven_multilingual_v2",  // Switched back to multilingual v2 which has better Hebrew support
         voice_settings: {
           stability: 0.3,
           similarity_boost: 0.95,
@@ -60,7 +60,7 @@ serve(async (req) => {
       text,
       audioLength: arrayBuffer.byteLength,
       voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice - better for Hebrew
-      model: "eleven_turbo_v2_5",
+      model: "eleven_multilingual_v2",
       settings: {
         stability: 0.3,
         similarity_boost: 0.95,
