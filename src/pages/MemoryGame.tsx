@@ -203,15 +203,20 @@ const MemoryGame = () => {
               >
                 <Card className="w-full h-40 cursor-pointer">
                   <div className="flip-card-inner w-full h-full">
-                    <div className="flip-card-front w-full h-full flex items-center justify-center bg-primary text-primary-foreground text-2xl font-bold">
+                    <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
                       {card.hebrew}
                     </div>
-                    <div className="flip-card-back w-full h-full">
+                    <div className="flip-card-back w-full h-full relative">
                       <img
                         src={card.imageUrl}
                         alt={card.english}
                         className="w-full h-full object-cover"
                       />
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span className="text-white text-xl font-bold">
+                          {card.english}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Card>
