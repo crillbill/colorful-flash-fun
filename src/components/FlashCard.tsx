@@ -73,7 +73,7 @@ export const FlashCard = ({
   };
 
   const getPhoneticPronunciation = (word: string) => {
-    // Map of Hebrew words to their phonetic pronunciations
+    // Map of Hebrew words to their phonetic pronunciations using English characters
     const pronunciations: { [key: string]: string } = {
       'שלום': 'sha - LOM',
       'מה שלומך': 'ma - shlo - MECH',
@@ -134,7 +134,6 @@ export const FlashCard = ({
             }`}
           >
             <div className="flex flex-col gap-2">
-              <span className="text-gray-600 text-sm">How to pronounce:</span>
               <span className="text-black font-medium text-lg">{getPhoneticPronunciation(question)}</span>
               <span className="text-gray-500 text-xs">Capitalized syllables are stressed</span>
             </div>
