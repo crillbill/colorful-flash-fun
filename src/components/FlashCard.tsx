@@ -112,7 +112,7 @@ export const FlashCard = ({
               showHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
             }`}
           >
-            <span className="text-gray-300">/hə-ˈbrü/</span>
+            <span className="text-black">/hə-ˈbrü/</span>
           </div>
         </div>
 
