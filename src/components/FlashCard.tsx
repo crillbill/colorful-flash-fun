@@ -47,7 +47,6 @@ export const FlashCard = ({
       onIncorrect();
     }
     
-    // Reset states before moving to next word
     setShowHint(false);
     setPronunciationScore(0);
     stopProcessing();
@@ -58,7 +57,6 @@ export const FlashCard = ({
   const handlePronunciationResult = (isCorrect: boolean) => {
     stopProcessing();
     
-    // Updated scoring logic: start at 80 for correct matches
     const score = isCorrect ? 
       Math.floor(Math.random() * 21) + 80 : // 80-100 for correct
       Math.floor(Math.random() * 20) + 60;  // 60-79 for incorrect
@@ -66,14 +64,12 @@ export const FlashCard = ({
     setPronunciationScore(score);
     console.log('FlashCard: Pronunciation score:', { isCorrect, score });
     
-    // Add a slight delay before handling the answer to allow the meter to update
     setTimeout(() => {
       handleAnswer(isCorrect);
     }, 1500);
   };
 
   const getPhoneticPronunciation = (word: string) => {
-    // Map of Hebrew words to their phonetic pronunciations using English characters
     const pronunciations: { [key: string]: string } = {
       'שלום': 'sha - LOM',
       'מה שלומך': 'ma - shlo - MECH',
@@ -118,7 +114,6 @@ export const FlashCard = ({
           />
         </div>
 
-        {/* Hint Section */}
         <div className="relative my-4 text-center">
           <button 
             className={`w-full bg-gray-700/80 backdrop-blur-sm rounded-lg p-4 cursor-pointer transition-all duration-300 ${
