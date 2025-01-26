@@ -59,73 +59,77 @@ const ImportWords = () => {
   };
 
   const validateEnglishText = (text: string): boolean => {
-    // English text should not contain Hebrew characters
-    const hebrewRegex = /[\u0590-\u05FF]/;
-    return !hebrewRegex.test(text);
+    // Basic English text validation - allows letters, numbers, spaces, and basic punctuation
+    const englishRegex = /^[a-zA-Z0-9\s.,!?'"-]+$/;
+    return englishRegex.test(text);
   };
 
   const parseInput = (text: string) => {
     // Split by newlines and filter out empty lines
     const lines = text.split('\n').filter(line => line.trim());
     
-    const parsedEntries = lines.map(line => {
-      // Match content between tabs or multiple spaces, preserving content within quotes
-      const matches = line.match(/(?:[^\t\s"]+|"[^"]*")+/g) || [];
+    const parsedEntries = lines.map((line, index) => {
+      // Match content between tabs or multiple spaces
+      const parts = line.split(/\t+|\s{2,}/).map(part => part.trim());
       
-      // Process each part to handle quotes and preserve special characters
-      const processedParts = matches.map(part => {
-        // Remove surrounding quotes if present, but preserve content exactly as is
-        if ((part.startsWith('"') && part.endsWith('"')) || 
-            (part.startsWith("'") && part.endsWith("'"))) {
-          return part.slice(1, -1);
-        }
-        return part;
-      });
-
       if (selectedTable === "hebrew_alphabet") {
-        const [letter, name, transliteration] = processedParts;
+        const [letter, name, transliteration] = parts;
+        
+        if (!letter || !name) {
+          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Letter[tab]Name[tab]Transliteration`);
+        }
         
         if (!validateHebrewText(letter)) {
-          throw new Error(`Invalid Hebrew letter: ${letter}`);
+          throw new Error(`Line ${index + 1}: Invalid Hebrew letter: "${letter}"`);
         }
         
         return {
-          letter: letter?.trim(),
-          name: name?.trim(),
-          transliteration: transliteration?.trim() || null,
+          letter,
+          name,
+          transliteration: transliteration || null,
         };
       } else if (selectedTable === "hebrew_verbs") {
-        const [hebrew, english, transliteration, root, tense, conjugation] = processedParts;
+        const [hebrew, english, transliteration, root, tense, conjugation] = parts;
+        
+        if (!hebrew || !english) {
+          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew[tab]English[tab]Transliteration[tab]Root[tab]Tense[tab]Conjugation`);
+        }
         
         if (!validateHebrewText(hebrew)) {
-          throw new Error(`Invalid Hebrew text: ${hebrew}`);
+          throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
         }
+        
         if (!validateEnglishText(english)) {
-          throw new Error(`Invalid English text: ${english}`);
+          throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters for English`);
         }
         
         return {
-          hebrew: hebrew?.trim(),
-          english: english?.trim(),
-          transliteration: transliteration?.trim() || null,
-          root: root?.trim() || null,
-          tense: tense?.trim() || null,
-          conjugation: conjugation?.trim() || null,
+          hebrew,
+          english,
+          transliteration: transliteration || null,
+          root: root || null,
+          tense: tense || null,
+          conjugation: conjugation || null,
         };
       } else {
-        const [hebrew, english, transliteration] = processedParts;
+        const [hebrew, english, transliteration] = parts;
+        
+        if (!hebrew || !english) {
+          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew[tab]English[tab]Transliteration`);
+        }
         
         if (!validateHebrewText(hebrew)) {
-          throw new Error(`Invalid Hebrew text: ${hebrew}`);
+          throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
         }
+        
         if (!validateEnglishText(english)) {
-          throw new Error(`Invalid English text: ${english}`);
+          throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters for English`);
         }
         
         return {
-          hebrew: hebrew?.trim(),
-          english: english?.trim(),
-          transliteration: transliteration?.trim() || null,
+          hebrew,
+          english,
+          transliteration: transliteration || null,
         };
       }
     });
@@ -225,8 +229,8 @@ const ImportWords = () => {
                 Paste your content ({getInstructions()})
               </label>
               <p className="text-sm text-muted-foreground">
-                Each entry on a new line. Separate fields with a tab or multiple spaces.
-                Hebrew text must contain Hebrew characters, and English text must not contain Hebrew characters.
+                Each entry on a new line. Separate fields with a tab.
+                Hebrew text must contain Hebrew characters, and English text must contain only English letters, numbers, and basic punctuation.
               </p>
               <Textarea
                 value={inputText}
