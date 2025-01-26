@@ -16,10 +16,19 @@ export const useAudioPlayback = () => {
       }
 
       console.log("AudioPlayback: Initiating audio playback for text:", text);
+      
+      // Call the Supabase Edge Function for text-to-speech
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { 
           text,
-          voice: 'nova'
+          voice_id: "EXAVITQu4vr4xnSDxMaL", // Sarah's voice
+          model_id: "eleven_multilingual_v2", // Best for Hebrew
+          voice_settings: {
+            stability: 0.85, // Higher stability for clearer pronunciation
+            similarity_boost: 0.75, // Balance between consistency and naturalness
+            style: 0.5, // Neutral style
+            speed: 0.85 // Slightly slower for clearer pronunciation
+          }
         },
       });
 

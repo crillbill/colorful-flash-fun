@@ -12,42 +12,43 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voice = 'nova' } = await req.json()
-    console.log('Text-to-speech request:', { text, voice })
+    const { 
+      text, 
+      voice_id = 'EXAVITQu4vr4xnSDxMaL',
+      model_id = 'eleven_multilingual_v2',
+      voice_settings = {
+        stability: 0.85,
+        similarity_boost: 0.75,
+        style: 0.5,
+        speed: 0.85
+      }
+    } = await req.json()
+
+    console.log('Text-to-speech request:', { text, voice_id, model_id, voice_settings })
 
     if (!text) {
       throw new Error('Text is required')
     }
 
-    // Add SSML tags for clearer pronunciation
-    const ssmlText = `<speak>
-      <prosody rate="slow" volume="loud">
-        ${text.split('').join(' ')}
-      </prosody>
-    </speak>`
-
-    // Make request to OpenAI API
-    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+    // Make request to ElevenLabs API
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Accept': 'audio/mpeg',
         'Content-Type': 'application/json',
+        'xi-api-key': Deno.env.get('ELEVEN_LABS_API_KEY') || '',
       },
       body: JSON.stringify({
-        model: 'tts-1',
-        input: text,
-        voice: voice,
-        response_format: 'mp3',
-        speed: 0.83, // Updated speed parameter
-        stability: 0.9, // Increased stability for clearer pronunciation
-        similarity_boost: 0.9 // Increased similarity boost for better enunciation
+        text,
+        model_id,
+        voice_settings
       }),
     })
 
     if (!response.ok) {
       const errorData = await response.text()
-      console.error('OpenAI API error:', errorData)
-      throw new Error(`OpenAI API error: ${errorData}`)
+      console.error('ElevenLabs API error:', errorData)
+      throw new Error(`ElevenLabs API error: ${errorData}`)
     }
 
     // Get audio data and convert to base64
