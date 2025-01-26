@@ -20,8 +20,8 @@ export const MeterChart = ({ score, maxScore = 100 }: MeterChartProps) => {
   const { color, icon } = getScoreDisplay(score);
 
   return (
-    <div className="w-full max-w-md mx-auto mb-6">
-      <div className="relative">
+    <div className="w-full max-w-md mx-auto mb-8 mt-4">
+      <div className="relative pt-8">
         {/* Background semi-circle */}
         <div className="h-32 bg-secondary rounded-t-full overflow-hidden">
           {/* Score gauge */}
