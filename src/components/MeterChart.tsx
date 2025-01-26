@@ -12,12 +12,17 @@ export const MeterChart = ({ score, maxScore = 100 }: MeterChartProps) => {
   return (
     <div className="w-full max-w-[300px] mx-auto mb-6">
       <div className="relative h-4">
-        {/* Background bar with complete gradient from red to yellow to green */}
+        {/* Background bar with gradient: red -> yellow -> light green -> dark green */}
         <div 
           className={cn(
-            "absolute inset-0 rounded-full bg-gradient-to-r from-[#ea384c] via-[#FEF7CD] to-[#4ade80] shadow-sm",
+            "absolute inset-0 rounded-full bg-gradient-to-r from-[#ea384c] via-[#FEF7CD] via-[#90EE90] to-[#228B22]",
             percentage > 90 && "animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
           )}
+          style={{
+            backgroundSize: '200%',
+            backgroundPosition: 'left',
+            backgroundImage: 'linear-gradient(to right, #ea384c 0%, #ea384c 30%, #FEF7CD 30%, #FEF7CD 70%, #90EE90 70%, #228B22 100%)'
+          }}
         />
         
         {/* White overlay that covers the unfilled portion */}
