@@ -54,8 +54,8 @@ export const FlashCard = ({
     stopProcessing();
     
     const score = isCorrect ? 
-      Math.floor(Math.random() * 16) + 85 : // 85-100 for correct
-      Math.floor(Math.random() * 25) + 60;  // 60-84 for close matches
+      Math.floor(Math.random() * 21) + 80 : // 80-100 for correct
+      Math.floor(Math.random() * 20) + 40;  // 40-59 for incorrect
     setPronunciationScore(score);
     
     handleAnswer(isCorrect);
