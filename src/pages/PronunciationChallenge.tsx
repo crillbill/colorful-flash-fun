@@ -116,32 +116,38 @@ const PronunciationChallenge = () => {
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-pureWhite">
       <Header1 />
       <div className="container mx-auto px-4 pt-24">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-center mb-8">
-            Pronunciation Challenge
+          <h1 className="text-4xl font-bold text-center mb-2 text-darkCharcoal">
+            Learn Hebrew
           </h1>
+          <p className="text-xl text-center mb-8 text-mediumGray">
+            Practice your pronunciation skills
+          </p>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <FlashCard
-                question={words[currentWordIndex].hebrew}
-                answer={words[currentWordIndex].english}
-                onNext={handleNext}
-                onCorrect={handleCorrect}
-                onIncorrect={handleIncorrect}
-              />
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                <FlashCard
+                  question={words[currentWordIndex].hebrew}
+                  answer={words[currentWordIndex].english}
+                  onNext={handleNext}
+                  onCorrect={handleCorrect}
+                  onIncorrect={handleIncorrect}
+                />
+              </div>
             </div>
             
-            <div>
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-2xl font-semibold mb-4 text-darkCharcoal">Leaderboard</h2>
               <Leaderboard />
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
