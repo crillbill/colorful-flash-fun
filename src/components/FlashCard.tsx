@@ -75,19 +75,19 @@ export const FlashCard = ({
   const getPhoneticPronunciation = (word: string) => {
     // Map of Hebrew words to their phonetic pronunciations
     const pronunciations: { [key: string]: string } = {
-      'שלום': 'sha-LOM',
-      'מה שלומך': 'ma shlo-MECH',
-      'מה שלומך היום': 'ma shlo-MECH ha-YOM',
-      'בוקר טוב': 'BO-ker tov',
-      'ערב טוב': 'E-rev tov',
-      'לילה טוב': 'LAI-la tov',
-      'תודה': 'to-DA',
-      'בבקשה': 'be-va-ka-SHA',
-      'סליחה': 'sli-CHA',
-      'מתי ארוחת צהריים': 'ma-TAI a-ru-CHAT tzo-ho-RA-yim',
-      'אני רעב': 'a-NI ra-EV',
-      'אני צמא': 'a-NI tza-ME',
-      'להתראות': 'le-hit-ra-OT',
+      'שלום': 'sha - LOM',
+      'מה שלומך': 'ma - shlo - MECH',
+      'מה שלומך היום': 'ma - shlo - MECH - ha - YOM',
+      'בוקר טוב': 'BO - ker - tov',
+      'ערב טוב': 'E - rev - tov',
+      'לילה טוב': 'LAI - la - tov',
+      'תודה': 'to - DA',
+      'בבקשה': 'be - va - ka - SHA',
+      'סליחה': 'sli - CHA',
+      'מתי ארוחת צהריים': 'ma - TAI - a - ru - CHAT - tzo - ho - RA - yim',
+      'אני רעב': 'a - NI - ra - EV',
+      'אני צמא': 'a - NI - tza - ME',
+      'להתראות': 'le - hit - ra - OT',
     };
     return pronunciations[word] || word;
   };
