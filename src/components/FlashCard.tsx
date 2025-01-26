@@ -74,11 +74,11 @@ export const FlashCard = ({
   };
 
   const getPhoneticPronunciation = (word: string) => {
-    // Map of Hebrew words to their phonetic pronunciations
+    // Map of Hebrew words to their phonetic pronunciations of the English translation
     const pronunciations: { [key: string]: string } = {
-      'שלום': 'shalom',
-      'מה שלומך היום': 'ma shlomcha hayom',
-      'מתי ארוחת צהריים': 'matai aruchat tzohorayim',
+      'שלום': 'heh-LOH',
+      'מה שלומך היום': 'how ARE you to-DAY',
+      'מתי ארוחת צהריים': 'what TIME is LUNCH',
     };
     return pronunciations[word] || word;
   };
@@ -101,6 +101,7 @@ export const FlashCard = ({
           <div className="flip-card-inner">
             <CardFront
               question={question}
+              english={answer}
               isPlaying={isPlaying}
               isListening={isListening}
               isProcessing={isProcessing}
