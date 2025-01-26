@@ -36,7 +36,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         text,
-        model_id: "eleven_multilingual_v2",
+        model_id: "eleven_turbo_v2_5",  // Changed to Turbo v2.5 for better non-English support
         voice_settings: {
           stability: 0.3,
           similarity_boost: 0.95,
@@ -60,7 +60,7 @@ serve(async (req) => {
       text,
       audioLength: arrayBuffer.byteLength,
       voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice - better for Hebrew
-      model: "eleven_multilingual_v2",
+      model: "eleven_turbo_v2_5",
       settings: {
         stability: 0.3,
         similarity_boost: 0.95,
