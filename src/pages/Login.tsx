@@ -42,7 +42,28 @@ const Login = () => {
       toast.success("Successfully logged in!");
       navigate("/pronunciation");
     } catch (error: any) {
-      if (error.message === "Invalid login credentials") {
+      if (error.message === "Email not confirmed") {
+        toast.error("Please confirm your email before logging in", {
+          description: "Check your inbox for the confirmation email",
+          action: {
+            label: "Resend email",
+            onClick: async () => {
+              try {
+                const { error } = await supabase.auth.resend({
+                  type: 'signup',
+                  email,
+                });
+                if (error) throw error;
+                toast.success("Confirmation email resent!");
+              } catch (err: any) {
+                toast.error("Failed to resend confirmation email", {
+                  description: err.message
+                });
+              }
+            }
+          }
+        });
+      } else if (error.message === "Invalid login credentials") {
         toast.error("Invalid email or password");
       } else {
         toast.error("Error logging in", {
