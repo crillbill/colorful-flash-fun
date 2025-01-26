@@ -104,8 +104,10 @@ export const FlashCard = ({
     setIsListening(false);
     setTimeLeft(2);
     
-    // Set a score based on pronunciation accuracy
-    const score = isCorrect ? 9 : Math.floor(Math.random() * 4) + 3; // Random score between 3-6 for incorrect
+    // Set a score based on pronunciation accuracy (0-100 scale)
+    const score = isCorrect ? 
+      Math.floor(Math.random() * 21) + 80 : // 80-100 for correct
+      Math.floor(Math.random() * 41) + 20;  // 20-60 for incorrect
     setPronunciationScore(score);
     
     handleAnswer(isCorrect);
