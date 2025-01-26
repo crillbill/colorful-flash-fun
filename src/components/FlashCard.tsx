@@ -206,11 +206,11 @@ export const FlashCard = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="w-full max-w-md mx-auto"
+        className="w-full max-w-sm mx-auto"
       >
         <MeterChart score={pronunciationScore} />
         <div
-          className={`flip-card h-[400px] w-full cursor-pointer ${
+          className={`flip-card h-[300px] w-full cursor-pointer ${
             isFlipped ? "flipped" : ""
           }`}
           onClick={handleFlip}
@@ -231,6 +231,31 @@ export const FlashCard = ({
               onPlayAudio={() => playAudio(answer)}
               onAnswer={handleAnswer}
             />
+          </div>
+        </div>
+        <div className="flex justify-center mt-4">
+          <div className="relative">
+            <Button
+              variant={isListening ? "destructive" : isProcessing ? "secondary" : "default"}
+              size="lg"
+              className="gap-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleStartListening();
+              }}
+              disabled={isListening || isProcessing || isPlaying}
+            >
+              <Mic className={isListening ? "animate-pulse" : ""} />
+              {isProcessing 
+                ? "Processing..." 
+                : isListening 
+                  ? `Speak now... (${timeLeft}s)` 
+                  : `Say "${question}"`}
+            </Button>
+            <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-muted-foreground">
+              {isListening && `${timeLeft} seconds remaining...`}
+              {isProcessing && "Analyzing your pronunciation..."}
+            </div>
           </div>
         </div>
       </motion.div>

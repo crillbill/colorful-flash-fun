@@ -23,38 +23,13 @@ export const CardFront = ({
   onStartListening,
 }: CardFrontProps) => {
   return (
-    <Card className="flip-card-front p-6 flex flex-col items-center justify-between bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
-      <h2 className="text-8xl font-bold text-center">{question}</h2>
-      <div className="flex flex-col gap-4 items-center mt-4">
-        <AudioButton 
-          isPlaying={isPlaying} 
-          onToggle={onPlayAudio}
-          disabled={isListening || isProcessing} 
-        />
-        <div className="relative">
-          <Button
-            variant={isListening ? "destructive" : isProcessing ? "secondary" : "default"}
-            size="lg"
-            className="gap-2"
-            onClick={(e) => {
-              e.stopPropagation();
-              onStartListening();
-            }}
-            disabled={isListening || isProcessing || isPlaying}
-          >
-            <Mic className={isListening ? "animate-pulse" : ""} />
-            {isProcessing 
-              ? "Processing..." 
-              : isListening 
-                ? `Speak now... (${timeLeft}s)` 
-                : `Say "${question}"`}
-          </Button>
-          <div className="absolute -bottom-6 left-0 right-0 text-center text-sm text-muted-foreground">
-            {isListening && `${timeLeft} seconds remaining...`}
-            {isProcessing && "Analyzing your pronunciation..."}
-          </div>
-        </div>
-      </div>
+    <Card className="flip-card-front p-6 flex flex-col items-center justify-between bg-gradient-to-br from-primary/90 to-primary text-primary-foreground h-[300px]">
+      <h2 className="text-6xl font-bold text-center">{question}</h2>
+      <AudioButton 
+        isPlaying={isPlaying} 
+        onToggle={onPlayAudio}
+        disabled={isListening || isProcessing} 
+      />
     </Card>
   );
 };
