@@ -24,8 +24,12 @@ const ImportWords = () => {
     const lines = text.split('\n').filter(line => line.trim());
     
     return lines.map(line => {
-      // Split by tab or multiple spaces
-      const [hebrew, english, transliteration] = line.split(/[\t]+|\s{2,}/);
+      // Split by tab or multiple spaces, handling quotes appropriately
+      const parts = line.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+      const [hebrew, english, transliteration] = parts.map(part => 
+        part.startsWith('"') && part.endsWith('"') ? 
+          part.slice(1, -1) : part
+      );
       
       if (selectedTable === "hebrew_alphabet") {
         return {
@@ -100,6 +104,7 @@ const ImportWords = () => {
               </label>
               <p className="text-sm text-muted-foreground">
                 Each entry on a new line. Separate fields with a tab or multiple spaces.
+                If a field contains quotes, you can either wrap it in single quotes or double quotes.
                 Transliteration is optional.
               </p>
               <Textarea
@@ -107,8 +112,8 @@ const ImportWords = () => {
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder={
                   selectedTable === "hebrew_alphabet"
-                    ? "א\tAlef\tal-ef\nב\tBet\tbet"
-                    : "שלום\tHello\tsha-LOM\nתודה\tThank you\tto-DA"
+                    ? 'א\tAlef\tal-ef\nב\tBet\tbet'
+                    : 'שלום\tHello\tsha-LOM\n"מה שלומך"\t"How are you?"\tma shlo-MECH'
                 }
                 className="min-h-[200px] font-mono"
               />
