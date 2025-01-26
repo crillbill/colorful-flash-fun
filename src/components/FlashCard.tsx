@@ -8,6 +8,7 @@ import { VoiceRecordButton } from "./VoiceRecordButton";
 import VoiceInterface from "./VoiceInterface";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { useVoiceRecording } from "@/hooks/useVoiceRecording";
+import { Button } from "./ui/button";
 
 interface FlashCardProps {
   question: string;
@@ -25,6 +26,7 @@ export const FlashCard = ({
   onIncorrect,
 }: FlashCardProps) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [showHint, setShowHint] = useState(false);
   const [pronunciationScore, setPronunciationScore] = useState(0);
   const { isPlaying, playAudio } = useAudioPlayback();
   const { 
@@ -62,7 +64,7 @@ export const FlashCard = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -71,7 +73,7 @@ export const FlashCard = ({
       >
         <MeterChart score={pronunciationScore} />
         <div
-          className={`flip-card h-[300px] w-full cursor-pointer ${
+          className={`flip-card h-[250px] w-full cursor-pointer ${
             isFlipped ? "flipped" : ""
           }`}
           onClick={handleFlip}
@@ -94,7 +96,27 @@ export const FlashCard = ({
             />
           </div>
         </div>
-        <div className="flex justify-center mt-6">
+
+        {/* Hint Section */}
+        <div className="relative my-4 text-center">
+          <div 
+            className={`bg-gray-700/80 backdrop-blur-sm rounded-lg p-4 cursor-pointer transition-all duration-300 ${
+              showHint ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            }`}
+            onClick={() => setShowHint(true)}
+          >
+            <span className="text-white font-medium">Reveal Hint</span>
+          </div>
+          <div 
+            className={`absolute inset-0 rounded-lg p-4 transition-all duration-300 ${
+              showHint ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          >
+            <span className="text-gray-300">/hə-ˈbrü/</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center">
           <VoiceRecordButton
             isListening={isListening}
             isProcessing={isProcessing}
