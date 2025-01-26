@@ -129,8 +129,8 @@ const ImportWords = () => {
             
             {!isAuthorized && (
               <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 space-y-4" role="alert">
-                <p>You must be authorized to import data. Please log in with the correct account.</p>
-                <Button onClick={handleSignIn} variant="outline">
+                <p>Only admin users (crillbill@gmail.com) can import data. Please log in with the correct account.</p>
+                <Button onClick={handleSignIn}>
                   Sign In
                 </Button>
               </div>
