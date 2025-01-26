@@ -8,6 +8,7 @@ import LetterMatching from "./pages/LetterMatching";
 import MultipleChoice from "./pages/MultipleChoice";
 import SentenceBuilder from "./pages/SentenceBuilder";
 import WordSearch from "./pages/WordSearch";
+import Index from "./pages/Index";
 import { Toaster } from "@/components/ui/toaster";
 
 function App() {
@@ -23,7 +24,7 @@ function App() {
         <Route path="/multiple-choice" element={<MultipleChoice />} />
         <Route path="/sentence-builder" element={<SentenceBuilder />} />
         <Route path="/word-search" element={<WordSearch />} />
-        <Route path="/" element={<PronunciationChallenge />} />
+        <Route path="/" element={<Index />} />
       </Routes>
       <Toaster />
     </Router>
