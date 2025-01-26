@@ -69,14 +69,14 @@ const ImportWords = () => {
     const lines = text.split('\n').filter(line => line.trim());
     
     const parsedEntries = lines.map((line, index) => {
-      // Match content between tabs or multiple spaces
-      const parts = line.split(/\t+|\s{2,}/).map(part => part.trim());
+      // Split by two or more spaces
+      const parts = line.split(/\s{2,}/).map(part => part.trim());
       
       if (selectedTable === "hebrew_alphabet") {
         const [letter, name, transliteration] = parts;
         
         if (!letter || !name) {
-          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Letter[tab]Name[tab]Transliteration`);
+          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Letter  Name  Transliteration`);
         }
         
         if (!validateHebrewText(letter)) {
@@ -92,15 +92,11 @@ const ImportWords = () => {
         const [hebrew, english, transliteration, root, tense, conjugation] = parts;
         
         if (!hebrew || !english) {
-          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew[tab]English[tab]Transliteration[tab]Root[tab]Tense[tab]Conjugation`);
+          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew  English  Transliteration  Root  Tense  Conjugation`);
         }
         
         if (!validateHebrewText(hebrew)) {
           throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
-        }
-        
-        if (!validateEnglishText(english)) {
-          throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters for English`);
         }
         
         return {
@@ -115,15 +111,11 @@ const ImportWords = () => {
         const [hebrew, english, transliteration] = parts;
         
         if (!hebrew || !english) {
-          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew[tab]English[tab]Transliteration`);
+          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew  English  Transliteration`);
         }
         
         if (!validateHebrewText(hebrew)) {
           throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
-        }
-        
-        if (!validateEnglishText(english)) {
-          throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters for English`);
         }
         
         return {
@@ -171,21 +163,21 @@ const ImportWords = () => {
   const getPlaceholderText = () => {
     switch (selectedTable) {
       case "hebrew_alphabet":
-        return 'א\tAlef\tal-ef\nב\tBet\tbet';
+        return 'א  Alef  al-ef\nב  Bet  bet';
       case "hebrew_verbs":
-        return 'ללכת\tto walk\tla-le-chet\tה.ל.כ\tpresent\tsingular masculine';
+        return 'ללכת  to walk  la-le-chet  ה.ל.כ  present  singular masculine';
       default:
-        return 'שלום\tHello\tsha-LOM\nמה שלומך\tHow are you\tma-shlo-MECH';
+        return 'שלום  Hello  sha-LOM\nמה שלומך  How are you  ma-shlo-MECH';
     }
   };
 
   const getInstructions = () => {
     if (selectedTable === "hebrew_verbs") {
-      return "Format: Hebrew[tab]English[tab]Transliteration[tab]Root[tab]Tense[tab]Conjugation";
+      return "Format: Hebrew  English  Transliteration  Root  Tense  Conjugation (separate fields with two spaces)";
     } else if (selectedTable === "hebrew_alphabet") {
-      return "Format: Letter[tab]Name[tab]Transliteration";
+      return "Format: Letter  Name  Transliteration (separate fields with two spaces)";
     } else {
-      return "Format: Hebrew[tab]English[tab]Transliteration";
+      return "Format: Hebrew  English  Transliteration (separate fields with two spaces)";
     }
   };
 
@@ -229,8 +221,8 @@ const ImportWords = () => {
                 Paste your content ({getInstructions()})
               </label>
               <p className="text-sm text-muted-foreground">
-                Each entry on a new line. Separate fields with a tab.
-                Hebrew text must contain Hebrew characters, and English text must contain only English letters, numbers, and basic punctuation.
+                Each entry on a new line. Separate fields with two spaces.
+                Hebrew text must contain Hebrew characters.
               </p>
               <Textarea
                 value={inputText}
