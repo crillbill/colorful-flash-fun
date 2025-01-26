@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Header1 } from "@/components/ui/header";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type TableOption = "hebrew_words" | "hebrew_phrases" | "hebrew_alphabet" | "hebrew_verbs";
 
@@ -21,6 +22,7 @@ const ImportWords = () => {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuthorization();
@@ -65,65 +67,40 @@ const ImportWords = () => {
   };
 
   const parseInput = (text: string) => {
+    setError(null);
     // Split by newlines and filter out empty lines
     const lines = text.split('\n').filter(line => line.trim());
     
     const parsedEntries = lines.map((line, index) => {
+      console.log(`Processing line ${index + 1}:`, line); // Debug log
+      
       // Split by two or more spaces
       const parts = line.split(/\s{2,}/).map(part => part.trim());
+      console.log(`Line ${index + 1} parts:`, parts); // Debug log
       
-      if (selectedTable === "hebrew_alphabet") {
-        const [letter, name, transliteration] = parts;
-        
-        if (!letter || !name) {
-          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Letter  Name  Transliteration`);
-        }
-        
-        if (!validateHebrewText(letter)) {
-          throw new Error(`Line ${index + 1}: Invalid Hebrew letter: "${letter}"`);
-        }
-        
-        return {
-          letter,
-          name,
-          transliteration: transliteration || null,
-        };
-      } else if (selectedTable === "hebrew_verbs") {
-        const [hebrew, english, transliteration, root, tense, conjugation] = parts;
-        
-        if (!hebrew || !english) {
-          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew  English  Transliteration  Root  Tense  Conjugation`);
-        }
-        
-        if (!validateHebrewText(hebrew)) {
-          throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
-        }
-        
-        return {
-          hebrew,
-          english,
-          transliteration: transliteration || null,
-          root: root || null,
-          tense: tense || null,
-          conjugation: conjugation || null,
-        };
-      } else {
-        const [hebrew, english, transliteration] = parts;
-        
-        if (!hebrew || !english) {
-          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew  English  Transliteration`);
-        }
-        
-        if (!validateHebrewText(hebrew)) {
-          throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
-        }
-        
-        return {
-          hebrew,
-          english,
-          transliteration: transliteration || null,
-        };
+      if (parts.length < 2) {
+        throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces. Found: "${line}"`);
       }
+
+      const [hebrew, english, transliteration] = parts;
+      
+      if (!hebrew || !english) {
+        throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew  English  Transliteration`);
+      }
+      
+      if (!validateHebrewText(hebrew)) {
+        throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
+      }
+
+      if (!validateEnglishText(english)) {
+        throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters. Only English letters, numbers, and basic punctuation are allowed.`);
+      }
+      
+      return {
+        hebrew,
+        english,
+        transliteration: transliteration || null,
+      };
     });
 
     return parsedEntries;
@@ -137,6 +114,9 @@ const ImportWords = () => {
 
     try {
       setIsLoading(true);
+      setError(null);
+      
+      console.log("Input text:", inputText); // Debug log
       const entries = parseInput(inputText);
       
       if (entries.length === 0) {
@@ -144,16 +124,19 @@ const ImportWords = () => {
         return;
       }
 
-      const { error } = await supabase
+      console.log("Parsed entries:", entries); // Debug log
+
+      const { error: supabaseError } = await supabase
         .from(selectedTable)
         .insert(entries);
 
-      if (error) throw error;
+      if (supabaseError) throw supabaseError;
 
       toast.success(`Successfully imported ${entries.length} entries`);
       setInputText("");
     } catch (error: any) {
       console.error('Import error:', error);
+      setError(error.message);
       toast.error(error.message || "Failed to import entries");
     } finally {
       setIsLoading(false);
@@ -165,20 +148,14 @@ const ImportWords = () => {
       case "hebrew_alphabet":
         return 'א  Alef  al-ef\nב  Bet  bet';
       case "hebrew_verbs":
-        return 'ללכת  to walk  la-le-chet  ה.ל.כ  present  singular masculine';
+        return 'ללכת  to walk  la-le-chet';
       default:
-        return 'שלום  Hello  sha-LOM\nמה שלומך  How are you  ma-shlo-MECH';
+        return 'שלום  Hello  sha-LOM\nתודה  Thank you  to-DA';
     }
   };
 
   const getInstructions = () => {
-    if (selectedTable === "hebrew_verbs") {
-      return "Format: Hebrew  English  Transliteration  Root  Tense  Conjugation (separate fields with two spaces)";
-    } else if (selectedTable === "hebrew_alphabet") {
-      return "Format: Letter  Name  Transliteration (separate fields with two spaces)";
-    } else {
-      return "Format: Hebrew  English  Transliteration (separate fields with two spaces)";
-    }
+    return "Format: Hebrew  English  Transliteration (separate fields with TWO spaces)";
   };
 
   return (
@@ -198,6 +175,12 @@ const ImportWords = () => {
               </div>
             )}
             
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Select Table</label>
               <Select
@@ -221,9 +204,12 @@ const ImportWords = () => {
                 Paste your content ({getInstructions()})
               </label>
               <p className="text-sm text-muted-foreground">
-                Each entry on a new line. Separate fields with two spaces.
-                Hebrew text must contain Hebrew characters.
+                Each entry on a new line. Separate Hebrew, English, and Transliteration with TWO spaces.
+                Example format:
               </p>
+              <pre className="bg-gray-100 p-2 rounded text-sm">
+                {getPlaceholderText()}
+              </pre>
               <Textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
