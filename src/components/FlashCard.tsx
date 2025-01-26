@@ -62,7 +62,6 @@ export const FlashCard = ({
       Math.floor(Math.random() * 20) + 60;  // 60-79 for incorrect
     
     setPronunciationScore(score);
-    console.log('FlashCard: Pronunciation score:', { isCorrect, score });
     
     setTimeout(() => {
       handleAnswer(isCorrect);
@@ -121,7 +120,7 @@ export const FlashCard = ({
             }`}
             onClick={() => setShowHint(true)}
           >
-            <span className="text-white font-medium">Reveal Pronunciation</span>
+            <span className="text-white font-medium">Show Pronunciation Guide</span>
           </button>
           <div 
             className={`absolute inset-0 bg-white rounded-lg p-4 transition-all duration-300 ${
