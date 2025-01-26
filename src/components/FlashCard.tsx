@@ -94,7 +94,7 @@ export const FlashCard = ({
               isListening={isListening}
               isProcessing={isProcessing}
               timeLeft={timeLeft}
-              onPlayAudio={() => playAudio(getPhoneticPronunciation(question))}
+              onPlayAudio={() => playAudio(question)}
               onStartListening={startListening}
             />
             <CardBack
