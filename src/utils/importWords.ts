@@ -404,7 +404,7 @@ const wordsList: WordEntry[] = [
   { english: "simple", hebrew: "פשוט", transliteration: "pa-shut" },
   { english: "open", hebrew: "פתוח", transliteration: "pa-tu-akh" },
   { english: "color", hebrew: "צבע", transliteration: "tse-va" },
-  { english: "I.D.F. (Israel Defense Forces)", hebrew: "צה"ל", transliteration: "tsa-hal" },
+  { english: "I.D.F. (Israel Defense Forces)", hebrew: 'צה"ל', transliteration: "tsa-hal" },
   { english: "yellow", hebrew: "צהוב", transliteration: "tsa-hov" },
   { english: "noon", hebrew: "צהריים", transliteration: "tso-ho-ra-yim" },
   { english: "bird", hebrew: "ציפור", transliteration: "tsi-por" },
