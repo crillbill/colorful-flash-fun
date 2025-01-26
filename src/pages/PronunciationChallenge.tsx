@@ -12,7 +12,7 @@ interface Word {
 }
 
 const words: Word[] = [
-  { hebrew: "שלום", english: "Hello" },
+  { hebrew: "שלום", english: "shalom" },
   { hebrew: "מה שלומך היום", english: "How are you today?" },
   { hebrew: "מתי ארוחת צהריים", english: "What time is lunch?" },
 ];
