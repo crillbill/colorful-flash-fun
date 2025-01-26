@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      hebrew_content: {
+        Row: {
+          category: Database["public"]["Enums"]["word_category"]
+          created_at: string
+          english: string
+          hebrew: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["word_category"]
+          created_at?: string
+          english: string
+          hebrew: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["word_category"]
+          created_at?: string
+          english?: string
+          hebrew?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pronunciation_leaderboard: {
         Row: {
           attempts: number
@@ -68,7 +95,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      word_category: "word" | "phrase" | "alphabet"
     }
     CompositeTypes: {
       [_ in never]: never
