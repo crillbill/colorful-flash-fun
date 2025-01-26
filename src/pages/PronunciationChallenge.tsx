@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FlashCard } from "@/components/FlashCard";
-import { ScoreDisplay } from "@/components/ScoreDisplay";
-import { ProgressBar } from "@/components/ProgressBar";
 import { Leaderboard } from "@/components/Leaderboard";
 import { Header1 } from "@/components/ui/header";
 import { useNavigate } from "react-router-dom";
@@ -128,16 +126,6 @@ const PronunciationChallenge = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <ScoreDisplay 
-                correct={correctCount} 
-                total={totalAttempts} 
-              />
-              
-              <ProgressBar 
-                current={currentWordIndex + 1} 
-                total={words.length} 
-              />
-
               <FlashCard
                 question={words[currentWordIndex].hebrew}
                 answer={words[currentWordIndex].english}
