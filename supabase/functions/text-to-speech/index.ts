@@ -36,12 +36,12 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         text,
-        model_id: "eleven_multilingual_v2",
+        model_id: "eleven_multilingual_sts_v2", // Using Speech-to-Speech model for better pronunciation
         voice_settings: {
-          stability: 0.5, // Reduced for more natural speech
-          similarity_boost: 0.85, // Increased for better voice consistency
-          style: 0.35, // Added some style for more expressive speech
-          speed: 0.85 // Slightly faster but still clear
+          stability: 0.3, // Lower stability for more natural variations
+          similarity_boost: 0.95, // Higher similarity for consistent voice
+          style: 0.5, // Moderate style for expressive speech
+          speed: 0.8 // Slightly slower for clearer pronunciation
         }
       }),
     })
@@ -60,11 +60,12 @@ serve(async (req) => {
       text,
       audioLength: arrayBuffer.byteLength,
       voiceId: "21m00Tcm4TlvDq8ikWAM", // Rachel voice - better for Hebrew
+      model: "eleven_multilingual_sts_v2",
       settings: {
-        stability: 0.5,
-        similarity_boost: 0.85,
-        style: 0.35,
-        speed: 0.85
+        stability: 0.3,
+        similarity_boost: 0.95,
+        style: 0.5,
+        speed: 0.8
       }
     })
 
