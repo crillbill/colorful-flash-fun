@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,20 @@ const ImportWords = () => {
   const [selectedTable, setSelectedTable] = useState<TableOption>("hebrew_words");
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  useEffect(() => {
+    checkAuthorization();
+  }, []);
+
+  const checkAuthorization = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email === 'crillbill@gmail.com') {
+      setIsAuthorized(true);
+    } else {
+      toast.error("You are not authorized to import data");
+    }
+  };
 
   const parseInput = (text: string) => {
     // Split by newlines and filter out empty lines
@@ -56,6 +70,11 @@ const ImportWords = () => {
   };
 
   const handleImport = async () => {
+    if (!isAuthorized) {
+      toast.error("You are not authorized to import data");
+      return;
+    }
+
     try {
       setIsLoading(true);
       const entries = parseInput(inputText);
@@ -88,6 +107,12 @@ const ImportWords = () => {
         <div className="max-w-2xl mx-auto space-y-8">
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">Import Hebrew Content</h2>
+            
+            {!isAuthorized && (
+              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+                <p>You must be authorized to import data. Please log in with the correct account.</p>
+              </div>
+            )}
             
             <div className="space-y-2">
               <label className="text-sm font-medium">Select Table</label>
@@ -129,7 +154,7 @@ const ImportWords = () => {
 
             <Button 
               onClick={handleImport}
-              disabled={isLoading || !inputText.trim()}
+              disabled={isLoading || !inputText.trim() || !isAuthorized}
             >
               {isLoading ? "Importing..." : "Import"}
             </Button>
