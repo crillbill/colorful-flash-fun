@@ -21,8 +21,8 @@ export const CardFront = ({
   onStartListening,
 }: CardFrontProps) => {
   return (
-    <Card className="flip-card-front p-8 flex flex-col items-center justify-between bg-gradient-to-br from-vividPurple to-magentaPink text-white h-[300px] shadow-lg rounded-xl border-2 border-white/20">
-      <h2 className="text-6xl font-bold text-center tracking-wide animate-float">{question}</h2>
+    <Card className="flip-card-front p-8 flex flex-col items-center justify-between bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white h-[300px] shadow-xl rounded-xl border-2 border-white/30">
+      <h2 className="text-6xl font-bold text-center tracking-wide animate-float text-white">{question}</h2>
       <AudioButton 
         isPlaying={isPlaying} 
         onToggle={onPlayAudio}
