@@ -10,24 +10,30 @@ import SentenceBuilder from "./pages/SentenceBuilder";
 import WordSearch from "./pages/WordSearch";
 import Index from "./pages/Index";
 import { Toaster } from "@/components/ui/toaster";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Create a client
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/pronunciation" element={<PronunciationChallenge />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/flashcards" element={<Flashcards />} />
-        <Route path="/greetings" element={<Greetings />} />
-        <Route path="/hangman" element={<Hangman />} />
-        <Route path="/letter-matching" element={<LetterMatching />} />
-        <Route path="/multiple-choice" element={<MultipleChoice />} />
-        <Route path="/sentence-builder" element={<SentenceBuilder />} />
-        <Route path="/word-search" element={<WordSearch />} />
-        <Route path="/" element={<Index />} />
-      </Routes>
-      <Toaster />
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Routes>
+          <Route path="/pronunciation" element={<PronunciationChallenge />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/flashcards" element={<Flashcards />} />
+          <Route path="/greetings" element={<Greetings />} />
+          <Route path="/hangman" element={<Hangman />} />
+          <Route path="/letter-matching" element={<LetterMatching />} />
+          <Route path="/multiple-choice" element={<MultipleChoice />} />
+          <Route path="/sentence-builder" element={<SentenceBuilder />} />
+          <Route path="/word-search" element={<WordSearch />} />
+          <Route path="/" element={<Index />} />
+        </Routes>
+        <Toaster />
+      </Router>
+    </QueryClientProvider>
   );
 }
 
