@@ -18,6 +18,10 @@ const Login = () => {
       toast.error("Please fill in all fields");
       return false;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Please enter a valid email address");
+      return false;
+    }
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters");
       return false;
@@ -65,8 +69,10 @@ const Login = () => {
             onClick: handleResendConfirmation
           }
         });
-      } else if (error.message === "Invalid login credentials") {
-        toast.error("Invalid email or password");
+      } else if (error.message.includes("Invalid login credentials")) {
+        toast.error("Invalid email or password", {
+          description: "Please check your credentials and try again"
+        });
       } else {
         toast.error("Error logging in", {
           description: error.message
