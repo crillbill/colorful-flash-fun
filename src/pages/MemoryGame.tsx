@@ -74,6 +74,7 @@ const MemoryGame = () => {
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
   const [timer, setTimer] = useState<number>(0);
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
+  const [isProcessingMatch, setIsProcessingMatch] = useState<boolean>(false);
 
   useEffect(() => {
     if (isGameStarted) {
@@ -115,32 +116,35 @@ const MemoryGame = () => {
     setMatchedPairs(0);
     setTimer(0);
     setIsGameStarted(true);
+    setIsProcessingMatch(false);
   };
 
   const handleCardClick = (cardId: number) => {
-    if (!isGameStarted) return;
-    
-    const clickedCard = cards.find((card) => card.id === cardId);
     if (
-      !clickedCard ||
-      flippedCards.includes(cardId) ||
-      clickedCard.isMatched ||
-      flippedCards.length >= 2
+      !isGameStarted ||
+      isProcessingMatch || // Prevent new card flips while processing a match
+      flippedCards.includes(cardId)
     ) {
       return;
     }
 
-    const newFlippedCards = [...flippedCards, cardId];
-    setFlippedCards(newFlippedCards);
+    const clickedCard = cards.find((card) => card.id === cardId);
+    if (!clickedCard || clickedCard.isMatched) {
+      return;
+    }
 
-    if (newFlippedCards.length === 2) {
-      const [firstId, secondId] = newFlippedCards;
+    // If we already have one card flipped
+    if (flippedCards.length === 1) {
+      setIsProcessingMatch(true);
+      const [firstId] = flippedCards;
       const firstCard = cards.find((card) => card.id === firstId);
-      const secondCard = cards.find((card) => card.id === secondId);
 
-      if (firstCard && secondCard && firstCard.hebrew === secondCard.hebrew) {
+      setFlippedCards([firstId, cardId]);
+
+      if (firstCard && firstCard.hebrew === clickedCard.hebrew) {
+        // Match found
         setCards(cards.map((card) =>
-          card.id === firstId || card.id === secondId
+          card.id === firstId || card.id === cardId
             ? { ...card, isMatched: true }
             : card
         ));
@@ -153,11 +157,17 @@ const MemoryGame = () => {
           return newMatchedPairs;
         });
         setFlippedCards([]);
+        setIsProcessingMatch(false);
       } else {
+        // No match, flip cards back after delay
         setTimeout(() => {
           setFlippedCards([]);
+          setIsProcessingMatch(false);
         }, 1000);
       }
+    } else {
+      // First card flip
+      setFlippedCards([cardId]);
     }
   };
 
