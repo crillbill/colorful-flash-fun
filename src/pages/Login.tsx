@@ -25,6 +25,21 @@ const Login = () => {
     return true;
   };
 
+  const handleResendConfirmation = async () => {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+      });
+      if (error) throw error;
+      toast.success("Confirmation email has been resent!");
+    } catch (error: any) {
+      toast.error("Failed to resend confirmation email", {
+        description: error.message
+      });
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -47,20 +62,7 @@ const Login = () => {
           description: "Check your inbox for the confirmation email",
           action: {
             label: "Resend email",
-            onClick: async () => {
-              try {
-                const { error } = await supabase.auth.resend({
-                  type: 'signup',
-                  email,
-                });
-                if (error) throw error;
-                toast.success("Confirmation email resent!");
-              } catch (err: any) {
-                toast.error("Failed to resend confirmation email", {
-                  description: err.message
-                });
-              }
-            }
+            onClick: handleResendConfirmation
           }
         });
       } else if (error.message === "Invalid login credentials") {
