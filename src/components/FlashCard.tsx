@@ -47,7 +47,12 @@ export const FlashCard = ({
       onIncorrect();
     }
     
+    // Reset states before moving to next word
     setIsFlipped(false);
+    setShowHint(false);
+    setPronunciationScore(0);
+    stopProcessing();
+    
     onNext();
   };
 
