@@ -505,8 +505,7 @@ const wordsList: WordEntry[] = [
   { english: "apple", hebrew: "תפוח", transliteration: "ta-pu-akh" },
   { english: "potato", hebrew: "תפוח אדמה", transliteration: "ta-pu-akh a-da-ma" },
   { english: "ceiling", hebrew: "תקרה", transliteration: "tik-ra" },
-  { english: "spinach", hebrew: "תרד", transliteration: "te-red" },
-  { english: "answer", hebrew: "תשובה", transliteration: "tshu-va" }
+  { english: "spinach", hebrew: "תרד", transliteration: "te-red" }
 ];
 
 export const importWords = async () => {
