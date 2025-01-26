@@ -8,7 +8,6 @@ import { VoiceRecordButton } from "./VoiceRecordButton";
 import VoiceInterface from "./VoiceInterface";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { useVoiceRecording } from "@/hooks/useVoiceRecording";
-import { Button } from "./ui/button";
 
 interface FlashCardProps {
   question: string;
@@ -66,11 +65,11 @@ export const FlashCard = ({
   const getPhoneticPronunciation = (word: string) => {
     // Map of Hebrew words to their phonetic pronunciations
     const pronunciations: { [key: string]: string } = {
-      'שלום': '/sha-ˈlom/',
-      'מה שלומך היום': '/ma shlo-ˈmekh ha-ˈyom/',
-      'מתי ארוחת צהריים': '/ma-ˈtai a-ru-ˈkhat tso-ho-ra-ˈyim/',
+      'שלום': 'shalom',
+      'מה שלומך היום': 'ma shlomcha hayom',
+      'מתי ארוחת צהריים': 'matai aruchat tzohorayim',
     };
-    return pronunciations[word] || '/pronunciation not available/';
+    return pronunciations[word] || word;
   };
 
   return (
@@ -95,7 +94,7 @@ export const FlashCard = ({
               isListening={isListening}
               isProcessing={isProcessing}
               timeLeft={timeLeft}
-              onPlayAudio={() => playAudio(question)}
+              onPlayAudio={() => playAudio(getPhoneticPronunciation(question))}
               onStartListening={startListening}
             />
             <CardBack
