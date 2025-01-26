@@ -39,7 +39,7 @@ serve(async (req) => {
         'xi-api-key': Deno.env.get('ELEVEN_LABS_API_KEY') || '',
       },
       body: JSON.stringify({
-        text,
+        text: text.trim(),
         model_id,
         voice_settings
       }),

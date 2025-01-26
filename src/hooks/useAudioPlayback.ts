@@ -20,7 +20,7 @@ export const useAudioPlayback = () => {
       // Call the Supabase Edge Function for text-to-speech
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { 
-          text,
+          text: text.trim(), // Ensure text is trimmed
           voice_id: "EXAVITQu4vr4xnSDxMaL", // Sarah's voice
           model_id: "eleven_multilingual_v2", // Best for Hebrew
           voice_settings: {
