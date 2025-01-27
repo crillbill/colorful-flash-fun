@@ -11,6 +11,9 @@ export const ScoreDisplay = ({ correct, total }: ScoreDisplayProps) => {
       <p className="text-lg font-semibold">
         Score: {correct}/{total} ({percentage}%)
       </p>
+      <p className="text-sm text-red-500 mt-1">
+        When The Last Balloon Pops, You Lose!
+      </p>
     </div>
   );
 };
