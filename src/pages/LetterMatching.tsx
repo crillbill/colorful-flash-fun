@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Puzzle, Shuffle, Check, X } from "lucide-react";
+import { Puzzle, Shuffle, Check, X, Eye } from "lucide-react";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ const LetterMatching = () => {
   const [options, setOptions] = useState<string[]>([]);
   const [gameActive, setGameActive] = useState(false);
   const [letters, setLetters] = useState<HebrewLetter[]>([]);
+  const [showHint, setShowHint] = useState(false);
   const totalRounds = 10;
 
   useEffect(() => {
@@ -66,6 +67,7 @@ const LetterMatching = () => {
     setScore({ correct: 0, total: 0 });
     setCurrentRound(1);
     setGameActive(true);
+    setShowHint(false);
     setupRound();
     toast("New game started! Match the Hebrew letters to their names.");
   };
@@ -75,8 +77,8 @@ const LetterMatching = () => {
     
     const randomLetter = letters[Math.floor(Math.random() * letters.length)];
     setCurrentLetter(randomLetter);
+    setShowHint(false);
     
-    // Create options including the correct name and some wrong ones
     const wrongOptions = letters
       .filter(l => l.name !== randomLetter.name)
       .map(l => l.name);
@@ -142,10 +144,20 @@ const LetterMatching = () => {
                     </div>
                     {currentLetter.transliteration && (
                       <div 
-                        className="text-xl mb-2"
+                        className="relative text-xl mb-2 cursor-pointer"
+                        onClick={() => setShowHint(!showHint)}
                         style={{ color: colors.secondaryPurple }}
                       >
-                        Transliteration: {currentLetter.transliteration}
+                        {showHint ? (
+                          <>
+                            Transliteration: {currentLetter.transliteration}
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2 p-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                            <Eye className="h-4 w-4" />
+                            Click to reveal transliteration
+                          </div>
+                        )}
                       </div>
                     )}
                     {currentLetter.sound_description && (
