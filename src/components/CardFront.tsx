@@ -31,20 +31,28 @@ export const CardFront = ({
   showNext = true,
 }: CardFrontProps) => {
   return (
-    <div className="bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] rounded-lg shadow-lg p-8 flex flex-col items-center justify-between h-full">
-      <div className="text-center space-y-4">
-        <p className="text-lg text-white/90">How to say "{english}" in Hebrew</p>
-        <h2 className="text-4xl font-bold text-white mb-2" dir="rtl">{question}</h2>
+    <div className="bg-gradient-to-br from-softPurple via-softBlue to-softPink rounded-xl shadow-lg p-8 flex flex-col items-center justify-between h-full border border-white/20 backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
+      <div className="text-center space-y-6 w-full">
+        <p className="text-lg text-gray-600 font-medium">
+          How to say <span className="text-primaryPurple">"{english}"</span> in Hebrew
+        </p>
+        <h2 
+          className="text-5xl font-bold bg-gradient-to-r from-vividPurple to-magentaPink text-transparent bg-clip-text mb-2 transition-all duration-300 hover:scale-105" 
+          dir="rtl"
+        >
+          {question}
+        </h2>
       </div>
-      <div className="flex items-center gap-4">
+      
+      <div className="flex items-center gap-4 mt-6">
         {showPrevious && (
           <Button
             variant="outline"
             size="icon"
             onClick={onPrevious}
-            className="hover:bg-white/20 bg-white/10 border-white/30"
+            className="bg-white/80 hover:bg-white border-primaryPurple/20 hover:border-primaryPurple transition-all duration-300"
           >
-            <ArrowLeft className="h-6 w-6 text-white" />
+            <ArrowLeft className="h-6 w-6 text-primaryPurple" />
           </Button>
         )}
         <Button
@@ -52,18 +60,18 @@ export const CardFront = ({
           size="icon"
           onClick={onPlayAudio}
           disabled={isPlaying}
-          className="hover:bg-white/20 bg-white/10 border-white/30"
+          className="bg-white/80 hover:bg-white border-primaryPurple/20 hover:border-primaryPurple transition-all duration-300"
         >
-          <Volume2 className="h-6 w-6 text-white" />
+          <Volume2 className="h-6 w-6 text-primaryPurple" />
         </Button>
         {showNext && (
           <Button
             variant="outline"
             size="icon"
             onClick={onNext}
-            className="hover:bg-white/20 bg-white/10 border-white/30"
+            className="bg-white/80 hover:bg-white border-primaryPurple/20 hover:border-primaryPurple transition-all duration-300"
           >
-            <ArrowRight className="h-6 w-6 text-white" />
+            <ArrowRight className="h-6 w-6 text-primaryPurple" />
           </Button>
         )}
       </div>
