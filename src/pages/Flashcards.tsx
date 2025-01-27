@@ -33,27 +33,23 @@ const Flashcards = () => {
       if (category === "all") {
         return ["all"];
       }
-      
-      // If selecting a specific category while "all" is selected,
-      // remove "all" and add only this category
+
+      // If "all" is currently selected and user selects another category,
+      // remove "all" and select only the new category
       if (prev.includes("all")) {
         return [category];
       }
-      
-      let newCategories = [...prev];
-      
-      // Toggle the selected category
-      if (newCategories.includes(category)) {
-        newCategories = newCategories.filter(c => c !== category);
-      } else {
-        newCategories.push(category);
-      }
-      
+
+      // Handle toggling of other categories
+      const newCategories = prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category];
+
       // If no categories are selected, default to "all"
       if (newCategories.length === 0) {
         return ["all"];
       }
-      
+
       return newCategories;
     });
   };
