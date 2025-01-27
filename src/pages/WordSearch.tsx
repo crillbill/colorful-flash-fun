@@ -214,7 +214,7 @@ const WordSearch = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-4 pt-24">
-        <div className="mx-auto space-y-3 max-w-[400px]">
+        <div className="mx-auto space-y-3 max-w-[450px]"> {/* Increased max-width to accommodate larger cells */}
           <h1 className="text-3xl font-bold text-center">Hebrew Word Search</h1>
           
           <div className="flex justify-between items-center">
@@ -232,7 +232,7 @@ const WordSearch = () => {
                 {row.map((letter, colIndex) => (
                   <button
                     key={`${rowIndex}-${colIndex}`}
-                    className={`w-[38px] h-[38px] text-lg font-bold flex items-center justify-center transition-colors
+                    className={`w-[42px] h-[42px] text-xl font-bold flex items-center justify-center transition-colors
                       ${isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 
                         isCellFound(rowIndex, colIndex) ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent-foreground/10'}`}
                     onClick={() => handleCellClick(rowIndex, colIndex)}
