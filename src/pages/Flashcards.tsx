@@ -29,19 +29,23 @@ const Flashcards = () => {
 
   const handleCategoryChange = (category: Category) => {
     setSelectedCategories(prev => {
-      // If selecting "all", uncheck everything else
+      // If selecting "all", clear other selections
       if (category === "all") {
         return ["all"];
       }
       
-      let newCategories = prev.filter(c => c !== "all");
+      // If selecting a specific category while "all" is selected,
+      // remove "all" and add only this category
+      if (prev.includes("all")) {
+        return [category];
+      }
+      
+      let newCategories = [...prev];
       
       // Toggle the selected category
       if (newCategories.includes(category)) {
-        // Remove the category if it's already selected
         newCategories = newCategories.filter(c => c !== category);
       } else {
-        // Add the category if it's not selected
         newCategories.push(category);
       }
       
