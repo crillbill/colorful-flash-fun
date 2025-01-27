@@ -4,7 +4,7 @@ import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Header1 } from "@/components/ui/header";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Square, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,34 +29,28 @@ const Flashcards = () => {
 
   const handleCategoryChange = (category: Category) => {
     setSelectedCategories(prev => {
-      // If clicking "all", clear other selections
       if (category === "all") {
         return ["all"];
       }
 
-      // If "all" is selected and clicking another category
-      if (prev.includes("all")) {
-        return [category];
-      }
-
-      // For other categories
-      const isCurrentlySelected = prev.includes(category);
       let newCategories: Category[];
 
-      if (isCurrentlySelected) {
-        // Remove the category if it's already selected
-        newCategories = prev.filter(c => c !== category);
+      if (prev.includes("all")) {
+        // If "all" is currently selected and user clicks another category,
+        // switch to just that category
+        newCategories = [category];
       } else {
-        // Add the category if it's not selected
-        newCategories = [...prev, category];
+        if (prev.includes(category)) {
+          // Remove the category if it's already selected
+          newCategories = prev.filter(c => c !== category);
+        } else {
+          // Add the category if it's not selected
+          newCategories = [...prev, category];
+        }
       }
 
-      // If no categories remain selected, default to "all"
-      if (newCategories.length === 0) {
-        return ["all"];
-      }
-
-      return newCategories;
+      // If no categories are selected, default to "all"
+      return newCategories.length === 0 ? ["all"] : newCategories;
     });
   };
 
@@ -157,6 +151,50 @@ const Flashcards = () => {
   const isGameComplete = currentCardIndex === flashcardsData.length - 1 && 
                         totalAnswered === flashcardsData.length;
 
+  const CustomCheckbox = ({ 
+    id, 
+    checked, 
+    onChange, 
+    label, 
+    disabled 
+  }: { 
+    id: string; 
+    checked: boolean; 
+    onChange: () => void; 
+    label: string;
+    disabled?: boolean;
+  }) => (
+    <div className="flex items-center space-x-2">
+      <button
+        type="button"
+        id={id}
+        onClick={onChange}
+        disabled={disabled}
+        className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-colors
+          ${checked 
+            ? 'bg-primary border-primary text-primary-foreground' 
+            : 'border-primary bg-transparent'
+          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-primary/10'}`
+        }
+        aria-checked={checked}
+        role="checkbox"
+      >
+        {checked ? (
+          <X className="h-3 w-3" />
+        ) : (
+          <Square className="h-3 w-3 opacity-0" />
+        )}
+      </button>
+      <label
+        htmlFor={id}
+        className={`text-sm font-medium leading-none select-none
+          ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+      >
+        {label}
+      </label>
+    </div>
+  );
+
   return (
     <>
       <Header1 />
@@ -171,80 +209,40 @@ const Flashcards = () => {
                     Select Categories
                   </label>
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="all"
-                        checked={selectedCategories.includes("all")}
-                        onCheckedChange={() => handleCategoryChange("all")}
-                        className="cursor-pointer"
-                      />
-                      <label
-                        htmlFor="all"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
-                      >
-                        All Categories
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="words"
-                        checked={selectedCategories.includes("words")}
-                        onCheckedChange={() => handleCategoryChange("words")}
-                        disabled={selectedCategories.includes("all")}
-                        className="cursor-pointer"
-                      />
-                      <label
-                        htmlFor="words"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
-                      >
-                        Words
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="phrases"
-                        checked={selectedCategories.includes("phrases")}
-                        onCheckedChange={() => handleCategoryChange("phrases")}
-                        disabled={selectedCategories.includes("all")}
-                        className="cursor-pointer"
-                      />
-                      <label
-                        htmlFor="phrases"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
-                      >
-                        Phrases
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="verbs"
-                        checked={selectedCategories.includes("verbs")}
-                        onCheckedChange={() => handleCategoryChange("verbs")}
-                        disabled={selectedCategories.includes("all")}
-                        className="cursor-pointer"
-                      />
-                      <label
-                        htmlFor="verbs"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
-                      >
-                        Verbs
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="alphabet"
-                        checked={selectedCategories.includes("alphabet")}
-                        onCheckedChange={() => handleCategoryChange("alphabet")}
-                        disabled={selectedCategories.includes("all")}
-                        className="cursor-pointer"
-                      />
-                      <label
-                        htmlFor="alphabet"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
-                      >
-                        Alphabet
-                      </label>
-                    </div>
+                    <CustomCheckbox 
+                      id="all"
+                      checked={selectedCategories.includes("all")}
+                      onChange={() => handleCategoryChange("all")}
+                      label="All Categories"
+                    />
+                    <CustomCheckbox 
+                      id="words"
+                      checked={selectedCategories.includes("words")}
+                      onChange={() => handleCategoryChange("words")}
+                      disabled={selectedCategories.includes("all")}
+                      label="Words"
+                    />
+                    <CustomCheckbox 
+                      id="phrases"
+                      checked={selectedCategories.includes("phrases")}
+                      onChange={() => handleCategoryChange("phrases")}
+                      disabled={selectedCategories.includes("all")}
+                      label="Phrases"
+                    />
+                    <CustomCheckbox 
+                      id="verbs"
+                      checked={selectedCategories.includes("verbs")}
+                      onChange={() => handleCategoryChange("verbs")}
+                      disabled={selectedCategories.includes("all")}
+                      label="Verbs"
+                    />
+                    <CustomCheckbox 
+                      id="alphabet"
+                      checked={selectedCategories.includes("alphabet")}
+                      onChange={() => handleCategoryChange("alphabet")}
+                      disabled={selectedCategories.includes("all")}
+                      label="Alphabet"
+                    />
                   </div>
                 </div>
                 <Button 
