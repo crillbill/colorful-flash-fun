@@ -8,6 +8,7 @@ export class WebRTCManager {
   private audioChunks: Blob[] = [];
   private isRecording: boolean = false;
   private mediaStream: MediaStream | null = null;
+  private recordingStartTime: number = 0;
 
   constructor(private onMessage: (message: any) => void) {
     console.log('WebRTCManager: Initializing');
@@ -18,8 +19,6 @@ export class WebRTCManager {
   getMediaStream(): MediaStream | null {
     return this.mediaStream;
   }
-
-  // ... keep existing code (initialize method)
 
   async initialize(requireMicrophone: boolean = true) {
     try {
@@ -63,10 +62,17 @@ export class WebRTCManager {
 
         this.mediaRecorder.onstop = async () => {
           try {
+            const recordingDuration = Date.now() - this.recordingStartTime;
+            if (recordingDuration < 100) { // 100ms = 0.1 seconds
+              throw new Error("Recording too short. Please speak for at least 0.1 seconds.");
+            }
+
             const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
             const base64Audio = await this.blobToBase64(audioBlob);
             
             console.log('WebRTCManager: Processing audio data');
+            console.log('WebRTCManager: Audio duration:', recordingDuration, 'ms');
+            
             const response = await supabase.functions.invoke('voice-to-text', {
               body: { audio: base64Audio }
             });
@@ -162,6 +168,7 @@ export class WebRTCManager {
           throw new Error('MediaRecorder not initialized. Did you call initialize with requireMicrophone=true?');
         }
         this.audioChunks = [];
+        this.recordingStartTime = Date.now();
         this.mediaRecorder.start();
         this.isRecording = true;
         console.log('WebRTCManager: Started recording');
