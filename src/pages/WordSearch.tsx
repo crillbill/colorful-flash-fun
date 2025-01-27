@@ -214,7 +214,7 @@ const WordSearch = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-8 pt-24">
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-6">
           <h1 className="text-4xl font-bold text-center">Hebrew Word Search</h1>
           
           <div className="flex justify-between items-center">
@@ -226,12 +226,12 @@ const WordSearch = () => {
 
           <ProgressBar current={score.found} total={score.total} />
 
-          <div className="grid grid-cols-10 gap-1 bg-accent p-4 rounded-lg">
+          <div className="grid grid-cols-10 gap-0.5 bg-accent p-2 rounded-lg">
             {grid.map((row, rowIndex) => (
               row.map((letter, colIndex) => (
                 <button
                   key={`${rowIndex}-${colIndex}`}
-                  className={`w-10 h-10 text-lg font-bold rounded flex items-center justify-center transition-colors
+                  className={`w-9 h-9 text-lg font-bold rounded flex items-center justify-center transition-colors
                     ${isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 
                       isCellFound(rowIndex, colIndex) ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent-foreground/10'}`}
                   onClick={() => handleCellClick(rowIndex, colIndex)}
