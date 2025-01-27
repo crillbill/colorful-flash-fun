@@ -93,7 +93,7 @@ const WordSearch = () => {
 
   const isCellFound = (row: number, col: number) => {
     return wordLocations.some(wl => 
-      wl.found && wl.cells.some(cell => cell.row === row && cell.col === cell)
+      wl.found && wl.cells.some(cell => cell.row === row && cell.col === col)
     );
   };
 
