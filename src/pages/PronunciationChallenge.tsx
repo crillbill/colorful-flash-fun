@@ -16,7 +16,6 @@ interface Word {
 
 const fetchContent = async (category: Category): Promise<Word[]> => {
   if (category === "all") {
-    // Fetch from all tables and combine results
     const [phrases, words, letters, verbs] = await Promise.all([
       supabase.from('hebrew_phrases').select('hebrew, english, transliteration'),
       supabase.from('hebrew_words').select('hebrew, english, transliteration'),
@@ -24,7 +23,6 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
       supabase.from('hebrew_verbs').select('hebrew, english, transliteration')
     ]);
 
-    // Combine and type the results
     const allContent: Word[] = [
       ...(phrases.data || []),
       ...(words.data || []),
@@ -32,11 +30,9 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
       ...(verbs.data || [])
     ];
 
-    // Shuffle the combined results
     return allContent.sort(() => Math.random() - 0.5);
   }
 
-  // Now letters table has the same structure as other tables
   const tableMap = {
     phrases: 'hebrew_phrases',
     words: 'hebrew_words',
@@ -218,3 +214,4 @@ const PronunciationChallenge = () => {
   );
 };
 
+export default PronunciationChallenge;
