@@ -5,6 +5,8 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 type WordLocation = {
   word: string;
@@ -12,12 +14,13 @@ type WordLocation = {
   cells: { row: number; col: number }[];
 };
 
+type HebrewWord = {
+  hebrew: string;
+  english: string;
+  transliteration: string | null;
+};
+
 const GRID_SIZE = 10;
-const WORDS = [
-  { hebrew: "שלום", translation: "Shalom (Hello)" },
-  { hebrew: "תודה", translation: "Toda (Thank you)" },
-  { hebrew: "אהבה", translation: "Ahava (Love)" },
-];
 
 const HEBREW_LETTERS = [
   'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י',
@@ -25,15 +28,42 @@ const HEBREW_LETTERS = [
   'ש', 'ת'
 ];
 
+const fetchWords = async () => {
+  const { data, error } = await supabase
+    .from('hebrew_words')
+    .select('hebrew, english, transliteration')
+    .limit(3);
+  
+  if (error) {
+    throw error;
+  }
+  
+  return data;
+};
+
 const WordSearch = () => {
   const colors = useColors();
   const [grid, setGrid] = useState<string[][]>([]);
   const [wordLocations, setWordLocations] = useState<WordLocation[]>([]);
   const [selectedCells, setSelectedCells] = useState<{ row: number; col: number }[]>([]);
-  const [score, setScore] = useState({ found: 0, total: WORDS.length });
+  const [score, setScore] = useState({ found: 0, total: 0 });
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
 
+  const { data: words = [], isLoading, error } = useQuery({
+    queryKey: ['wordSearchWords'],
+    queryFn: fetchWords,
+  });
+
+  useEffect(() => {
+    if (words.length > 0) {
+      setScore(prev => ({ ...prev, total: words.length }));
+      generateGrid();
+    }
+  }, [words]);
+
   const generateGrid = () => {
+    if (!words.length) return;
+
     // Initialize empty grid
     const newGrid = Array(GRID_SIZE).fill(null).map(() =>
       Array(GRID_SIZE).fill(null)
@@ -42,7 +72,7 @@ const WordSearch = () => {
     // Place words in random positions
     const newWordLocations: WordLocation[] = [];
 
-    WORDS.forEach(({ hebrew }) => {
+    words.forEach(({ hebrew }) => {
       let placed = false;
       let attempts = 0;
       const maxAttempts = 100;
@@ -117,11 +147,11 @@ const WordSearch = () => {
     );
 
     if (wordLocation) {
-      const word = WORDS.find(w => w.hebrew === wordLocation.word);
+      const word = words.find(w => w.hebrew === wordLocation.word);
       if (word) {
         toast({
           title: "Word Found!",
-          description: `You found ${word.hebrew} (${word.translation})`,
+          description: `You found ${word.hebrew} (${word.english})`,
         });
         setWordLocations(prev => 
           prev.map(wl => 
@@ -149,7 +179,6 @@ const WordSearch = () => {
   };
 
   useEffect(() => {
-    generateGrid();
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -173,6 +202,14 @@ const WordSearch = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  if (isLoading) {
+    return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">Error loading words</div>;
+  }
+
   return (
     <>
       <Header1 />
@@ -183,7 +220,7 @@ const WordSearch = () => {
           <div className="flex justify-between items-center">
             <ScoreDisplay correct={score.found} total={score.total} />
             <div className="text-lg font-semibold">
-              Time: {formatTime(timeLeft)}
+              Time: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </div>
           </div>
 
@@ -208,7 +245,7 @@ const WordSearch = () => {
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold">Words to Find:</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {WORDS.map(({ hebrew, translation }) => {
+              {words.map(({ hebrew, english, transliteration }) => {
                 const isFound = wordLocations.find(wl => wl.word === hebrew)?.found;
                 return (
                   <div
@@ -218,7 +255,10 @@ const WordSearch = () => {
                     }`}
                   >
                     <div className="text-lg font-bold">{hebrew}</div>
-                    <div className="text-sm">{translation}</div>
+                    <div className="text-sm">{english}</div>
+                    {transliteration && (
+                      <div className="text-xs opacity-75">{transliteration}</div>
+                    )}
                   </div>
                 );
               })}
@@ -229,7 +269,7 @@ const WordSearch = () => {
             <Button
               onClick={() => {
                 setTimeLeft(300);
-                setScore({ found: 0, total: WORDS.length });
+                setScore({ found: 0, total: words.length });
                 generateGrid();
               }}
             >
