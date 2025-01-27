@@ -213,25 +213,25 @@ const WordSearch = () => {
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white p-8 pt-24">
-        <div className="max-w-3xl mx-auto space-y-4">
-          <h1 className="text-4xl font-bold text-center">Hebrew Word Search</h1>
+      <div className="min-h-screen bg-white p-4 pt-24">
+        <div className="max-w-xl mx-auto space-y-3">
+          <h1 className="text-3xl font-bold text-center">Hebrew Word Search</h1>
           
           <div className="flex justify-between items-center">
             <ScoreDisplay correct={score.found} total={score.total} />
-            <div className="text-lg font-semibold">
+            <div className="text-base font-semibold">
               Time: {formatTime(timeLeft)}
             </div>
           </div>
 
           <ProgressBar current={score.found} total={score.total} />
 
-          <div className="grid grid-cols-10 gap-0 bg-accent p-1 rounded-lg">
+          <div className="grid grid-cols-10 gap-0 bg-accent p-0.5 rounded-md">
             {grid.map((row, rowIndex) => (
               row.map((letter, colIndex) => (
                 <button
                   key={`${rowIndex}-${colIndex}`}
-                  className={`w-8 h-8 text-base font-bold rounded-sm flex items-center justify-center transition-colors
+                  className={`w-7 h-7 text-sm font-bold rounded-none flex items-center justify-center transition-colors
                     ${isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 
                       isCellFound(rowIndex, colIndex) ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent-foreground/10'}`}
                   onClick={() => handleCellClick(rowIndex, colIndex)}
@@ -242,19 +242,19 @@ const WordSearch = () => {
             ))}
           </div>
 
-          <div className="space-y-3">
-            <h2 className="text-2xl font-semibold">Words to Find:</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Words to Find:</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {words.map(({ hebrew, english, transliteration }) => {
                 const isFound = wordLocations.find(wl => wl.word === hebrew)?.found;
                 return (
                   <div
                     key={hebrew}
-                    className={`p-3 rounded-lg ${
+                    className={`p-2 rounded-md ${
                       isFound ? 'bg-green-500 text-white' : 'bg-card'
                     }`}
                   >
-                    <div className="text-lg font-bold">{hebrew}</div>
+                    <div className="text-base font-bold">{hebrew}</div>
                     <div className="text-sm">{english}</div>
                     {transliteration && (
                       <div className="text-xs opacity-75">{transliteration}</div>
