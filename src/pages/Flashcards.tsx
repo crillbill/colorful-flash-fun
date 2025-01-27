@@ -85,8 +85,16 @@ const Flashcards = () => {
       if (fetchAll || categories.includes("alphabet")) {
         const { data: alphabet } = await supabase
           .from("hebrew_alphabet")
-          .select("letter as hebrew, name as english, transliteration");
-        if (alphabet) allData.push(...alphabet);
+          .select("letter, name, transliteration");
+        
+        // Transform alphabet data to match FlashcardData interface
+        const transformedAlphabet = alphabet?.map(letter => ({
+          hebrew: letter.letter,
+          english: letter.name,
+          transliteration: letter.transliteration
+        }));
+        
+        if (transformedAlphabet) allData.push(...transformedAlphabet);
       }
 
       const shuffledData = allData.sort(() => Math.random() - 0.5).slice(0, MAX_CARDS);
