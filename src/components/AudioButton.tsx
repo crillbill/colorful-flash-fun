@@ -9,16 +9,19 @@ interface AudioButtonProps {
 
 export const AudioButton = ({ isPlaying, onToggle, disabled }: AudioButtonProps) => {
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={(e) => {
-        e.stopPropagation();
-        onToggle();
-      }}
-      disabled={disabled}
-    >
-      {isPlaying ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
-    </Button>
+    <div onClick={(e) => e.stopPropagation()}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onToggle();
+        }}
+        disabled={disabled}
+      >
+        {isPlaying ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
+      </Button>
+    </div>
   );
 };
