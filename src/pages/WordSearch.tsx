@@ -20,7 +20,7 @@ type HebrewWord = {
   transliteration: string | null;
 };
 
-const GRID_SIZE = 10;
+const GRID_SIZE = 12; // Changed from 10 to 12
 
 const HEBREW_LETTERS = [
   'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י',
@@ -64,7 +64,7 @@ const WordSearch = () => {
   const generateGrid = () => {
     if (!words.length) return;
 
-    // Initialize empty grid
+    // Initialize empty grid with new size
     const newGrid = Array(GRID_SIZE).fill(null).map(() =>
       Array(GRID_SIZE).fill(null)
     );
