@@ -36,20 +36,15 @@ const Flashcards = () => {
       let newCategories: Category[];
 
       if (prev.includes("all")) {
-        // If "all" is currently selected and user clicks another category,
-        // switch to just that category
         newCategories = [category];
       } else {
         if (prev.includes(category)) {
-          // Remove the category if it's already selected
           newCategories = prev.filter(c => c !== category);
         } else {
-          // Add the category if it's not selected
           newCategories = [...prev, category];
         }
       }
 
-      // If no categories are selected, default to "all"
       return newCategories.length === 0 ? ["all"] : newCategories;
     });
   };
@@ -59,7 +54,6 @@ const Flashcards = () => {
     try {
       let allData: FlashcardData[] = [];
 
-      // If "all" is selected or no categories selected, fetch from all tables
       const fetchAll = categories.includes("all") || categories.length === 0;
 
       if (fetchAll || categories.includes("words")) {
@@ -88,7 +82,6 @@ const Flashcards = () => {
           .from("hebrew_alphabet")
           .select("letter, name, transliteration");
         
-        // Transform alphabet data to match FlashcardData interface
         const transformedAlphabet = alphabet?.map(letter => ({
           hebrew: letter.letter,
           english: letter.name,
@@ -174,7 +167,9 @@ const Flashcards = () => {
           ${checked 
             ? 'bg-primary border-primary text-primary-foreground' 
             : 'border-primary bg-transparent'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-primary/10'}`
+          } ${disabled 
+            ? 'opacity-50' 
+            : 'hover:bg-primary/10 cursor-pointer'}`
         }
         aria-checked={checked}
         role="checkbox"
@@ -188,7 +183,7 @@ const Flashcards = () => {
       <label
         htmlFor={id}
         className={`text-sm font-medium leading-none select-none
-          ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+          ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
       >
         {label}
       </label>
