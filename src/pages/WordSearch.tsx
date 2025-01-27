@@ -33,7 +33,7 @@ const fetchWords = async () => {
   const { data, error } = await supabase
     .from('hebrew_words')
     .select('hebrew, english, transliteration')
-    .limit(3);
+    .limit(10);  // Changed from 3 to 10
   
   if (error) {
     throw error;
@@ -41,6 +41,8 @@ const fetchWords = async () => {
   
   return data;
 };
+
+// ... keep existing code (useState declarations and useQuery hook)
 
 const WordSearch = () => {
   const colors = useColors();
@@ -215,7 +217,7 @@ const WordSearch = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-4 pt-24">
-        <div className="mx-auto space-y-3 max-w-[500px]"> {/* Increased max-width to accommodate wider grid */}
+        <div className="mx-auto space-y-3 max-w-[500px]">
           <h1 className="text-3xl font-bold text-center">Hebrew Word Search</h1>
           
           <div className="flex justify-between items-center">
