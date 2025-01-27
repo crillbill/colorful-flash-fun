@@ -232,7 +232,7 @@ const WordSearch = () => {
                 {row.map((letter, colIndex) => (
                   <button
                     key={`${rowIndex}-${colIndex}`}
-                    className={`w-[38px] h-[38px] text-sm font-bold flex items-center justify-center transition-colors
+                    className={`w-[38px] h-[38px] text-lg font-bold flex items-center justify-center transition-colors
                       ${isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 
                         isCellFound(rowIndex, colIndex) ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent-foreground/10'}`}
                     onClick={() => handleCellClick(rowIndex, colIndex)}
