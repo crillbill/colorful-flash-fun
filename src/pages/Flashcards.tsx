@@ -29,23 +29,29 @@ const Flashcards = () => {
 
   const handleCategoryChange = (category: Category) => {
     setSelectedCategories(prev => {
-      // If selecting "all", clear other selections
+      // If clicking "all", clear other selections
       if (category === "all") {
         return ["all"];
       }
 
-      // If "all" is currently selected and user selects another category,
-      // remove "all" and select only the new category
+      // If "all" is selected and clicking another category
       if (prev.includes("all")) {
         return [category];
       }
 
-      // Handle toggling of other categories
-      const newCategories = prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category];
+      // For other categories
+      const isCurrentlySelected = prev.includes(category);
+      let newCategories: Category[];
 
-      // If no categories are selected, default to "all"
+      if (isCurrentlySelected) {
+        // Remove the category if it's already selected
+        newCategories = prev.filter(c => c !== category);
+      } else {
+        // Add the category if it's not selected
+        newCategories = [...prev, category];
+      }
+
+      // If no categories remain selected, default to "all"
       if (newCategories.length === 0) {
         return ["all"];
       }
