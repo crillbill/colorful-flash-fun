@@ -20,7 +20,11 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
     const [phrases, words, letters, verbs] = await Promise.all([
       supabase.from('hebrew_phrases').select('hebrew, english, transliteration'),
       supabase.from('hebrew_words').select('hebrew, english, transliteration'),
-      supabase.from('hebrew_alphabet').select('letter as hebrew, name as english, transliteration'),
+      supabase.from('hebrew_alphabet').select('letter, name, transliteration').transform((letter) => ({
+        hebrew: letter.letter,
+        english: letter.name,
+        transliteration: letter.transliteration
+      })),
       supabase.from('hebrew_verbs').select('hebrew, english, transliteration')
     ]);
 
@@ -28,7 +32,11 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
     const allContent: Word[] = [
       ...(phrases.data || []),
       ...(words.data || []),
-      ...(letters.data || []),
+      ...(letters.data?.map(letter => ({
+        hebrew: letter.hebrew,
+        english: letter.english,
+        transliteration: letter.transliteration
+      })) || []),
       ...(verbs.data || [])
     ];
 
@@ -36,26 +44,30 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
     return allContent.sort(() => Math.random() - 0.5);
   }
 
-  // Map category to table name and handle specific selections
-  const tableMap = {
-    phrases: 'hebrew_phrases' as const,
-    words: 'hebrew_words' as const,
-    letters: 'hebrew_alphabet' as const,
-    verbs: 'hebrew_verbs' as const
-  };
-
-  const table = tableMap[category];
-  
   // Special handling for letters table which has different column names
   if (category === 'letters') {
     const { data, error } = await supabase
-      .from(table)
-      .select('letter as hebrew, name as english, transliteration');
+      .from('hebrew_alphabet')
+      .select('letter, name, transliteration');
     
     if (error) throw error;
-    return data || [];
+    
+    return (data || []).map(letter => ({
+      hebrew: letter.letter,
+      english: letter.name,
+      transliteration: letter.transliteration
+    }));
   }
 
+  // Handle other categories
+  const tableMap = {
+    phrases: 'hebrew_phrases',
+    words: 'hebrew_words',
+    verbs: 'hebrew_verbs'
+  } as const;
+
+  const table = tableMap[category as keyof typeof tableMap];
+  
   const { data, error } = await supabase
     .from(table)
     .select('hebrew, english, transliteration');
