@@ -11,10 +11,10 @@ import { CategorySelector, type Category } from "@/components/CategorySelector";
 interface Word {
   hebrew: string;
   english: string;
-  transliteration?: string;
+  transliteration?: string | null;
 }
 
-const fetchContent = async (category: Category) => {
+const fetchContent = async (category: Category): Promise<Word[]> => {
   if (category === "all") {
     // Fetch from all tables and combine results
     const [phrases, words, letters, verbs] = await Promise.all([
@@ -24,7 +24,8 @@ const fetchContent = async (category: Category) => {
       supabase.from('hebrew_verbs').select('hebrew, english, transliteration')
     ]);
 
-    const allContent = [
+    // Combine and type the results
+    const allContent: Word[] = [
       ...(phrases.data || []),
       ...(words.data || []),
       ...(letters.data || []),
@@ -37,10 +38,10 @@ const fetchContent = async (category: Category) => {
 
   // Map category to table name and handle specific selections
   const tableMap = {
-    phrases: 'hebrew_phrases',
-    words: 'hebrew_words',
-    letters: 'hebrew_alphabet',
-    verbs: 'hebrew_verbs'
+    phrases: 'hebrew_phrases' as const,
+    words: 'hebrew_words' as const,
+    letters: 'hebrew_alphabet' as const,
+    verbs: 'hebrew_verbs' as const
   };
 
   const table = tableMap[category];
@@ -52,7 +53,7 @@ const fetchContent = async (category: Category) => {
       .select('letter as hebrew, name as english, transliteration');
     
     if (error) throw error;
-    return data;
+    return data || [];
   }
 
   const { data, error } = await supabase
@@ -60,7 +61,7 @@ const fetchContent = async (category: Category) => {
     .select('hebrew, english, transliteration');
 
   if (error) throw error;
-  return data;
+  return data || [];
 };
 
 const PronunciationChallenge = () => {
@@ -68,7 +69,7 @@ const PronunciationChallenge = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [totalAttempts, setTotalAttempts] = useState(0);
   const [user, setUser] = useState<any>(null);
-  const [category, setCategory] = useState<Category>("phrases");
+  const [category, setCategory] = useState<Category>("words");
   const navigate = useNavigate();
 
   const { data: words = [], isLoading, error } = useQuery({
