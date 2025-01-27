@@ -34,17 +34,18 @@ const Flashcards = () => {
         return ["all"];
       }
       
-      // If selecting a specific category while "all" is checked, uncheck "all"
       let newCategories = prev.filter(c => c !== "all");
       
       // Toggle the selected category
       if (newCategories.includes(category)) {
+        // Remove the category if it's already selected
         newCategories = newCategories.filter(c => c !== category);
       } else {
+        // Add the category if it's not selected
         newCategories.push(category);
       }
       
-      // If no categories selected, default to "all"
+      // If no categories are selected, default to "all"
       if (newCategories.length === 0) {
         return ["all"];
       }
