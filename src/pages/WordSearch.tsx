@@ -7,6 +7,7 @@ import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 type WordLocation = {
   word: string;
@@ -42,8 +43,6 @@ const fetchWords = async () => {
   return data;
 };
 
-// ... keep existing code (useState declarations and useQuery hook)
-
 const WordSearch = () => {
   const colors = useColors();
   const [grid, setGrid] = useState<string[][]>([]);
@@ -51,6 +50,7 @@ const WordSearch = () => {
   const [selectedCells, setSelectedCells] = useState<{ row: number; col: number }[]>([]);
   const [score, setScore] = useState({ found: 0, total: 0 });
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
+  const [revealedWords, setRevealedWords] = useState<Set<string>>(new Set());
 
   const { data: words = [], isLoading, error } = useQuery({
     queryKey: ['wordSearchWords'],
@@ -205,6 +205,14 @@ const WordSearch = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const handleRevealWord = (word: string) => {
+    setRevealedWords(prev => {
+      const newSet = new Set(prev);
+      newSet.add(word);
+      return newSet;
+    });
+  };
+
   if (isLoading) {
     return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">Loading...</div>;
   }
@@ -252,19 +260,38 @@ const WordSearch = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {words.map(({ hebrew, english, transliteration }) => {
                 const isFound = wordLocations.find(wl => wl.word === hebrew)?.found;
+                const isRevealed = revealedWords.has(hebrew);
                 return (
-                  <div
-                    key={hebrew}
-                    className={`p-2 rounded-md ${
-                      isFound ? 'bg-green-500 text-white' : 'bg-card'
-                    }`}
-                  >
-                    <div className="text-base font-bold">{hebrew}</div>
-                    <div className="text-sm">{english}</div>
-                    {transliteration && (
-                      <div className="text-xs opacity-75">{transliteration}</div>
-                    )}
-                  </div>
+                  <Popover key={hebrew}>
+                    <PopoverTrigger asChild>
+                      <div
+                        className={`p-2 rounded-md cursor-pointer transition-all
+                          ${isFound ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent/50'}`}
+                        onClick={() => !isFound && handleRevealWord(hebrew)}
+                      >
+                        <div className="text-base font-bold">
+                          {isFound || isRevealed ? hebrew : '• • • •'}
+                        </div>
+                        {(isFound || isRevealed) && (
+                          <>
+                            <div className="text-sm">{english}</div>
+                            {transliteration && (
+                              <div className="text-xs opacity-75">{transliteration}</div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48">
+                      <div className="space-y-1">
+                        <p className="font-semibold">{hebrew}</p>
+                        <p className="text-sm">{english}</p>
+                        {transliteration && (
+                          <p className="text-xs text-muted-foreground">{transliteration}</p>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 );
               })}
             </div>
@@ -275,6 +302,7 @@ const WordSearch = () => {
               onClick={() => {
                 setTimeLeft(300);
                 setScore({ found: 0, total: words.length });
+                setRevealedWords(new Set());
                 generateGrid();
               }}
             >
