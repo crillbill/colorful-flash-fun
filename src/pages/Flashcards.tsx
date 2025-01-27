@@ -163,16 +163,17 @@ const Flashcards = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Select Categories
                   </label>
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                     <div className="flex items-center space-x-2">
                       <Checkbox 
                         id="all"
                         checked={selectedCategories.includes("all")}
                         onCheckedChange={() => handleCategoryChange("all")}
+                        className="cursor-pointer"
                       />
                       <label
                         htmlFor="all"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
                       >
                         All Categories
                       </label>
@@ -183,10 +184,11 @@ const Flashcards = () => {
                         checked={selectedCategories.includes("words")}
                         onCheckedChange={() => handleCategoryChange("words")}
                         disabled={selectedCategories.includes("all")}
+                        className="cursor-pointer"
                       />
                       <label
                         htmlFor="words"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
                       >
                         Words
                       </label>
@@ -197,10 +199,11 @@ const Flashcards = () => {
                         checked={selectedCategories.includes("phrases")}
                         onCheckedChange={() => handleCategoryChange("phrases")}
                         disabled={selectedCategories.includes("all")}
+                        className="cursor-pointer"
                       />
                       <label
                         htmlFor="phrases"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
                       >
                         Phrases
                       </label>
@@ -211,10 +214,11 @@ const Flashcards = () => {
                         checked={selectedCategories.includes("verbs")}
                         onCheckedChange={() => handleCategoryChange("verbs")}
                         disabled={selectedCategories.includes("all")}
+                        className="cursor-pointer"
                       />
                       <label
                         htmlFor="verbs"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
                       >
                         Verbs
                       </label>
@@ -225,10 +229,11 @@ const Flashcards = () => {
                         checked={selectedCategories.includes("alphabet")}
                         onCheckedChange={() => handleCategoryChange("alphabet")}
                         disabled={selectedCategories.includes("all")}
+                        className="cursor-pointer"
                       />
                       <label
                         htmlFor="alphabet"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
                       >
                         Alphabet
                       </label>
