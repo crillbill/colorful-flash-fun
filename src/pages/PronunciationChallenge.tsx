@@ -6,6 +6,7 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { Header1 } from "@/components/ui/header";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { CategorySelector, type Category } from "@/components/CategorySelector";
 
 interface Word {
   hebrew: string;
@@ -13,17 +14,53 @@ interface Word {
   transliteration?: string;
 }
 
-const fetchPhrases = async () => {
-  const { data, error } = await supabase
-    .from('hebrew_phrases')
-    .select('hebrew, english, transliteration');
+const fetchContent = async (category: Category) => {
+  if (category === "all") {
+    // Fetch from all tables and combine results
+    const [phrases, words, letters, verbs] = await Promise.all([
+      supabase.from('hebrew_phrases').select('hebrew, english, transliteration'),
+      supabase.from('hebrew_words').select('hebrew, english, transliteration'),
+      supabase.from('hebrew_alphabet').select('letter as hebrew, name as english, transliteration'),
+      supabase.from('hebrew_verbs').select('hebrew, english, transliteration')
+    ]);
 
-  if (error) {
-    console.error('Error fetching phrases:', error);
-    throw error;
+    const allContent = [
+      ...(phrases.data || []),
+      ...(words.data || []),
+      ...(letters.data || []),
+      ...(verbs.data || [])
+    ];
+
+    // Shuffle the combined results
+    return allContent.sort(() => Math.random() - 0.5);
   }
 
-  return data as Word[];
+  // Map category to table name and handle specific selections
+  const tableMap = {
+    phrases: 'hebrew_phrases',
+    words: 'hebrew_words',
+    letters: 'hebrew_alphabet',
+    verbs: 'hebrew_verbs'
+  };
+
+  const table = tableMap[category];
+  
+  // Special handling for letters table which has different column names
+  if (category === 'letters') {
+    const { data, error } = await supabase
+      .from(table)
+      .select('letter as hebrew, name as english, transliteration');
+    
+    if (error) throw error;
+    return data;
+  }
+
+  const { data, error } = await supabase
+    .from(table)
+    .select('hebrew, english, transliteration');
+
+  if (error) throw error;
+  return data;
 };
 
 const PronunciationChallenge = () => {
@@ -31,11 +68,12 @@ const PronunciationChallenge = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [totalAttempts, setTotalAttempts] = useState(0);
   const [user, setUser] = useState<any>(null);
+  const [category, setCategory] = useState<Category>("phrases");
   const navigate = useNavigate();
 
   const { data: words = [], isLoading, error } = useQuery({
-    queryKey: ['phrases'],
-    queryFn: fetchPhrases,
+    queryKey: ['content', category],
+    queryFn: () => fetchContent(category),
   });
 
   useEffect(() => {
@@ -60,7 +98,7 @@ const PronunciationChallenge = () => {
       return;
     }
 
-    const score = 100; // Perfect score for correct pronunciation
+    const score = 100;
     try {
       const { error } = await supabase
         .from('pronunciation_scores')
@@ -93,7 +131,7 @@ const PronunciationChallenge = () => {
       return;
     }
 
-    const score = 50; // Partial score for incorrect pronunciation
+    const score = 50;
     try {
       const { error } = await supabase
         .from('pronunciation_scores')
@@ -133,7 +171,7 @@ const PronunciationChallenge = () => {
   }
 
   if (error) {
-    toast.error("Failed to load phrases");
+    toast.error("Failed to load content");
     return null;
   }
 
@@ -141,7 +179,7 @@ const PronunciationChallenge = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-gray-800 text-center">
-          <h1 className="text-2xl font-bold mb-4">No phrases available</h1>
+          <h1 className="text-2xl font-bold mb-4">No content available</h1>
           <p>Please try again later</p>
         </div>
       </div>
@@ -156,6 +194,8 @@ const PronunciationChallenge = () => {
           <h1 className="text-5xl font-bold text-center mb-12 bg-gradient-to-r from-primaryPurple via-vividPurple to-magentaPink text-transparent bg-clip-text">
             Learn Hebrew Pronunciation
           </h1>
+          
+          <CategorySelector value={category} onChange={setCategory} />
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
