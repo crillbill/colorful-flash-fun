@@ -5,42 +5,70 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
-
-type Category = "animals" | "food" | "places" | "objects";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface Word {
   hebrew: string;
   english: string;
-  hint: string;
-  category: Category;
+  transliteration?: string;
 }
 
-const WORDS: Word[] = [
-  { hebrew: "מחשב", english: "computer", hint: "You use this to type", category: "objects" },
-  { hebrew: "כלב", english: "dog", hint: "A common pet", category: "animals" },
-  { hebrew: "חתול", english: "cat", hint: "Another common pet", category: "animals" },
-  { hebrew: "פיצה", english: "pizza", hint: "A popular Italian food", category: "food" },
-  { hebrew: "ירושלים", english: "Jerusalem", hint: "Israel's capital", category: "places" },
-];
-
 const MAX_TRIES = 6;
+
+const fetchWords = async () => {
+  const { data, error } = await supabase
+    .from('hebrew_words')
+    .select('hebrew, english, transliteration');
+  
+  if (error) {
+    throw error;
+  }
+  
+  return data;
+};
 
 const Hangman = () => {
   const colors = useColors();
   const { toast } = useToast();
-  const [currentWord, setCurrentWord] = useState<Word>(WORDS[0]);
+  const [currentWord, setCurrentWord] = useState<Word | null>(null);
   const [guessedLetters, setGuessedLetters] = useState<Set<string>>(new Set());
   const [wrongGuesses, setWrongGuesses] = useState<number>(0);
   const [score, setScore] = useState<{ correct: number; total: number }>({ correct: 0, total: 0 });
   const [showHint, setShowHint] = useState<boolean>(false);
 
+  const { data: words = [], isLoading, error } = useQuery({
+    queryKey: ['hangmanWords'],
+    queryFn: fetchWords,
+  });
+
   const getNewWord = () => {
-    const randomIndex = Math.floor(Math.random() * WORDS.length);
-    setCurrentWord(WORDS[randomIndex]);
-    setGuessedLetters(new Set());
-    setWrongGuesses(0);
-    setShowHint(false);
+    if (words.length > 0) {
+      const randomIndex = Math.floor(Math.random() * words.length);
+      setCurrentWord(words[randomIndex]);
+      setGuessedLetters(new Set());
+      setWrongGuesses(0);
+      setShowHint(false);
+    }
   };
+
+  useEffect(() => {
+    if (words.length > 0 && !currentWord) {
+      getNewWord();
+    }
+  }, [words]);
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">Error loading words</div>;
+  }
+
+  if (!currentWord) {
+    return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">No words available</div>;
+  }
 
   const displayWord = currentWord.hebrew
     .split("")
@@ -90,10 +118,6 @@ const Hangman = () => {
 
   const hebrewAlphabet = "אבגדהוזחטיכלמנסעפצקרשת";
 
-  useEffect(() => {
-    getNewWord();
-  }, []);
-
   return (
     <>
       <Header1 />
@@ -115,7 +139,7 @@ const Hangman = () => {
               </Button>
               {showHint && (
                 <p className="mt-2 text-muted-foreground">
-                  Hint: {currentWord.hint}
+                  Hint: {currentWord.transliteration || 'No transliteration available'}
                 </p>
               )}
             </div>
@@ -139,10 +163,6 @@ const Hangman = () => {
                 </Button>
               ))}
             </div>
-          </div>
-
-          <div className="text-center text-sm text-muted-foreground">
-            Category: {currentWord.category}
           </div>
         </div>
       </div>
