@@ -20,11 +20,7 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
     const [phrases, words, letters, verbs] = await Promise.all([
       supabase.from('hebrew_phrases').select('hebrew, english, transliteration'),
       supabase.from('hebrew_words').select('hebrew, english, transliteration'),
-      supabase.from('hebrew_alphabet').select('letter, name, transliteration').transform((letter) => ({
-        hebrew: letter.letter,
-        english: letter.name,
-        transliteration: letter.transliteration
-      })),
+      supabase.from('hebrew_alphabet').select('letter, name, transliteration'),
       supabase.from('hebrew_verbs').select('hebrew, english, transliteration')
     ]);
 
@@ -33,8 +29,8 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
       ...(phrases.data || []),
       ...(words.data || []),
       ...(letters.data?.map(letter => ({
-        hebrew: letter.hebrew,
-        english: letter.english,
+        hebrew: letter.letter,
+        english: letter.name,
         transliteration: letter.transliteration
       })) || []),
       ...(verbs.data || [])
@@ -239,5 +235,3 @@ const PronunciationChallenge = () => {
     </div>
   );
 };
-
-export default PronunciationChallenge;
