@@ -214,24 +214,24 @@ const WordSearch = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-8 pt-24">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-4">
           <h1 className="text-4xl font-bold text-center">Hebrew Word Search</h1>
           
           <div className="flex justify-between items-center">
             <ScoreDisplay correct={score.found} total={score.total} />
             <div className="text-lg font-semibold">
-              Time: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+              Time: {formatTime(timeLeft)}
             </div>
           </div>
 
           <ProgressBar current={score.found} total={score.total} />
 
-          <div className="grid grid-cols-10 gap-0.5 bg-accent p-2 rounded-lg">
+          <div className="grid grid-cols-10 gap-0 bg-accent p-1 rounded-lg">
             {grid.map((row, rowIndex) => (
               row.map((letter, colIndex) => (
                 <button
                   key={`${rowIndex}-${colIndex}`}
-                  className={`w-9 h-9 text-lg font-bold rounded flex items-center justify-center transition-colors
+                  className={`w-8 h-8 text-base font-bold rounded-sm flex items-center justify-center transition-colors
                     ${isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 
                       isCellFound(rowIndex, colIndex) ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent-foreground/10'}`}
                   onClick={() => handleCellClick(rowIndex, colIndex)}
@@ -242,15 +242,15 @@ const WordSearch = () => {
             ))}
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h2 className="text-2xl font-semibold">Words to Find:</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {words.map(({ hebrew, english, transliteration }) => {
                 const isFound = wordLocations.find(wl => wl.word === hebrew)?.found;
                 return (
                   <div
                     key={hebrew}
-                    className={`p-4 rounded-lg ${
+                    className={`p-3 rounded-lg ${
                       isFound ? 'bg-green-500 text-white' : 'bg-card'
                     }`}
                   >
@@ -280,6 +280,35 @@ const WordSearch = () => {
       </div>
     </>
   );
+};
+
+const canPlaceWord = (grid: string[][], word: string, row: number, col: number, direction: string) => {
+  if (direction === "horizontal") {
+    if (col + word.length > GRID_SIZE) return false;
+    for (let i = 0; i < word.length; i++) {
+      if (grid[row][col + i] && grid[row][col + i] !== word[i]) return false;
+    }
+  } else {
+    if (row + word.length > GRID_SIZE) return false;
+    for (let i = 0; i < word.length; i++) {
+      if (grid[row + i][col] && grid[row + i][col] !== word[i]) return false;
+    }
+  }
+  return true;
+};
+
+const placeWord = (grid: string[][], word: string, row: number, col: number, direction: string) => {
+  const cells: { row: number; col: number }[] = [];
+  for (let i = 0; i < word.length; i++) {
+    if (direction === "horizontal") {
+      grid[row][col + i] = word[i];
+      cells.push({ row, col: col + i });
+    } else {
+      grid[row + i][col] = word[i];
+      cells.push({ row: row + i, col });
+    }
+  }
+  return cells;
 };
 
 export default WordSearch;
