@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-type Category = "all" | "words" | "phrases" | "verbs";
+type Category = "all" | "words" | "phrases" | "verbs" | "alphabet";
 
 interface FlashcardData {
   hebrew: string;
@@ -80,6 +80,13 @@ const Flashcards = () => {
           .from("hebrew_verbs")
           .select("hebrew, english, transliteration");
         if (verbs) allData.push(...verbs);
+      }
+
+      if (fetchAll || categories.includes("alphabet")) {
+        const { data: alphabet } = await supabase
+          .from("hebrew_alphabet")
+          .select("letter as hebrew, name as english, transliteration");
+        if (alphabet) allData.push(...alphabet);
       }
 
       const shuffledData = allData.sort(() => Math.random() - 0.5).slice(0, MAX_CARDS);
@@ -202,6 +209,20 @@ const Flashcards = () => {
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
                         Verbs
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="alphabet"
+                        checked={selectedCategories.includes("alphabet")}
+                        onCheckedChange={() => handleCategoryChange("alphabet")}
+                        disabled={selectedCategories.includes("all")}
+                      />
+                      <label
+                        htmlFor="alphabet"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Alphabet
                       </label>
                     </div>
                   </div>
