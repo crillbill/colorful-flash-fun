@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 
 interface Question {
   word: string;
@@ -21,10 +22,10 @@ const MultipleChoice = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [score, setScore] = useState({ correct: 0, total: 0 });
-  const [isPlaying, setIsPlaying] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { isPlaying, playAudio } = useAudioPlayback();
 
   useEffect(() => {
     fetchWords();
@@ -117,21 +118,11 @@ const MultipleChoice = () => {
     }
   };
 
-  const playAudio = async () => {
+  const handlePlayAudio = async () => {
     try {
-      setIsPlaying(true);
-      const { data, error } = await supabase.functions.invoke("text-to-speech", {
-        body: { text: questions[currentQuestion].word },
-      });
-
-      if (error) throw error;
-
-      const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
-      audio.onended = () => setIsPlaying(false);
-      await audio.play();
+      await playAudio(questions[currentQuestion].word);
     } catch (error) {
       console.error("Error playing audio:", error);
-      setIsPlaying(false);
       toast({
         title: "Error playing audio",
         description: "Please try again",
@@ -186,7 +177,7 @@ const MultipleChoice = () => {
                 </h2>
                 <AudioButton
                   isPlaying={isPlaying}
-                  onToggle={playAudio}
+                  onToggle={handlePlayAudio}
                   disabled={isPlaying}
                 />
               </div>
