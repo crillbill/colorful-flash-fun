@@ -61,7 +61,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom colors for flashcards
+				softPurple: '#F4F1FF',
+				softBlue: '#E8F4FF',
+				softPink: '#FFF1F8',
+				primaryPurple: '#6B46C1',
+				vividPurple: '#8B5CF6',
+				magentaPink: '#D946EF',
+				darkPurple: '#1A1F2C'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -70,20 +78,12 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
 				}
 			},
 			animation: {

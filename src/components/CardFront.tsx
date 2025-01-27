@@ -37,7 +37,7 @@ export const CardFront = ({
           How to say <span className="text-primaryPurple">"{english}"</span> in Hebrew
         </p>
         <h2 
-          className="text-5xl font-bold bg-gradient-to-r from-vividPurple to-magentaPink text-transparent bg-clip-text mb-2 transition-all duration-300 hover:scale-105" 
+          className="text-5xl font-bold text-darkPurple mb-2 transition-all duration-300 hover:scale-105" 
           dir="rtl"
         >
           {question}
