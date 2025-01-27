@@ -25,7 +25,8 @@ const LetterMatching = () => {
   const [gameActive, setGameActive] = useState(false);
   const [letters, setLetters] = useState<HebrewLetter[]>([]);
   const [showHint, setShowHint] = useState(false);
-  const totalRounds = 10;
+  const [remainingLetters, setRemainingLetters] = useState<HebrewLetter[]>([]);
+  const [totalRounds, setTotalRounds] = useState(0);
 
   useEffect(() => {
     fetchHebrewLetters();
@@ -43,6 +44,7 @@ const LetterMatching = () => {
 
       if (data) {
         setLetters(data);
+        setTotalRounds(data.length); // Set total rounds to match total number of letters
       }
     } catch (error) {
       console.error('Error fetching Hebrew letters:', error);
@@ -68,21 +70,23 @@ const LetterMatching = () => {
     setCurrentRound(1);
     setGameActive(true);
     setShowHint(false);
+    setRemainingLetters(shuffleArray([...letters])); // Initialize remaining letters
     setupRound();
-    toast("New game started! Match the Hebrew letters to their names.");
+    toast("New game started! Match all Hebrew letters to their names.");
   };
 
   const setupRound = () => {
-    if (letters.length === 0) return;
+    if (remainingLetters.length === 0) return;
     
-    const randomLetter = letters[Math.floor(Math.random() * letters.length)];
-    setCurrentLetter(randomLetter);
+    // Take the next letter from remaining letters
+    const nextLetter = remainingLetters[0];
+    setCurrentLetter(nextLetter);
     setShowHint(false);
     
     const wrongOptions = letters
-      .filter(l => l.name !== randomLetter.name)
+      .filter(l => l.name !== nextLetter.name)
       .map(l => l.name);
-    const shuffledOptions = shuffleArray([randomLetter.name, ...wrongOptions.slice(0, 3)]);
+    const shuffledOptions = shuffleArray([nextLetter.name, ...wrongOptions.slice(0, 3)]);
     setOptions(shuffledOptions);
   };
 
@@ -105,12 +109,15 @@ const LetterMatching = () => {
       });
     }
 
+    // Remove the current letter from remaining letters
+    setRemainingLetters(prev => prev.slice(1));
+
     if (currentRound < totalRounds) {
       setCurrentRound(prev => prev + 1);
       setupRound();
     } else {
       setGameActive(false);
-      toast("Game Over! Click 'Start New Game' to play again.");
+      toast("Game Over! You've completed all Hebrew letters. Click 'Start New Game' to play again.");
     }
   };
 
