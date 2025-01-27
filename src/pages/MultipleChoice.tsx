@@ -16,41 +16,70 @@ interface Question {
   options: string[];
 }
 
-const questions: Question[] = [
-  {
-    word: "ספר",
-    translation: "Book",
-    options: ["Book", "Tree", "Water", "Car"],
-  },
-  {
-    word: "עץ",
-    translation: "Tree",
-    options: ["Book", "Tree", "House", "Dog"],
-  },
-  {
-    word: "בית",
-    translation: "House",
-    options: ["Car", "Tree", "House", "Water"],
-  },
-  {
-    word: "מים",
-    translation: "Water",
-    options: ["Book", "Water", "Car", "Tree"],
-  },
-  {
-    word: "כלב",
-    translation: "Dog",
-    options: ["Cat", "Dog", "House", "Book"],
-  },
-];
-
 const MultipleChoice = () => {
   const colors = useColors();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [isPlaying, setIsPlaying] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetchWords();
+  }, []);
+
+  const fetchWords = async () => {
+    try {
+      const { data: words, error } = await supabase
+        .from("hebrew_words")
+        .select("hebrew, english")
+        .limit(20);
+
+      if (error) throw error;
+
+      if (!words || words.length < 4) {
+        toast({
+          title: "Error",
+          description: "Not enough words available for the game",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Shuffle words and create questions
+      const shuffledWords = words.sort(() => Math.random() - 0.5);
+      const gameQuestions = shuffledWords.slice(0, 5).map((word) => {
+        // Get 3 random incorrect options
+        const incorrectOptions = shuffledWords
+          .filter((w) => w.english !== word.english)
+          .slice(0, 3)
+          .map((w) => w.english);
+
+        // Add correct answer and shuffle options
+        const options = [...incorrectOptions, word.english].sort(
+          () => Math.random() - 0.5
+        );
+
+        return {
+          word: word.hebrew,
+          translation: word.english,
+          options,
+        };
+      });
+
+      setQuestions(gameQuestions);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching words:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load words. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleAnswer = () => {
     if (!selectedAnswer) {
@@ -115,7 +144,31 @@ const MultipleChoice = () => {
     setCurrentQuestion(0);
     setSelectedAnswer("");
     setScore({ correct: 0, total: 0 });
+    fetchWords();
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white p-8 pt-24">
+        <div className="max-w-2xl mx-auto text-center">
+          Loading questions...
+        </div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-white p-8 pt-24">
+        <div className="max-w-2xl mx-auto text-center">
+          <p>No questions available. Please try again later.</p>
+          <Button onClick={fetchWords} className="mt-4">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
