@@ -12,6 +12,8 @@ export type Database = {
       hebrew_alphabet: {
         Row: {
           created_at: string
+          english: string
+          hebrew: string
           id: string
           letter: string
           name: string
@@ -21,6 +23,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          english: string
+          hebrew: string
           id?: string
           letter: string
           name: string
@@ -30,6 +34,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          english?: string
+          hebrew?: string
           id?: string
           letter?: string
           name?: string

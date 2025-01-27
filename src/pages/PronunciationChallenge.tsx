@@ -20,7 +20,7 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
     const [phrases, words, letters, verbs] = await Promise.all([
       supabase.from('hebrew_phrases').select('hebrew, english, transliteration'),
       supabase.from('hebrew_words').select('hebrew, english, transliteration'),
-      supabase.from('hebrew_alphabet').select('letter, name, transliteration'),
+      supabase.from('hebrew_alphabet').select('hebrew, english, transliteration'),
       supabase.from('hebrew_verbs').select('hebrew, english, transliteration')
     ]);
 
@@ -28,11 +28,7 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
     const allContent: Word[] = [
       ...(phrases.data || []),
       ...(words.data || []),
-      ...(letters.data?.map(letter => ({
-        hebrew: letter.letter,
-        english: letter.name,
-        transliteration: letter.transliteration
-      })) || []),
+      ...(letters.data || []),
       ...(verbs.data || [])
     ];
 
@@ -40,25 +36,11 @@ const fetchContent = async (category: Category): Promise<Word[]> => {
     return allContent.sort(() => Math.random() - 0.5);
   }
 
-  // Special handling for letters table which has different column names
-  if (category === 'letters') {
-    const { data, error } = await supabase
-      .from('hebrew_alphabet')
-      .select('letter, name, transliteration');
-    
-    if (error) throw error;
-    
-    return (data || []).map(letter => ({
-      hebrew: letter.letter,
-      english: letter.name,
-      transliteration: letter.transliteration
-    }));
-  }
-
-  // Handle other categories
+  // Now letters table has the same structure as other tables
   const tableMap = {
     phrases: 'hebrew_phrases',
     words: 'hebrew_words',
+    letters: 'hebrew_alphabet',
     verbs: 'hebrew_verbs'
   } as const;
 
@@ -235,3 +217,4 @@ const PronunciationChallenge = () => {
     </div>
   );
 };
+
