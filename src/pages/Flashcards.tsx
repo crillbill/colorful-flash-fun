@@ -30,22 +30,35 @@ const Flashcards = () => {
   const handleCategoryChange = (category: Category) => {
     setSelectedCategories(prev => {
       if (category === "all") {
+        // If "all" is currently selected and we're clicking it, switch to no categories
+        if (prev.includes("all")) {
+          return [];
+        }
+        // If we're selecting "all", clear other selections
         return ["all"];
       }
 
-      let newCategories: Category[];
+      // If we're selecting a specific category
+      let newCategories = [...prev];
 
-      if (prev.includes("all")) {
-        newCategories = [category];
-      } else {
-        if (prev.includes(category)) {
-          newCategories = prev.filter(c => c !== category);
-        } else {
-          newCategories = [...prev, category];
-        }
+      // Remove "all" if it's present
+      if (newCategories.includes("all")) {
+        newCategories = newCategories.filter(c => c !== "all");
       }
 
-      return newCategories.length === 0 ? ["all"] : newCategories;
+      // Toggle the selected category
+      if (newCategories.includes(category)) {
+        newCategories = newCategories.filter(c => c !== category);
+      } else {
+        newCategories.push(category);
+      }
+
+      // If no categories are selected, default to "all"
+      if (newCategories.length === 0) {
+        return ["all"];
+      }
+
+      return newCategories;
     });
   };
 
@@ -168,7 +181,7 @@ const Flashcards = () => {
             ? 'bg-primary border-primary text-primary-foreground' 
             : 'border-primary bg-transparent'
           } ${disabled 
-            ? 'opacity-50' 
+            ? 'opacity-50 cursor-not-allowed' 
             : 'hover:bg-primary/10 cursor-pointer'}`
         }
         aria-checked={checked}
@@ -183,7 +196,7 @@ const Flashcards = () => {
       <label
         htmlFor={id}
         className={`text-sm font-medium leading-none select-none
-          ${disabled ? 'opacity-50' : 'cursor-pointer'}`}
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       >
         {label}
       </label>
