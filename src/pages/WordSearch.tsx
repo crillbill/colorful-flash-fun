@@ -20,7 +20,8 @@ type HebrewWord = {
   transliteration: string | null;
 };
 
-const GRID_SIZE = 12; // Changed from 10 to 12
+const GRID_WIDTH = 12;
+const GRID_HEIGHT = 10;
 
 const HEBREW_LETTERS = [
   'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י',
@@ -64,9 +65,9 @@ const WordSearch = () => {
   const generateGrid = () => {
     if (!words.length) return;
 
-    // Initialize empty grid with new size
-    const newGrid = Array(GRID_SIZE).fill(null).map(() =>
-      Array(GRID_SIZE).fill(null)
+    // Initialize empty grid with new dimensions
+    const newGrid = Array(GRID_HEIGHT).fill(null).map(() =>
+      Array(GRID_WIDTH).fill(null)
     );
 
     // Place words in random positions
@@ -79,8 +80,8 @@ const WordSearch = () => {
 
       while (!placed && attempts < maxAttempts) {
         const direction = Math.random() < 0.5 ? "horizontal" : "vertical";
-        const row = Math.floor(Math.random() * GRID_SIZE);
-        const col = Math.floor(Math.random() * GRID_SIZE);
+        const row = Math.floor(Math.random() * GRID_HEIGHT);
+        const col = Math.floor(Math.random() * GRID_WIDTH);
 
         if (canPlaceWord(newGrid, hebrew, row, col, direction)) {
           const cells = placeWord(newGrid, hebrew, row, col, direction);
@@ -92,8 +93,8 @@ const WordSearch = () => {
     });
 
     // Fill remaining empty cells with random Hebrew letters
-    for (let i = 0; i < GRID_SIZE; i++) {
-      for (let j = 0; j < GRID_SIZE; j++) {
+    for (let i = 0; i < GRID_HEIGHT; i++) {
+      for (let j = 0; j < GRID_WIDTH; j++) {
         if (!newGrid[i][j]) {
           newGrid[i][j] = HEBREW_LETTERS[Math.floor(Math.random() * HEBREW_LETTERS.length)];
         }
@@ -106,12 +107,12 @@ const WordSearch = () => {
 
   const canPlaceWord = (grid: string[][], word: string, row: number, col: number, direction: string) => {
     if (direction === "horizontal") {
-      if (col + word.length > GRID_SIZE) return false;
+      if (col + word.length > GRID_WIDTH) return false;
       for (let i = 0; i < word.length; i++) {
         if (grid[row][col + i] && grid[row][col + i] !== word[i]) return false;
       }
     } else {
-      if (row + word.length > GRID_SIZE) return false;
+      if (row + word.length > GRID_HEIGHT) return false;
       for (let i = 0; i < word.length; i++) {
         if (grid[row + i][col] && grid[row + i][col] !== word[i]) return false;
       }
@@ -214,7 +215,7 @@ const WordSearch = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-4 pt-24">
-        <div className="mx-auto space-y-3 max-w-[450px]"> {/* Increased max-width to accommodate larger cells */}
+        <div className="mx-auto space-y-3 max-w-[500px]"> {/* Increased max-width to accommodate wider grid */}
           <h1 className="text-3xl font-bold text-center">Hebrew Word Search</h1>
           
           <div className="flex justify-between items-center">
@@ -232,7 +233,7 @@ const WordSearch = () => {
                 {row.map((letter, colIndex) => (
                   <button
                     key={`${rowIndex}-${colIndex}`}
-                    className={`w-[42px] h-[42px] text-xl font-bold flex items-center justify-center transition-colors
+                    className={`w-[42px] h-[42px] text-2xl font-bold flex items-center justify-center transition-colors
                       ${isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 
                         isCellFound(rowIndex, colIndex) ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent-foreground/10'}`}
                     onClick={() => handleCellClick(rowIndex, colIndex)}
@@ -282,35 +283,6 @@ const WordSearch = () => {
       </div>
     </>
   );
-};
-
-const canPlaceWord = (grid: string[][], word: string, row: number, col: number, direction: string) => {
-  if (direction === "horizontal") {
-    if (col + word.length > GRID_SIZE) return false;
-    for (let i = 0; i < word.length; i++) {
-      if (grid[row][col + i] && grid[row][col + i] !== word[i]) return false;
-    }
-  } else {
-    if (row + word.length > GRID_SIZE) return false;
-    for (let i = 0; i < word.length; i++) {
-      if (grid[row + i][col] && grid[row + i][col] !== word[i]) return false;
-    }
-  }
-  return true;
-};
-
-const placeWord = (grid: string[][], word: string, row: number, col: number, direction: string) => {
-  const cells: { row: number; col: number }[] = [];
-  for (let i = 0; i < word.length; i++) {
-    if (direction === "horizontal") {
-      grid[row][col + i] = word[i];
-      cells.push({ row, col: col + i });
-    } else {
-      grid[row + i][col] = word[i];
-      cells.push({ row: row + i, col });
-    }
-  }
-  return cells;
 };
 
 export default WordSearch;
