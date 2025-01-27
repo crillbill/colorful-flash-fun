@@ -4,13 +4,7 @@ import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Header1 } from "@/components/ui/header";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,38 +22,66 @@ const Flashcards = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState<Category>("all");
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>(["all"]);
   const [gameActive, setGameActive] = useState(false);
   const [flashcardsData, setFlashcardsData] = useState<FlashcardData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchFlashcards = async (category: Category) => {
+  const handleCategoryChange = (category: Category) => {
+    setSelectedCategories(prev => {
+      // If selecting "all", uncheck everything else
+      if (category === "all") {
+        return ["all"];
+      }
+      
+      // If selecting a specific category while "all" is checked, uncheck "all"
+      let newCategories = prev.filter(c => c !== "all");
+      
+      // Toggle the selected category
+      if (newCategories.includes(category)) {
+        newCategories = newCategories.filter(c => c !== category);
+      } else {
+        newCategories.push(category);
+      }
+      
+      // If no categories selected, default to "all"
+      if (newCategories.length === 0) {
+        return ["all"];
+      }
+      
+      return newCategories;
+    });
+  };
+
+  const fetchFlashcards = async (categories: Category[]) => {
     setIsLoading(true);
     try {
       let allData: FlashcardData[] = [];
 
-      if (category === "all" || category === "words") {
+      // If "all" is selected or no categories selected, fetch from all tables
+      const fetchAll = categories.includes("all") || categories.length === 0;
+
+      if (fetchAll || categories.includes("words")) {
         const { data: words } = await supabase
           .from("hebrew_words")
           .select("hebrew, english, transliteration");
         if (words) allData.push(...words);
       }
 
-      if (category === "all" || category === "phrases") {
+      if (fetchAll || categories.includes("phrases")) {
         const { data: phrases } = await supabase
           .from("hebrew_phrases")
           .select("hebrew, english, transliteration");
         if (phrases) allData.push(...phrases);
       }
 
-      if (category === "all" || category === "verbs") {
+      if (fetchAll || categories.includes("verbs")) {
         const { data: verbs } = await supabase
           .from("hebrew_verbs")
           .select("hebrew, english, transliteration");
         if (verbs) allData.push(...verbs);
       }
 
-      // Shuffle and limit to MAX_CARDS
       const shuffledData = allData.sort(() => Math.random() - 0.5).slice(0, MAX_CARDS);
       setFlashcardsData(shuffledData);
       setGameActive(true);
@@ -75,8 +97,8 @@ const Flashcards = () => {
     setCurrentCardIndex(0);
     setCorrectAnswers(0);
     setTotalAnswered(0);
-    await fetchFlashcards(selectedCategory);
-    toast.success(`Starting new game with ${selectedCategory} cards!`);
+    await fetchFlashcards(selectedCategories);
+    toast.success(`Starting new game with selected categories!`);
   };
 
   const handleNext = () => {
@@ -121,24 +143,69 @@ const Flashcards = () => {
           {!gameActive ? (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-center">Hebrew Flashcards</h2>
-              <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Select Category
-                </label>
-                <Select
-                  value={selectedCategory}
-                  onValueChange={(value: Category) => setSelectedCategory(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="words">Words</SelectItem>
-                    <SelectItem value="phrases">Phrases</SelectItem>
-                    <SelectItem value="verbs">Verbs</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Select Categories
+                  </label>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="all"
+                        checked={selectedCategories.includes("all")}
+                        onCheckedChange={() => handleCategoryChange("all")}
+                      />
+                      <label
+                        htmlFor="all"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        All Categories
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="words"
+                        checked={selectedCategories.includes("words")}
+                        onCheckedChange={() => handleCategoryChange("words")}
+                        disabled={selectedCategories.includes("all")}
+                      />
+                      <label
+                        htmlFor="words"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Words
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="phrases"
+                        checked={selectedCategories.includes("phrases")}
+                        onCheckedChange={() => handleCategoryChange("phrases")}
+                        disabled={selectedCategories.includes("all")}
+                      />
+                      <label
+                        htmlFor="phrases"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Phrases
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="verbs"
+                        checked={selectedCategories.includes("verbs")}
+                        onCheckedChange={() => handleCategoryChange("verbs")}
+                        disabled={selectedCategories.includes("all")}
+                      />
+                      <label
+                        htmlFor="verbs"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Verbs
+                      </label>
+                    </div>
+                  </div>
+                </div>
                 <Button 
                   onClick={startGame} 
                   className="w-full"
