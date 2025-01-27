@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
@@ -193,9 +192,14 @@ const Hangman = () => {
                 Show Hint
               </Button>
               {showHint && (
-                <p className="mt-2 text-muted-foreground">
-                  Hint: {currentWord.transliteration || 'No transliteration available'}
-                </p>
+                <div className="mt-2 space-y-1">
+                  <p className="text-muted-foreground">
+                    <span className="font-semibold">Hint:</span> {currentWord.transliteration || 'No transliteration available'}
+                  </p>
+                  <p className="text-muted-foreground">
+                    <span className="font-semibold">English:</span> {currentWord.english}
+                  </p>
+                </div>
               )}
             </div>
 
