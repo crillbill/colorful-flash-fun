@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Path, Circle, Text, Triangle, Group } from "fabric";
+import { Canvas as FabricCanvas, Path, Circle, Text, Triangle, Group, Shadow } from "fabric";
 
 interface WheelProps {
   onSpinEnd: (category: string) => void;
@@ -30,7 +30,6 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
     const radius = 150;
     const anglePerSegment = (2 * Math.PI) / CATEGORIES.length;
 
-    // Create a group for the wheel elements
     const wheelGroup = new Group([], {
       left: centerX,
       top: centerY,
@@ -39,7 +38,6 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       selectable: false,
     });
 
-    // Add outer circle for border
     const outerCircle = new Circle({
       left: 0,
       top: 0,
@@ -62,7 +60,7 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
         stroke: '#2D3748',
         strokeWidth: 1,
         selectable: false,
-        shadow: new fabric.Shadow({
+        shadow: new Shadow({
           color: 'rgba(0,0,0,0.2)',
           blur: 4,
           offsetX: 2,
@@ -92,7 +90,6 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       wheelGroup.add(text);
     });
 
-    // Add center decoration
     const centerCircle = new Circle({
       left: 0,
       top: 0,
@@ -103,7 +100,7 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       originX: 'center',
       originY: 'center',
       selectable: false,
-      shadow: new fabric.Shadow({
+      shadow: new Shadow({
         color: 'rgba(0,0,0,0.3)',
         blur: 10,
         offsetX: 2,
@@ -127,7 +124,6 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
     wheelGroup.add(centerCircle);
     wheelGroup.add(innerCircle);
 
-    // Add pointer (outside the wheel group since it shouldn't rotate)
     const pointer = new Triangle({
       left: centerX,
       top: 30,
@@ -138,7 +134,7 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       originX: 'center',
       originY: 'center',
       selectable: false,
-      shadow: new fabric.Shadow({
+      shadow: new Shadow({
         color: 'rgba(0,0,0,0.2)',
         blur: 4,
         offsetX: 0,
