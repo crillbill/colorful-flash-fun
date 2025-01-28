@@ -1,47 +1,57 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
+  const buttonVariants = [
+    "bg-gradient-to-r from-primaryPurple to-vividPurple hover:from-vividPurple hover:to-primaryPurple",
+    "bg-gradient-to-r from-magentaPink to-brightOrange hover:from-brightOrange hover:to-magentaPink",
+    "bg-gradient-to-r from-oceanBlue to-brightBlue hover:from-brightBlue hover:to-oceanBlue",
+    "bg-gradient-to-r from-softPurple to-softPink hover:from-softPink hover:to-softPurple",
+    "bg-gradient-to-r from-softGreen to-softYellow hover:from-softYellow hover:to-softGreen",
+    "bg-gradient-to-r from-softOrange to-softPeach hover:from-softPeach hover:to-softOrange",
+    "bg-gradient-to-r from-softBlue to-softPurple hover:from-softPurple hover:to-softBlue",
+    "bg-gradient-to-r from-primaryPurple to-magentaPink hover:from-magentaPink hover:to-primaryPurple",
+    "bg-gradient-to-r from-brightOrange to-oceanBlue hover:from-oceanBlue hover:to-brightOrange",
+    "bg-gradient-to-r from-vividPurple to-brightBlue hover:from-brightBlue hover:to-vividPurple",
+    "bg-gradient-to-r from-softPink to-softPurple hover:from-softPurple hover:to-softPink"
+  ];
+
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gradient-to-b from-white to-softGray">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl font-bold text-center mb-8 gradient-text animate-float">
+            Hebrew Learning Games
+          </h1>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <Link to="/flashcards">
-              <Button className="w-full">Flashcards</Button>
-            </Link>
-            <Link to="/multiple-choice">
-              <Button className="w-full">Multiple Choice</Button>
-            </Link>
-            <Link to="/word-search">
-              <Button className="w-full">Word Search</Button>
-            </Link>
-            <Link to="/letter-matching">
-              <Button className="w-full">Letter Matching</Button>
-            </Link>
-            <Link to="/fill-in-the-blank">
-              <Button className="w-full">Fill in the Blank</Button>
-            </Link>
-            <Link to="/sentence-builder">
-              <Button className="w-full">Sentence Builder</Button>
-            </Link>
-            <Link to="/hangman">
-              <Button className="w-full">Hangman</Button>
-            </Link>
-            <Link to="/memory-game">
-              <Button className="w-full">Memory Game</Button>
-            </Link>
-            <Link to="/pronunciation-challenge">
-              <Button className="w-full">Pronunciation Challenge</Button>
-            </Link>
-            <Link to="/import-words">
-              <Button className="w-full">Import Words</Button>
-            </Link>
-            <Link to="/import-bulk-words">
-              <Button className="w-full">Import Bulk Words</Button>
-            </Link>
+            {[
+              { path: "/flashcards", label: "Flashcards" },
+              { path: "/multiple-choice", label: "Multiple Choice" },
+              { path: "/word-search", label: "Word Search" },
+              { path: "/letter-matching", label: "Letter Matching" },
+              { path: "/fill-in-the-blank", label: "Fill in the Blank" },
+              { path: "/sentence-builder", label: "Sentence Builder" },
+              { path: "/hangman", label: "Hangman" },
+              { path: "/memory-game", label: "Memory Game" },
+              { path: "/pronunciation-challenge", label: "Pronunciation Challenge" },
+              { path: "/import-words", label: "Import Words" },
+              { path: "/import-bulk-words", label: "Import Bulk Words" }
+            ].map((item, index) => (
+              <Link key={item.path} to={item.path}>
+                <Button 
+                  className={cn(
+                    "w-full h-24 text-lg font-semibold shadow-lg hover-card",
+                    "transition-all duration-300 text-white",
+                    buttonVariants[index % buttonVariants.length]
+                  )}
+                >
+                  {item.label}
+                </Button>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
