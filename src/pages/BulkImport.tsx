@@ -28,6 +28,11 @@ const BulkImport = () => {
     return hebrewRegex.test(text);
   };
 
+  const sanitizeText = (text: string): string => {
+    // Remove special characters but keep spaces, letters, and numbers
+    return text.replace(/[^\w\s\u0590-\u05FF.,'-]/g, '').trim();
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setFile(event.target.files[0]);
@@ -51,15 +56,20 @@ const BulkImport = () => {
         throw new Error(`Invalid entry at index ${index}. Each entry must contain hebrew and english fields.`);
       }
       
-      if (!validateHebrewText(entry.hebrew)) {
+      // Sanitize both Hebrew and English text
+      const sanitizedHebrew = sanitizeText(entry.hebrew);
+      const sanitizedEnglish = sanitizeText(entry.english);
+      const sanitizedTransliteration = entry.transliteration ? sanitizeText(entry.transliteration) : null;
+      
+      if (!validateHebrewText(sanitizedHebrew)) {
         throw new Error(`Invalid Hebrew text at index ${index}`);
       }
       
       return {
         word_number: entry.rank || index + 1,
-        hebrew: entry.hebrew,
-        english: entry.english,
-        transliteration: entry.transliteration || null
+        hebrew: sanitizedHebrew,
+        english: sanitizedEnglish,
+        transliteration: sanitizedTransliteration
       };
     });
   };
@@ -86,7 +96,7 @@ const BulkImport = () => {
       }
 
       const { data, error: supabaseError } = await supabase
-        .from('hebrew_bulk_words')
+        .from('hebrew_word_dump')  // Changed to use the dump table
         .insert(words)
         .select();
 
@@ -99,7 +109,7 @@ const BulkImport = () => {
 
       setSuccess(true);
       setImportedCount(words.length);
-      toast.success(`Successfully imported ${words.length} words!`);
+      toast.success(`Successfully imported ${words.length} words to dump table!`);
       
       // Clear the form
       setFile(null);
@@ -134,7 +144,7 @@ const BulkImport = () => {
             {success && (
               <Alert>
                 <AlertDescription className="text-green-600">
-                  Successfully imported {importedCount} words!
+                  Successfully imported {importedCount} words to dump table!
                 </AlertDescription>
               </Alert>
             )}
@@ -153,6 +163,9 @@ const BulkImport = () => {
   }
 ]`}
               </pre>
+              <p className="text-sm text-gray-500">
+                Note: Special characters will be automatically removed from the text.
+              </p>
             </div>
 
             <Input

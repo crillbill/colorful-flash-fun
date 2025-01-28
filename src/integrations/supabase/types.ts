@@ -258,6 +258,39 @@ export type Database = {
         }
         Relationships: []
       }
+      hebrew_word_dump: {
+        Row: {
+          created_at: string
+          english: string
+          hebrew: string
+          id: number
+          processed: boolean | null
+          transliteration: string | null
+          updated_at: string
+          word_number: number | null
+        }
+        Insert: {
+          created_at?: string
+          english: string
+          hebrew: string
+          id?: number
+          processed?: boolean | null
+          transliteration?: string | null
+          updated_at?: string
+          word_number?: number | null
+        }
+        Update: {
+          created_at?: string
+          english?: string
+          hebrew?: string
+          id?: number
+          processed?: boolean | null
+          transliteration?: string | null
+          updated_at?: string
+          word_number?: number | null
+        }
+        Relationships: []
+      }
       hebrew_words: {
         Row: {
           created_at: string
