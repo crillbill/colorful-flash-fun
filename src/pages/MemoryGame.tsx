@@ -181,31 +181,39 @@ const MemoryGame = () => {
   };
 
   if (isLoading) {
-    return <div className="min-h-screen bg-white p-8 pt-24 text-center">Loading words...</div>;
+    return <div className="min-h-screen bg-white p-4 pt-16 text-center">Loading words...</div>;
   }
 
   if (error) {
-    return <div className="min-h-screen bg-white p-8 pt-24 text-center">Error loading words</div>;
+    return <div className="min-h-screen bg-white p-4 pt-16 text-center">Error loading words</div>;
   }
 
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white p-8 pt-24">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="flex flex-col gap-4">
-            <CategorySelector value={category} onChange={setCategory} />
-            <div className="flex justify-between items-center">
-              <Button onClick={shuffleCards} size="lg" className="bg-primary">
-                {isGameStarted ? "Restart Game" : "Start Game"}
-              </Button>
+      <div className="min-h-screen bg-white p-4 pt-16">
+        <div className="max-w-4xl mx-auto space-y-4">
+          {/* Game controls section */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-lg font-semibold">
                 <Timer className="w-6 h-6" />
                 {formatTime(timer)}
               </div>
+              <div className="text-center text-lg font-semibold">
+                Matched Pairs: {matchedPairs} / 8
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between gap-4">
+              <CategorySelector value={category} onChange={setCategory} />
+              <Button onClick={shuffleCards} size="lg" className="bg-primary whitespace-nowrap">
+                {isGameStarted ? "Restart Game" : "Start Game"}
+              </Button>
             </div>
           </div>
 
+          {/* Game grid */}
           <div className="grid grid-cols-4 gap-3">
             {cards.map((card) => (
               <div
@@ -237,10 +245,6 @@ const MemoryGame = () => {
                 </Card>
               </div>
             ))}
-          </div>
-
-          <div className="text-center text-lg font-semibold">
-            Matched Pairs: {matchedPairs} / 8
           </div>
         </div>
       </div>
