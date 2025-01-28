@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Search, Book, X } from 'lucide-react';
+import { Search, Book, X, Mic } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { VoiceRecordButton } from '@/components/VoiceRecordButton';
 import VoiceInterface from '@/components/VoiceInterface';
 
 interface HebrewWord {
@@ -11,7 +10,6 @@ interface HebrewWord {
   transliteration: string | null;
 }
 
-// Helper function to group results by Hebrew word
 const groupByHebrew = (words: HebrewWord[]) => {
   return words.reduce((acc, curr) => {
     if (!acc[curr.hebrew]) {
@@ -38,7 +36,6 @@ const Dictionary = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ['hebrewWords', searchTerm],
@@ -106,7 +103,6 @@ const Dictionary = () => {
 
   const handlePronunciationResult = (text: string) => {
     setIsListening(false);
-    setIsProcessing(false);
     setSearchTerm(text);
     setIsActive(true);
   };
@@ -123,7 +119,7 @@ const Dictionary = () => {
           </p>
         </div>
 
-        <div className="relative group mb-8">
+        <div className="relative group">
           <div className={`absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-70 blur transition-all duration-300 group-hover:opacity-100 ${isActive ? 'blur-md' : 'blur'}`} />
           <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
             <div className="flex items-center px-6 py-4">
@@ -137,22 +133,20 @@ const Dictionary = () => {
                 onFocus={handleSearchFocus}
                 onBlur={handleSearchBlur}
               />
-              {searchTerm && (
-                <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
-                  <X className="h-5 w-5" />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleStartListening}
+                  className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${isListening ? 'text-purple-500' : 'text-gray-400'}`}
+                  title="Search by voice"
+                >
+                  <Mic className={`h-5 w-5 ${isListening ? 'animate-pulse' : ''}`} />
                 </button>
-              )}
-            </div>
-
-            <div className="flex justify-center pb-4">
-              <VoiceRecordButton
-                isListening={isListening}
-                isProcessing={isProcessing}
-                timeLeft={3}
-                question="Search for a word"
-                isPlaying={false}
-                onStartListening={handleStartListening}
-              />
+                {searchTerm && (
+                  <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
             </div>
 
             <VoiceInterface

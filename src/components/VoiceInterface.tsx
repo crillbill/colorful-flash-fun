@@ -3,7 +3,7 @@ import { WebRTCManager } from '@/utils/webrtc/WebRTCManager';
 
 interface VoiceInterfaceProps {
   currentWord: string;
-  onPronunciationResult: (isCorrect: boolean) => void;
+  onPronunciationResult: (text: string) => void;  // Changed from boolean to string
   isListening: boolean;
 }
 
@@ -70,7 +70,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       console.error('VoiceInterface: Error starting recording:', error);
       isRecordingRef.current = false;
       stopRecording();
-      onPronunciationResult(false);
+      onPronunciationResult('');
     }
   };
 
@@ -79,19 +79,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
     if (event.text) {
       const transcribedText = event.text.toLowerCase().trim();
-      const expectedWord = currentWord;
-      const isCorrect = await evaluatePronunciation(transcribedText, expectedWord);
-      
-      console.log('VoiceInterface: Speech evaluation result:', {
-        transcribed: transcribedText,
-        expected: expectedWord,
-        isCorrect
-      });
-
-      onPronunciationResult(isCorrect);
+      console.log('VoiceInterface: Transcribed text:', transcribedText);
+      onPronunciationResult(transcribedText);
     } else if (event.type === 'error') {
       console.error('VoiceInterface: Error event received:', event);
-      onPronunciationResult(false);
+      onPronunciationResult('');
     }
   };
 
