@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Circle, Text } from "fabric";
+import { Canvas as FabricCanvas, Path, Circle, Text } from "fabric";
 
 interface WheelProps {
   onSpinEnd: (category: string) => void;
@@ -35,7 +35,7 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       const startAngle = index * anglePerSegment;
       const endAngle = (index + 1) * anglePerSegment;
 
-      const path = new fabric.Path(createArcPath(centerX, centerY, radius, startAngle, endAngle), {
+      const path = new Path(createArcPath(centerX, centerY, radius, startAngle, endAngle), {
         fill: COLORS[index],
         selectable: false,
       });
@@ -69,7 +69,9 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
     canvas.add(centerCircle);
 
     wheelRef.current = canvas;
-    return () => canvas.dispose();
+    return () => {
+      canvas.dispose();
+    };
   }, []);
 
   const createArcPath = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
