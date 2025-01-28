@@ -93,12 +93,10 @@ const LetterMatching = () => {
     const nextLetter = remainingLetters[0];
     setCurrentLetter(nextLetter);
     
-    // Get wrong options from the letters array, excluding the correct answer
     const wrongOptions = letters
       .filter(l => l.name !== nextLetter.name)
       .map(l => l.name);
     
-    // Take 3 random wrong options and add the correct answer
     const shuffledOptions = shuffleArray([nextLetter.name, ...wrongOptions.slice(0, 3)]);
     setOptions(shuffledOptions);
   };
@@ -190,12 +188,9 @@ const LetterMatching = () => {
                             showTransliteration ? 'opacity-100' : 'opacity-0 pointer-events-none'
                           }`}
                         >
-                          <div className="flex flex-col gap-2">
-                            <span className="text-black font-medium text-lg">
-                              {currentLetter.transliteration || "Pronunciation guide not available"}
-                            </span>
-                            <span className="text-gray-500 text-xs">How to pronounce this letter</span>
-                          </div>
+                          <span className="text-black font-medium text-lg">
+                            {currentLetter.transliteration || "No transliteration available"}
+                          </span>
                         </div>
                       </div>
                       
