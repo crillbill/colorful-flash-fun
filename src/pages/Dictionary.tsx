@@ -182,22 +182,23 @@ const Dictionary = () => {
                       ) : Object.values(groupedResults).length > 0 ? (
                         Object.values(groupedResults).map((result, index) => (
                           <div key={index} className="p-4 hover:bg-gray-50 transition-colors duration-150">
-                            <div className="flex justify-between items-start mb-2">
-                              <span className="text-sm text-purple-500 font-medium">word</span>
-                              <div className="text-sm text-gray-500 text-right">
-                                {Array.from(result.transliterations).join(', ') || 'N/A'}
+                            <div className="flex justify-between items-center gap-4">
+                              <div className="flex-1">
+                                <span className="text-sm text-purple-500 font-medium">word</span>
+                                <div className="text-sm text-gray-500">
+                                  {Array.from(result.transliterations).join(', ') || 'N/A'}
+                                </div>
+                                <div className="mt-1">
+                                  {Array.from(result.translations).map((translation, i) => (
+                                    <span key={i} className="text-gray-700">
+                                      {translation}
+                                      {i < result.translations.size - 1 && ', '}
+                                    </span>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex flex-col space-y-4">
-                              <div className="flex flex-col">
-                                {Array.from(result.translations).map((translation, i) => (
-                                  <span key={i} className="text-gray-700">
-                                    {translation}
-                                    {i < result.translations.size - 1 && ','}
-                                  </span>
-                                ))}
-                              </div>
-                              <div className="flex justify-center gap-4">
+                              
+                              <div className="flex items-center gap-4">
                                 <button
                                   onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], true)}
                                   className="p-2 hover:bg-green-50 rounded-full transition-colors"
@@ -213,7 +214,8 @@ const Dictionary = () => {
                                   <ThumbsDown className="h-5 w-5 text-red-600" />
                                 </button>
                               </div>
-                              <div className="flex justify-end">
+
+                              <div className="min-w-[120px] text-right">
                                 <span className="text-2xl font-bold text-gray-800" dir="rtl">{result.hebrew}</span>
                               </div>
                             </div>
