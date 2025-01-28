@@ -118,50 +118,55 @@ function Header1({ children, className }: Header1Props) {
     return (
         <header className={`w-full z-40 fixed top-0 left-0 bg-background ${className || ''}`}>
             <div className="container relative mx-auto min-h-20 flex items-center justify-between">
-                <div className="flex-1 lg:flex hidden">
-                    <NavigationMenu>
-                        <NavigationMenuList className="flex gap-4">
-                            {navigationItems.map((item) => (
-                                <NavigationMenuItem key={item.title}>
-                                    {item.href ? (
-                                        <NavigationMenuLink asChild>
-                                            <Link to={item.href}>
-                                                <Button variant="ghost">{item.title}</Button>
-                                            </Link>
-                                        </NavigationMenuLink>
-                                    ) : (
-                                        <>
-                                            <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
-                                            <NavigationMenuContent>
-                                                <div className="flex flex-col lg:grid grid-cols-2 gap-4">
-                                                    <div className="flex flex-col h-full justify-between">
-                                                        <div className="flex flex-col">
-                                                            <p className="text-base">{item.title}</p>
-                                                            <p className="text-muted-foreground text-sm">
-                                                                {item.description}
-                                                            </p>
+                <div className="flex items-center gap-8">
+                    <Link to="/" className="text-2xl font-bold text-primary hover:text-primary/90 transition-colors">
+                        Hebrew.ai
+                    </Link>
+                    <div className="lg:flex hidden">
+                        <NavigationMenu>
+                            <NavigationMenuList className="flex gap-4">
+                                {navigationItems.map((item) => (
+                                    <NavigationMenuItem key={item.title}>
+                                        {item.href ? (
+                                            <NavigationMenuLink asChild>
+                                                <Link to={item.href}>
+                                                    <Button variant="ghost">{item.title}</Button>
+                                                </Link>
+                                            </NavigationMenuLink>
+                                        ) : (
+                                            <>
+                                                <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
+                                                <NavigationMenuContent>
+                                                    <div className="flex flex-col lg:grid grid-cols-2 gap-4">
+                                                        <div className="flex flex-col h-full justify-between">
+                                                            <div className="flex flex-col">
+                                                                <p className="text-base">{item.title}</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    {item.description}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex flex-col text-sm h-full justify-end">
+                                                            {item.items?.map((subItem) => (
+                                                                <Link
+                                                                    to={subItem.href}
+                                                                    key={subItem.title}
+                                                                    className="flex flex-row justify-between items-center hover:bg-muted py-2 px-4 rounded"
+                                                                >
+                                                                    <span>{subItem.title}</span>
+                                                                    <MoveRight className="w-4 h-4 text-muted-foreground" />
+                                                                </Link>
+                                                            ))}
                                                         </div>
                                                     </div>
-                                                    <div className="flex flex-col text-sm h-full justify-end">
-                                                        {item.items?.map((subItem) => (
-                                                            <Link
-                                                                to={subItem.href}
-                                                                key={subItem.title}
-                                                                className="flex flex-row justify-between items-center hover:bg-muted py-2 px-4 rounded"
-                                                            >
-                                                                <span>{subItem.title}</span>
-                                                                <MoveRight className="w-4 h-4 text-muted-foreground" />
-                                                            </Link>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </NavigationMenuContent>
-                                        </>
-                                    )}
-                                </NavigationMenuItem>
-                            ))}
-                        </NavigationMenuList>
-                    </NavigationMenu>
+                                                </NavigationMenuContent>
+                                            </>
+                                        )}
+                                    </NavigationMenuItem>
+                                ))}
+                            </NavigationMenuList>
+                        </NavigationMenu>
+                    </div>
                 </div>
 
                 <div className="flex-1 max-w-xl mx-auto px-4">
@@ -234,49 +239,51 @@ function Header1({ children, className }: Header1Props) {
                     </div>
                 </div>
 
-                <div className="flex-1 flex justify-end">
-                    <Button>Get started</Button>
+                <div className="flex items-center gap-4">
+                    <div className="hidden lg:block">
+                        <Button>Get started</Button>
+                    </div>
+                    <div className="lg:hidden">
+                        <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
+                            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                        </Button>
+                    </div>
                 </div>
 
-                <div className="lg:hidden">
-                    <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
-                        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                    </Button>
-                    {isOpen && (
-                        <div className="absolute top-20 border-t flex flex-col w-full right-0 bg-background shadow-lg py-4 container gap-8">
-                            {navigationItems.map((item) => (
-                                <div key={item.title}>
-                                    <div className="flex flex-col gap-2">
-                                        {item.href ? (
+                {isOpen && (
+                    <div className="absolute top-20 border-t flex flex-col w-full right-0 bg-background shadow-lg py-4 container gap-8">
+                        {navigationItems.map((item) => (
+                            <div key={item.title}>
+                                <div className="flex flex-col gap-2">
+                                    {item.href ? (
+                                        <Link
+                                            to={item.href}
+                                            className="flex justify-between items-center"
+                                        >
+                                            <span className="text-lg">{item.title}</span>
+                                            <MoveRight className="w-4 h-4 stroke-1 text-muted-foreground" />
+                                        </Link>
+                                    ) : (
+                                        <p className="text-lg">{item.title}</p>
+                                    )}
+                                    {item.items &&
+                                        item.items.map((subItem) => (
                                             <Link
-                                                to={item.href}
+                                                key={subItem.title}
+                                                to={subItem.href}
                                                 className="flex justify-between items-center"
                                             >
-                                                <span className="text-lg">{item.title}</span>
-                                                <MoveRight className="w-4 h-4 stroke-1 text-muted-foreground" />
+                                                <span className="text-muted-foreground">
+                                                    {subItem.title}
+                                                </span>
+                                                <MoveRight className="w-4 h-4 stroke-1" />
                                             </Link>
-                                        ) : (
-                                            <p className="text-lg">{item.title}</p>
-                                        )}
-                                        {item.items &&
-                                            item.items.map((subItem) => (
-                                                <Link
-                                                    key={subItem.title}
-                                                    to={subItem.href}
-                                                    className="flex justify-between items-center"
-                                                >
-                                                    <span className="text-muted-foreground">
-                                                        {subItem.title}
-                                                    </span>
-                                                    <MoveRight className="w-4 h-4 stroke-1" />
-                                                </Link>
-                                            ))}
-                                    </div>
+                                        ))}
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
             {children}
         </header>
