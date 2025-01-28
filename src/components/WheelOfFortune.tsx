@@ -1,5 +1,8 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Path, Circle, Text, Triangle, Group, Shadow } from "fabric";
+import { Canvas as FabricCanvas, Circle, Group } from "fabric";
+import { createWheelSegment } from "./wheel/WheelSegment";
+import { createWheelCenter } from "./wheel/WheelCenter";
+import { createWheelPointer } from "./wheel/WheelPointer";
 
 interface WheelProps {
   onSpinEnd: (category: string) => void;
@@ -52,98 +55,22 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
     wheelGroup.add(outerCircle);
 
     CATEGORIES.forEach((category, index) => {
-      const startAngle = index * anglePerSegment;
-      const endAngle = (index + 1) * anglePerSegment;
-
-      const path = new Path(createArcPath(0, 0, radius, startAngle, endAngle), {
-        fill: COLORS[index],
-        stroke: '#2D3748',
-        strokeWidth: 1,
-        selectable: false,
-        shadow: new Shadow({
-          color: 'rgba(0,0,0,0.2)',
-          blur: 4,
-          offsetX: 2,
-          offsetY: 2,
-          affectStroke: false,
-          includeDefaultValues: true,
-          nonScaling: false
-        })
-      });
-
-      const textAngle = startAngle + anglePerSegment / 2;
-      const textRadius = radius * 0.65;
-      const text = new Text(category, {
-        left: textRadius * Math.cos(textAngle),
-        top: textRadius * Math.sin(textAngle),
-        fontSize: 18,
-        fontWeight: 'bold',
-        fill: '#2D3748',
-        fontFamily: 'Arial',
-        originX: 'center',
-        originY: 'center',
-        angle: (textAngle * 180) / Math.PI + 90,
-        selectable: false,
-      });
-
+      const { path, text } = createWheelSegment(
+        category,
+        index,
+        anglePerSegment,
+        radius,
+        COLORS[index]
+      );
       wheelGroup.add(path);
       wheelGroup.add(text);
     });
 
-    const centerCircle = new Circle({
-      left: 0,
-      top: 0,
-      radius: 20,
-      fill: '#2D3748',
-      stroke: '#1A202C',
-      strokeWidth: 2,
-      originX: 'center',
-      originY: 'center',
-      selectable: false,
-      shadow: new Shadow({
-        color: 'rgba(0,0,0,0.3)',
-        blur: 10,
-        offsetX: 2,
-        offsetY: 2,
-        affectStroke: false,
-        includeDefaultValues: true,
-        nonScaling: false
-      })
-    });
-
-    const innerCircle = new Circle({
-      left: 0,
-      top: 0,
-      radius: 10,
-      fill: '#A0AEC0',
-      originX: 'center',
-      originY: 'center',
-      selectable: false,
-    });
-
+    const { centerCircle, innerCircle } = createWheelCenter();
     wheelGroup.add(centerCircle);
     wheelGroup.add(innerCircle);
 
-    const pointer = new Triangle({
-      left: centerX,
-      top: 30,
-      width: 20,
-      height: 30,
-      fill: '#E53E3E',
-      angle: 180,
-      originX: 'center',
-      originY: 'center',
-      selectable: false,
-      shadow: new Shadow({
-        color: 'rgba(0,0,0,0.2)',
-        blur: 4,
-        offsetX: 0,
-        offsetY: 2,
-        affectStroke: false,
-        includeDefaultValues: true,
-        nonScaling: false
-      })
-    });
+    const pointer = createWheelPointer(centerX);
 
     canvas.add(wheelGroup);
     canvas.add(pointer);
@@ -155,25 +82,6 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       canvas.dispose();
     };
   }, []);
-
-  const createArcPath = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
-    const start = {
-      x: cx + r * Math.cos(startAngle),
-      y: cy + r * Math.sin(startAngle),
-    };
-    const end = {
-      x: cx + r * Math.cos(endAngle),
-      y: cy + r * Math.sin(endAngle),
-    };
-
-    const largeArcFlag = endAngle - startAngle <= Math.PI ? "0" : "1";
-    return [
-      "M", cx, cy,
-      "L", start.x, start.y,
-      "A", r, r, 0, largeArcFlag, 1, end.x, end.y,
-      "Z"
-    ].join(" ");
-  };
 
   const spinWheel = () => {
     if (!wheelRef.current || !wheelGroupRef.current || isSpinning) return;
