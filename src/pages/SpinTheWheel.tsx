@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Circle, Trophy } from "lucide-react";
-import { CategorySelector, type Category } from "@/components/CategorySelector";
+import { Trophy } from "lucide-react";
+import { WheelOfFortune } from "@/components/WheelOfFortune";
+import type { Category } from "@/components/CategorySelector";
 
 const SpinTheWheel = () => {
   const [currentWord, setCurrentWord] = useState<{
@@ -42,21 +42,16 @@ const SpinTheWheel = () => {
     },
   });
 
-  const spinWheel = () => {
+  const handleSpinEnd = (category: Category) => {
     if (!words?.length) {
       toast.error("No words available in this category");
       return;
     }
 
-    setIsSpinning(true);
+    setSelectedCategory(category);
     const randomIndex = Math.floor(Math.random() * words.length);
-    
-    // Simulate wheel spinning animation
-    setTimeout(() => {
-      setCurrentWord(words[randomIndex]);
-      setIsSpinning(false);
-      toast.success("The wheel has stopped!");
-    }, 1500);
+    setCurrentWord(words[randomIndex]);
+    toast.success("The wheel has stopped!");
   };
 
   if (isLoading) {
@@ -69,11 +64,15 @@ const SpinTheWheel = () => {
       <div className="max-w-4xl mx-auto mt-16 text-center">
         <h1 className="text-4xl font-bold mb-8 gradient-text">Spin The Wheel</h1>
         <p className="text-lg text-gray-600 mb-8">
-          Select a category and spin the wheel to learn Hebrew words!
+          Spin the wheel to learn Hebrew words from different categories!
         </p>
 
         <div className="mb-8">
-          <CategorySelector value={selectedCategory} onChange={setSelectedCategory} />
+          <WheelOfFortune
+            onSpinEnd={handleSpinEnd}
+            isSpinning={isSpinning}
+            setIsSpinning={setIsSpinning}
+          />
         </div>
 
         <div className="bg-white rounded-lg shadow-xl p-8 mb-8 min-h-[200px] flex items-center justify-center">
@@ -89,22 +88,11 @@ const SpinTheWheel = () => {
               </div>
             </div>
           ) : (
-            <div className="text-xl text-gray-500 flex flex-col items-center gap-4">
-              <Circle className="w-16 h-16 text-primaryPurple" />
+            <div className="text-xl text-gray-500">
               <p>Spin the wheel to reveal a word!</p>
             </div>
           )}
         </div>
-
-        <Button
-          onClick={spinWheel}
-          disabled={isSpinning}
-          className={`text-xl px-8 py-6 bg-vividPurple hover:bg-vividPurple/90 ${
-            isSpinning ? "animate-spin" : ""
-          }`}
-        >
-          {isSpinning ? "Spinning..." : "Spin the Wheel!"}
-        </Button>
 
         {words && (
           <p className="mt-4 text-sm text-gray-500">
