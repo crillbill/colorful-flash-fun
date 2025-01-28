@@ -22,7 +22,8 @@ const PLACEHOLDER_IMAGES = [
   'https://images.unsplash.com/photo-1582562124811-c09040d0a901',
   'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9',
   'https://images.unsplash.com/photo-1466721591366-2d5fba72006d',
-  'https://images.unsplash.com/photo-1493962853295-0fd70327578a'
+  'https://images.unsplash.com/photo-1493962853295-0fd70327578a',
+  'https://images.unsplash.com/photo-1485833077593-4278bba3f11f'
 ];
 
 const ScavengerHunt = () => {
@@ -118,7 +119,7 @@ const ScavengerHunt = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {PLACEHOLDER_IMAGES.map((image, index) => (
                 <button
                   key={index}
