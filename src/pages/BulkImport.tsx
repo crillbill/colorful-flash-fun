@@ -6,6 +6,7 @@ import { Header1 } from "@/components/ui/header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface WordEntry {
   hebrew: string;
@@ -77,14 +78,18 @@ const BulkImport = () => {
         .from('hebrew_bulk_words')
         .insert(words);
 
-      if (supabaseError) throw supabaseError;
+      if (supabaseError) {
+        console.error('Supabase error:', supabaseError);
+        throw new Error("Failed to import words to database");
+      }
 
-      toast.success("Words imported successfully!");
-      navigate("/");
+      toast.success(`Successfully imported ${words.length} words!`);
+      setTimeout(() => navigate("/"), 1500); // Give time for the toast to be seen
     } catch (err) {
       console.error('Import error:', err);
-      setError(err instanceof Error ? err.message : "Failed to import words");
-      toast.error("Failed to import words");
+      const errorMessage = err instanceof Error ? err.message : "Failed to import words";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -129,13 +134,22 @@ const BulkImport = () => {
               accept=".json"
               onChange={handleFileChange}
               className="cursor-pointer"
+              disabled={isLoading}
             />
 
             <Button 
               onClick={handleImport}
               disabled={isLoading || !file}
+              className="w-full"
             >
-              {isLoading ? "Importing..." : "Import"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Importing...
+                </>
+              ) : (
+                "Import"
+              )}
             </Button>
           </div>
         </div>
