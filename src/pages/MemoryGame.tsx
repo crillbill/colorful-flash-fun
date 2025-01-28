@@ -195,11 +195,11 @@ const MemoryGame = () => {
         <div className="max-w-4xl mx-auto">
           {/* Game controls section */}
           <div className="mb-8">
-            <div className="flex items-center justify-between h-10">
-              <div className="flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center h-10">
                 <CategorySelector value={category} onChange={setCategory} />
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 h-10">
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
                   <Timer className="w-4 h-4" />
                   {formatTime(timer)}
@@ -207,7 +207,7 @@ const MemoryGame = () => {
                 <Button 
                   onClick={shuffleCards} 
                   size="sm"
-                  className="h-8 text-sm font-medium"
+                  className="h-8 text-sm font-medium bg-green-500 hover:bg-green-600"
                 >
                   {isGameStarted ? "Restart Game" : "Start Game"}
                 </Button>
