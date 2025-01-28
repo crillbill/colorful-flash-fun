@@ -14,8 +14,8 @@ interface ScavengerItem {
   hebrew: string;
   english: string;
   transliteration: string | null;
-  category: string;
-  hint: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 const PLACEHOLDER_IMAGES = [
@@ -40,7 +40,7 @@ const ScavengerHunt = () => {
         .in('english', ['table', 'chair', 'computer', 'book', 'desk']);
 
       if (error) throw error;
-      return data as ScavengerItem[];
+      return data;
     },
   });
 
