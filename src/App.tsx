@@ -15,6 +15,7 @@ import ImportWords from "./pages/ImportWords";
 import SpinTheWheel from "./pages/SpinTheWheel";
 import "./App.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 
 // Create a new client
 const queryClient = new QueryClient();
