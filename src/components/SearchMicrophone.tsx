@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic } from 'lucide-react';
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SearchMicrophoneProps {
   onTranscription: (text: string) => void;
@@ -34,42 +35,42 @@ const SearchMicrophone: React.FC<SearchMicrophoneProps> = ({ onTranscription }) 
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const formData = new FormData();
-        formData.append('file', audioBlob, 'audio.webm');
-        formData.append('model', 'whisper-1');
+        const reader = new FileReader();
+        
+        reader.onload = async () => {
+          if (reader.result) {
+            const base64Audio = (reader.result as string).split(',')[1];
+            
+            try {
+              const { data, error } = await supabase.functions.invoke('dictionary-voice', {
+                body: { audio: base64Audio }
+              });
 
-        try {
-          const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            },
-            body: formData,
-          });
+              if (error) throw error;
 
-          if (!response.ok) {
-            throw new Error('Transcription failed');
+              if (data.text) {
+                const transcribedText = data.text.toLowerCase()
+                  .replace(/thanks for watching!?/gi, '')
+                  .replace(/thank you!?/gi, '')
+                  .replace(/goodbye!?/gi, '')
+                  .replace(/hello!?/gi, '')
+                  .replace(/[.,!?]/g, '')
+                  .trim();
+
+                if (transcribedText) {
+                  onTranscription(transcribedText);
+                }
+              }
+            } catch (error) {
+              console.error('Transcription error:', error);
+              toast.error("Failed to transcribe audio");
+            }
           }
+        };
 
-          const data = await response.json();
-          const transcribedText = data.text.toLowerCase()
-            .replace(/thanks for watching!?/gi, '')
-            .replace(/thank you!?/gi, '')
-            .replace(/goodbye!?/gi, '')
-            .replace(/hello!?/gi, '')
-            .replace(/[.,!?]/g, '')
-            .trim();
-
-          if (transcribedText) {
-            onTranscription(transcribedText);
-          }
-        } catch (error) {
-          console.error('Transcription error:', error);
-          toast.error("Failed to transcribe audio");
-        } finally {
-          setIsListening(false);
-          stream.getTracks().forEach(track => track.stop());
-        }
+        reader.readAsDataURL(audioBlob);
+        setIsListening(false);
+        stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorder.start();
