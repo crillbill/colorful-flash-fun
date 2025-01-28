@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface WordEntry {
+  rank?: number;
   hebrew: string;
   english: string;
   transliteration?: string;
@@ -49,7 +50,7 @@ const BulkImport = () => {
       }
       
       return {
-        word_number: index + 1,
+        word_number: entry.rank || index + 1,
         hebrew: entry.hebrew,
         english: entry.english,
         transliteration: entry.transliteration || null
@@ -116,14 +117,10 @@ const BulkImport = () => {
               <pre className="bg-gray-100 p-4 rounded-md text-sm">
 {`[
   {
-    "hebrew": "שָׁלוֹם",
-    "english": "hello",
-    "transliteration": "shalom"
-  },
-  {
-    "hebrew": "תּוֹדָה",
-    "english": "thank you",
-    "transliteration": "toda"
+    "rank": 1,
+    "hebrew": "של",
+    "english": "of / belongs to",
+    "transliteration": "shel"
   }
 ]`}
               </pre>
