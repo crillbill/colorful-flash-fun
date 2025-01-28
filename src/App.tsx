@@ -9,8 +9,6 @@ import SentenceBuilder from "./pages/SentenceBuilder";
 import Hangman from "./pages/Hangman";
 import MemoryGame from "./pages/MemoryGame";
 import PronunciationChallenge from "./pages/PronunciationChallenge";
-import ScavengerHunt from "./pages/ScavengerHunt";
-import ScavengerHuntAdmin from "./pages/ScavengerHuntAdmin";
 import Login from "./pages/Login";
 import Greetings from "./pages/Greetings";
 import ImportWords from "./pages/ImportWords";
@@ -36,8 +34,6 @@ function App() {
           <Route path="/hangman" element={<Hangman />} />
           <Route path="/memory-game" element={<MemoryGame />} />
           <Route path="/pronunciation-challenge" element={<PronunciationChallenge />} />
-          <Route path="/scavenger-hunt" element={<ScavengerHunt />} />
-          <Route path="/scavenger-hunt-admin" element={<ScavengerHuntAdmin />} />
           <Route path="/login" element={<Login />} />
           <Route path="/greetings" element={<Greetings />} />
           <Route path="/import-words" element={<ImportWords />} />
