@@ -20,15 +20,22 @@ const Dictionary = () => {
       
       console.log('Searching for:', searchTerm); // Debug log
       
+      // Trim the search term and ensure it's not empty
+      const trimmedSearch = searchTerm.trim();
+      if (!trimmedSearch) return [];
+
       const { data, error } = await supabase
         .from('hebrew_bulk_words')
         .select('hebrew, english, transliteration')
-        .ilike('english', `%${searchTerm}%`)
+        .textSearch('english', trimmedSearch, {
+          type: 'plain',
+          config: 'english'
+        })
         .limit(10);
 
       if (error) {
         console.error('Error fetching words:', error);
-        return [];
+        throw error;
       }
 
       console.log('Search results:', data); // Debug log
