@@ -4,69 +4,37 @@ import { Button } from "@/components/ui/button";
 import { Timer } from "lucide-react";
 import { Header1 } from "@/components/ui/header";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface MemoryCard {
   id: number;
   hebrew: string;
   english: string;
-  imageUrl: string;
+  imageUrl?: string;
   isFlipped: boolean;
   isMatched: boolean;
   showHebrew: boolean;
 }
 
-const initialCards: Omit<MemoryCard, 'id' | 'isFlipped' | 'isMatched' | 'showHebrew'>[] = [
-  {
-    hebrew: "כלב",
-    english: "dog",
-    imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1",
-  },
-  {
-    hebrew: "חתול",
-    english: "cat",
-    imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba",
-  },
-  {
-    hebrew: "ציפור",
-    english: "bird",
-    imageUrl: "https://images.unsplash.com/photo-1444464666168-49d633b86797",
-  },
-  {
-    hebrew: "דג",
-    english: "fish",
-    imageUrl: "https://images.unsplash.com/photo-1524704654690-b56c05c78a00",
-  },
-  {
-    hebrew: "סוס",
-    english: "horse",
-    imageUrl: "https://images.unsplash.com/photo-1534073737927-85f1ebff1f5d",
-  },
-  {
-    hebrew: "פרה",
-    english: "cow",
-    imageUrl: "https://images.unsplash.com/photo-1546445317-29f4545e9d53",
-  },
-  {
-    hebrew: "ארנב",
-    english: "rabbit",
-    imageUrl: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308",
-  },
-  {
-    hebrew: "אריה",
-    english: "lion",
-    imageUrl: "https://images.unsplash.com/photo-1546182990-dffeafbe841d",
-  },
-  {
-    hebrew: "פיל",
-    english: "elephant",
-    imageUrl: "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46",
-  },
-  {
-    hebrew: "קוף",
-    english: "monkey",
-    imageUrl: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9",
-  },
-];
+interface HebrewWord {
+  id: string;
+  hebrew: string;
+  english: string;
+}
+
+const fetchHebrewWords = async () => {
+  const { data, error } = await supabase
+    .from('hebrew_words')
+    .select('*')
+    .limit(10);
+  
+  if (error) {
+    throw error;
+  }
+  
+  return data;
+};
 
 const MemoryGame = () => {
   const [cards, setCards] = useState<MemoryCard[]>([]);
@@ -75,6 +43,11 @@ const MemoryGame = () => {
   const [timer, setTimer] = useState<number>(0);
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
   const [isProcessingMatch, setIsProcessingMatch] = useState<boolean>(false);
+
+  const { data: hebrewWords, isLoading, error } = useQuery({
+    queryKey: ['hebrewWords'],
+    queryFn: fetchHebrewWords,
+  });
 
   useEffect(() => {
     if (isGameStarted) {
@@ -86,27 +59,34 @@ const MemoryGame = () => {
   }, [isGameStarted]);
 
   const shuffleCards = () => {
-    // Create pairs of cards, ensuring one Hebrew and one image for each pair
-    const cardPairs = [...initialCards].flatMap((card, index) => {
+    if (!hebrewWords || hebrewWords.length === 0) {
+      toast.error("No words available to start the game");
+      return;
+    }
+
+    // Create pairs of cards from hebrew words
+    const cardPairs = hebrewWords.flatMap((word: HebrewWord, index) => {
       // First card of the pair shows Hebrew
       const hebrewCard = {
-        ...card,
-        id: index * 2, // Using index to ensure unique IDs
+        id: index * 2,
+        hebrew: word.hebrew,
+        english: word.english,
         isFlipped: false,
         isMatched: false,
         showHebrew: true,
       };
       
-      // Second card of the pair shows image
-      const imageCard = {
-        ...card,
+      // Second card of the pair shows English
+      const englishCard = {
         id: index * 2 + 1,
+        hebrew: word.hebrew,
+        english: word.english,
         isFlipped: false,
         isMatched: false,
         showHebrew: false,
       };
       
-      return [hebrewCard, imageCard];
+      return [hebrewCard, englishCard];
     });
 
     // Shuffle the cards
@@ -150,7 +130,7 @@ const MemoryGame = () => {
         ));
         setMatchedPairs((prev) => {
           const newMatchedPairs = prev + 1;
-          if (newMatchedPairs === initialCards.length) {
+          if (newMatchedPairs === hebrewWords.length) {
             toast.success("Congratulations! You've completed the game!");
             setIsGameStarted(false);
           }
@@ -176,6 +156,14 @@ const MemoryGame = () => {
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-white p-8 pt-24 text-center">Loading words...</div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen bg-white p-8 pt-24 text-center">Error loading words</div>;
+  }
 
   return (
     <>
@@ -204,44 +192,12 @@ const MemoryGame = () => {
                 <Card className="w-full h-40 cursor-pointer">
                   <div className="flip-card-inner w-full h-full">
                     {/* Front of card */}
-                    {card.showHebrew ? (
-                      <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
-                        {card.hebrew}
-                      </div>
-                    ) : (
-                      <div className="flip-card-front w-full h-full relative">
-                        <img
-                          src={card.imageUrl}
-                          alt={card.english}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <span className="text-white text-xl font-bold">
-                            {card.english}
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                    <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
+                      {card.showHebrew ? card.hebrew : card.english}
+                    </div>
                     {/* Back of card */}
-                    <div className="flip-card-back w-full h-full relative">
-                      {!card.showHebrew ? (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
-                          {card.hebrew}
-                        </div>
-                      ) : (
-                        <>
-                          <img
-                            src={card.imageUrl}
-                            alt={card.english}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <span className="text-white text-xl font-bold">
-                              {card.english}
-                            </span>
-                          </div>
-                        </>
-                      )}
+                    <div className="flip-card-back w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
+                      {!card.showHebrew ? card.hebrew : card.english}
                     </div>
                   </div>
                 </Card>
@@ -250,7 +206,7 @@ const MemoryGame = () => {
           </div>
 
           <div className="text-center text-lg font-semibold">
-            Matched Pairs: {matchedPairs} / {initialCards.length}
+            Matched Pairs: {matchedPairs} / {hebrewWords?.length || 0}
           </div>
         </div>
       </div>
