@@ -44,7 +44,7 @@ const LetterMatching = () => {
 
       if (data) {
         setLetters(data);
-        setTotalRounds(data.length); // Set total rounds to match total number of letters
+        setTotalRounds(data.length);
       }
     } catch (error) {
       console.error('Error fetching Hebrew letters:', error);
@@ -70,7 +70,7 @@ const LetterMatching = () => {
     setCurrentRound(1);
     setGameActive(true);
     setShowHint(false);
-    setRemainingLetters(shuffleArray([...letters])); // Initialize remaining letters
+    setRemainingLetters(shuffleArray([...letters]));
     setupRound();
     toast("New game started! Match all Hebrew letters to their names.");
   };
@@ -78,7 +78,6 @@ const LetterMatching = () => {
   const setupRound = () => {
     if (remainingLetters.length === 0) return;
     
-    // Take the next letter from remaining letters
     const nextLetter = remainingLetters[0];
     setCurrentLetter(nextLetter);
     setShowHint(false);
@@ -109,7 +108,6 @@ const LetterMatching = () => {
       });
     }
 
-    // Remove the current letter from remaining letters
     setRemainingLetters(prev => prev.slice(1));
 
     if (currentRound < totalRounds) {
@@ -143,33 +141,24 @@ const LetterMatching = () => {
               {gameActive && currentLetter && (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <div 
-                      className="text-8xl font-bold mb-4"
-                      style={{ color: colors.vividPurple }}
-                    >
-                      {currentLetter.letter}
-                    </div>
-                    {currentLetter.transliteration && (
+                    <div className="flex flex-col items-center gap-2">
                       <div 
-                        className="relative text-xl mb-2 cursor-pointer"
-                        onClick={() => setShowHint(!showHint)}
+                        className="text-8xl font-bold"
+                        style={{ color: colors.vividPurple }}
+                      >
+                        {currentLetter.letter}
+                      </div>
+                      <div 
+                        className="text-2xl font-medium"
                         style={{ color: colors.secondaryPurple }}
                       >
-                        {showHint ? (
-                          <>
-                            Transliteration: {currentLetter.transliteration}
-                          </>
-                        ) : (
-                          <div className="flex items-center justify-center gap-2 p-2 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
-                            <Eye className="h-4 w-4" />
-                            Click to reveal transliteration
-                          </div>
-                        )}
+                        {currentLetter.transliteration || "No transliteration available"}
                       </div>
-                    )}
+                    </div>
+                    
                     {currentLetter.sound_description && (
                       <div 
-                        className="text-md"
+                        className="text-md mt-2"
                         style={{ color: colors.secondaryPurple }}
                       >
                         Sound: {currentLetter.sound_description}
