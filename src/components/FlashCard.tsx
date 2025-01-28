@@ -56,8 +56,11 @@ export const FlashCard = ({
     onNext();
   };
 
-  const handlePronunciationResult = (isCorrect: boolean) => {
+  const handlePronunciationResult = (transcribedText: string) => {
     stopProcessing();
+    
+    // Evaluate the transcribed text against the expected word
+    const isCorrect = evaluatePronunciation(transcribedText, question);
     
     const score = isCorrect ? 
       Math.floor(Math.random() * 21) + 80 : // 80-100 for correct
@@ -68,6 +71,16 @@ export const FlashCard = ({
     setTimeout(() => {
       handleAnswer(isCorrect);
     }, 1500);
+  };
+
+  const evaluatePronunciation = (transcribed: string, expected: string): boolean => {
+    const normalizedTranscribed = transcribed.toLowerCase().trim();
+    const normalizedExpected = expected.toLowerCase().trim();
+    
+    // Simple exact match or contains check
+    return normalizedTranscribed === normalizedExpected || 
+           normalizedTranscribed.includes(normalizedExpected) ||
+           normalizedExpected.includes(normalizedTranscribed);
   };
 
   return (

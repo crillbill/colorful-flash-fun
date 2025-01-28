@@ -40,8 +40,10 @@ const Greetings = () => {
     }
   ];
 
-  const handlePronunciationResult = (word: string, isCorrect: boolean) => {
+  const handlePronunciationResult = (transcribedText: string) => {
     setActiveListening(null);
+    const isCorrect = evaluatePronunciation(transcribedText, activeListening || '');
+    
     if (isCorrect) {
       toast.success("Perfect pronunciation!", {
         description: "Great job! You pronounced it correctly.",
@@ -49,13 +51,23 @@ const Greetings = () => {
       });
       speakWord("Excellent! Your pronunciation was perfect.", false);
     } else {
-      const tip = getPronunciationTip(word);
+      const tip = getPronunciationTip(activeListening || '');
       toast.error("Let's try again", {
         description: tip,
         duration: 5000
       });
       speakWord(`Let's practice once more. ${tip}`, false);
     }
+  };
+
+  const evaluatePronunciation = (transcribed: string, expected: string): boolean => {
+    const normalizedTranscribed = transcribed.toLowerCase().trim();
+    const normalizedExpected = expected.toLowerCase().trim();
+    
+    // Simple exact match or contains check
+    return normalizedTranscribed === normalizedExpected || 
+           normalizedTranscribed.includes(normalizedExpected) ||
+           normalizedExpected.includes(normalizedTranscribed);
   };
 
   const getPronunciationTip = (word: string) => {
@@ -144,7 +156,7 @@ const Greetings = () => {
           {activeListening && (
             <VoiceInterface
               currentWord={activeListening}
-              onPronunciationResult={(isCorrect) => handlePronunciationResult(activeListening, isCorrect)}
+              onPronunciationResult={handlePronunciationResult}
               isListening={!!activeListening}
             />
           )}
