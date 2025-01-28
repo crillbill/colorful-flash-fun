@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Path, Circle, Text } from "fabric";
+import { Canvas as FabricCanvas, Path, Circle, Text, Triangle } from "fabric";
 
 interface WheelProps {
   onSpinEnd: (category: string) => void;
@@ -8,7 +8,7 @@ interface WheelProps {
 }
 
 const CATEGORIES = ["Phrases", "Words", "Letters", "Verbs", "All"];
-const COLORS = ["#F4F1FF", "#E8F4FF", "#FFF1F8", "#F2FCE2", "#FEF7CD"];
+const COLORS = ["#4299E1", "#E53E3E", "#48BB78", "#ECC94B", "#9F7AEA"];
 
 export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,25 +30,50 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
     const radius = 150;
     const anglePerSegment = (2 * Math.PI) / CATEGORIES.length;
 
+    // Add outer circle for border
+    const outerCircle = new Circle({
+      left: centerX,
+      top: centerY,
+      radius: radius + 5,
+      fill: 'transparent',
+      stroke: '#2D3748',
+      strokeWidth: 3,
+      originX: 'center',
+      originY: 'center',
+      selectable: false,
+    });
+    canvas.add(outerCircle);
+
     CATEGORIES.forEach((category, index) => {
-      // Create segment
+      // Create segment with border
       const startAngle = index * anglePerSegment;
       const endAngle = (index + 1) * anglePerSegment;
 
       const path = new Path(createArcPath(centerX, centerY, radius, startAngle, endAngle), {
         fill: COLORS[index],
+        stroke: '#2D3748',
+        strokeWidth: 1,
         selectable: false,
+        shadow: new (window as any).fabric.Shadow({
+          color: 'rgba(0,0,0,0.2)',
+          blur: 4,
+          offsetX: 2,
+          offsetY: 2,
+        }),
       });
 
-      // Add text
+      // Add text with better positioning and rotation
       const textAngle = startAngle + anglePerSegment / 2;
+      const textRadius = radius * 0.65; // Position text closer to outer edge
       const text = new Text(category, {
-        left: centerX + (radius * 0.7) * Math.cos(textAngle),
-        top: centerY + (radius * 0.7) * Math.sin(textAngle),
-        fontSize: 16,
-        fontFamily: "Arial",
-        originX: "center",
-        originY: "center",
+        left: centerX + textRadius * Math.cos(textAngle),
+        top: centerY + textRadius * Math.sin(textAngle),
+        fontSize: 18,
+        fontWeight: 'bold',
+        fill: '#2D3748',
+        fontFamily: 'Arial',
+        originX: 'center',
+        originY: 'center',
         angle: (textAngle * 180) / Math.PI + 90,
         selectable: false,
       });
@@ -56,19 +81,57 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       canvas.add(path, text);
     });
 
-    // Add center circle
+    // Add center decoration
     const centerCircle = new Circle({
       left: centerX,
       top: centerY,
+      radius: 20,
+      fill: '#2D3748',
+      stroke: '#1A202C',
+      strokeWidth: 2,
+      originX: 'center',
+      originY: 'center',
+      selectable: false,
+      shadow: new (window as any).fabric.Shadow({
+        color: 'rgba(0,0,0,0.3)',
+        blur: 10,
+        offsetX: 2,
+        offsetY: 2,
+      }),
+    });
+
+    const innerCircle = new Circle({
+      left: centerX,
+      top: centerY,
       radius: 10,
-      fill: "#6B46C1",
-      originX: "center",
-      originY: "center",
+      fill: '#A0AEC0',
+      originX: 'center',
+      originY: 'center',
       selectable: false,
     });
-    canvas.add(centerCircle);
 
+    // Add pointer
+    const pointer = new Triangle({
+      left: centerX,
+      top: 30,
+      width: 20,
+      height: 30,
+      fill: '#E53E3E',
+      angle: 180,
+      originX: 'center',
+      originY: 'center',
+      selectable: false,
+      shadow: new (window as any).fabric.Shadow({
+        color: 'rgba(0,0,0,0.2)',
+        blur: 4,
+        offsetX: 0,
+        offsetY: 2,
+      }),
+    });
+
+    canvas.add(centerCircle, innerCircle, pointer);
     wheelRef.current = canvas;
+
     return () => {
       canvas.dispose();
     };
@@ -98,8 +161,8 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
 
     setIsSpinning(true);
     const canvas = wheelRef.current;
-    const totalRotation = 3600 + Math.random() * 360; // Spin multiple times + random
-    const duration = 5000; // 5 seconds
+    const totalRotation = 3600 + Math.random() * 720; // More rotations for longer spin
+    const duration = 8000; // 8 seconds for longer spin
     const startTime = Date.now();
 
     const animate = () => {
@@ -107,13 +170,19 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
       
-      // Easing function for smooth deceleration
-      const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-      const currentProgress = easeOut(progress);
+      // Enhanced easing function for more realistic deceleration
+      const easeOut = (t: number) => {
+        const t1 = t - 1;
+        return t1 * t1 * t1 * t1 * t1 + 1;
+      };
       
+      const currentProgress = easeOut(progress);
       const rotation = currentProgress * totalRotation;
+      
       canvas.getObjects().forEach(obj => {
-        obj.rotate(rotation - currentRotation.current);
+        if (obj.type !== 'triangle') { // Don't rotate the pointer
+          obj.rotate(rotation - currentRotation.current);
+        }
       });
       canvas.renderAll();
       
@@ -122,7 +191,6 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        // Calculate final category
         const finalAngle = (totalRotation % 360) * (Math.PI / 180);
         const segmentAngle = (2 * Math.PI) / CATEGORIES.length;
         const categoryIndex = Math.floor(((2 * Math.PI - (finalAngle % (2 * Math.PI))) / segmentAngle) % CATEGORIES.length);
