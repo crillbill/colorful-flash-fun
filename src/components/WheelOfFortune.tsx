@@ -99,7 +99,7 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
     setIsSpinning(true);
     const canvas = wheelRef.current;
     const totalRotation = 3600 + Math.random() * 360; // Spin multiple times + random
-    const duration = 5000;
+    const duration = 5000; // 5 seconds
     const startTime = Date.now();
 
     const animate = () => {
