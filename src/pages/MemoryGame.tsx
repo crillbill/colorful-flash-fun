@@ -195,8 +195,10 @@ const MemoryGame = () => {
         <div className="max-w-4xl mx-auto">
           {/* Game controls section */}
           <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <CategorySelector value={category} onChange={setCategory} />
+            <div className="flex items-center justify-between h-10">
+              <div className="flex-shrink-0">
+                <CategorySelector value={category} onChange={setCategory} />
+              </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
                   <Timer className="w-4 h-4" />
