@@ -6,28 +6,58 @@ import { Header1 } from "@/components/ui/header";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { CategorySelector, type Category } from "@/components/CategorySelector";
 
 interface MemoryCard {
   id: number;
   hebrew: string;
   english: string;
-  imageUrl?: string;
+  transliteration?: string | null;
   isFlipped: boolean;
   isMatched: boolean;
-  showHebrew: boolean;
 }
 
 interface HebrewWord {
   id: string;
   hebrew: string;
   english: string;
+  transliteration: string | null;
 }
 
-const fetchHebrewWords = async () => {
-  const { data, error } = await supabase
-    .from('hebrew_words')
-    .select('*')
-    .limit(10);
+const fetchHebrewData = async (category: Category) => {
+  let query;
+  
+  switch (category) {
+    case "phrases":
+      query = supabase.from('hebrew_phrases').select('*');
+      break;
+    case "words":
+      query = supabase.from('hebrew_words').select('*');
+      break;
+    case "letters":
+      query = supabase.from('hebrew_alphabet').select('*');
+      break;
+    case "verbs":
+      query = supabase.from('hebrew_verbs').select('*');
+      break;
+    case "all":
+      // Fetch from all tables and combine results
+      const [phrases, words, letters, verbs] = await Promise.all([
+        supabase.from('hebrew_phrases').select('*'),
+        supabase.from('hebrew_words').select('*'),
+        supabase.from('hebrew_alphabet').select('*'),
+        supabase.from('hebrew_verbs').select('*')
+      ]);
+      
+      return [
+        ...(phrases.data || []),
+        ...(words.data || []),
+        ...(letters.data || []),
+        ...(verbs.data || [])
+      ];
+  }
+  
+  const { data, error } = await query;
   
   if (error) {
     throw error;
@@ -43,10 +73,12 @@ const MemoryGame = () => {
   const [timer, setTimer] = useState<number>(0);
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
   const [isProcessingMatch, setIsProcessingMatch] = useState<boolean>(false);
+  const [category, setCategory] = useState<Category>("words");
 
-  const { data: hebrewWords, isLoading, error } = useQuery({
-    queryKey: ['hebrewWords'],
-    queryFn: fetchHebrewWords,
+  const { data: hebrewData, isLoading, error } = useQuery({
+    queryKey: ['hebrewData', category],
+    queryFn: () => fetchHebrewData(category),
+    enabled: true,
   });
 
   useEffect(() => {
@@ -59,38 +91,28 @@ const MemoryGame = () => {
   }, [isGameStarted]);
 
   const shuffleCards = () => {
-    if (!hebrewWords || hebrewWords.length === 0) {
+    if (!hebrewData || hebrewData.length === 0) {
       toast.error("No words available to start the game");
       return;
     }
 
-    // Create pairs of cards from hebrew words
-    const cardPairs = hebrewWords.flatMap((word: HebrewWord, index) => {
-      // First card of the pair shows Hebrew
-      const hebrewCard = {
-        id: index * 2,
-        hebrew: word.hebrew,
-        english: word.english,
-        isFlipped: false,
-        isMatched: false,
-        showHebrew: true,
-      };
-      
-      // Second card of the pair shows English
-      const englishCard = {
-        id: index * 2 + 1,
-        hebrew: word.hebrew,
-        english: word.english,
-        isFlipped: false,
-        isMatched: false,
-        showHebrew: false,
-      };
-      
-      return [hebrewCard, englishCard];
-    });
+    // Take a random subset of the data if we have more than 10 items
+    const selectedData = hebrewData.length > 10 
+      ? hebrewData.sort(() => Math.random() - 0.5).slice(0, 10)
+      : hebrewData;
+
+    // Create pairs of cards
+    const cardPairs = selectedData.map((word: HebrewWord, index) => ({
+      id: index,
+      hebrew: word.hebrew,
+      english: word.english,
+      transliteration: word.transliteration,
+      isFlipped: false,
+      isMatched: false,
+    }));
 
     // Shuffle the cards
-    const shuffledCards = cardPairs.sort(() => Math.random() - 0.5);
+    const shuffledCards = [...cardPairs].sort(() => Math.random() - 0.5);
     setCards(shuffledCards);
     setFlippedCards([]);
     setMatchedPairs(0);
@@ -102,7 +124,7 @@ const MemoryGame = () => {
   const handleCardClick = (cardId: number) => {
     if (
       !isGameStarted ||
-      isProcessingMatch || // Prevent new card flips while processing a match
+      isProcessingMatch ||
       flippedCards.includes(cardId)
     ) {
       return;
@@ -130,7 +152,7 @@ const MemoryGame = () => {
         ));
         setMatchedPairs((prev) => {
           const newMatchedPairs = prev + 1;
-          if (newMatchedPairs === hebrewWords.length) {
+          if (newMatchedPairs === hebrewData.length) {
             toast.success("Congratulations! You've completed the game!");
             setIsGameStarted(false);
           }
@@ -170,13 +192,16 @@ const MemoryGame = () => {
       <Header1 />
       <div className="min-h-screen bg-white p-8 pt-24">
         <div className="max-w-4xl mx-auto space-y-8">
-          <div className="flex justify-between items-center">
-            <Button onClick={shuffleCards} size="lg" className="bg-primary">
-              {isGameStarted ? "Restart Game" : "Start Game"}
-            </Button>
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <Timer className="w-6 h-6" />
-              {formatTime(timer)}
+          <div className="flex flex-col gap-4">
+            <CategorySelector value={category} onChange={setCategory} />
+            <div className="flex justify-between items-center">
+              <Button onClick={shuffleCards} size="lg" className="bg-primary">
+                {isGameStarted ? "Restart Game" : "Start Game"}
+              </Button>
+              <div className="flex items-center gap-2 text-lg font-semibold">
+                <Timer className="w-6 h-6" />
+                {formatTime(timer)}
+              </div>
             </div>
           </div>
 
@@ -189,15 +214,23 @@ const MemoryGame = () => {
                 }`}
                 onClick={() => handleCardClick(card.id)}
               >
-                <Card className="w-full h-40 cursor-pointer">
+                <Card className="w-full h-48 cursor-pointer">
                   <div className="flip-card-inner w-full h-full">
-                    {/* Front of card */}
-                    <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
-                      {card.showHebrew ? card.hebrew : card.english}
+                    {/* Front of card (blank) */}
+                    <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF]">
+                      <span className="text-white text-2xl font-bold">?</span>
                     </div>
-                    {/* Back of card */}
-                    <div className="flip-card-back w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF] text-white text-2xl font-bold">
-                      {!card.showHebrew ? card.hebrew : card.english}
+                    {/* Back of card (content) */}
+                    <div className="flip-card-back w-full h-full flex flex-col items-center justify-center p-4 bg-white text-center gap-2">
+                      <span className="text-2xl font-bold text-gray-900" dir="rtl">
+                        {card.hebrew}
+                      </span>
+                      <span className="text-sm text-gray-600">
+                        {card.transliteration}
+                      </span>
+                      <span className="text-base text-gray-800">
+                        {card.english}
+                      </span>
                     </div>
                   </div>
                 </Card>
@@ -206,7 +239,7 @@ const MemoryGame = () => {
           </div>
 
           <div className="text-center text-lg font-semibold">
-            Matched Pairs: {matchedPairs} / {hebrewWords?.length || 0}
+            Matched Pairs: {matchedPairs} / {hebrewData?.length || 0}
           </div>
         </div>
       </div>
