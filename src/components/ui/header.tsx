@@ -11,7 +11,12 @@ import { Menu, MoveRight, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-function Header1() {
+interface Header1Props {
+    children?: React.ReactNode;
+    className?: string;
+}
+
+function Header1({ children, className }: Header1Props) {
     const navigationItems = [
         {
             title: "Home",
@@ -66,7 +71,7 @@ function Header1() {
 
     const [isOpen, setOpen] = useState(false);
     return (
-        <header className="w-full z-40 fixed top-0 left-0 bg-background">
+        <header className={`w-full z-40 fixed top-0 left-0 bg-background ${className || ''}`}>
             <div className="container relative mx-auto min-h-20 flex gap-4 flex-row lg:grid lg:grid-cols-3 items-center">
                 <div className="justify-start items-center gap-4 lg:flex hidden flex-row">
                     <NavigationMenu className="flex justify-start items-start">
@@ -173,6 +178,7 @@ function Header1() {
                     )}
                 </div>
             </div>
+            {children}
         </header>
     );
 }
