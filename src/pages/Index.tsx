@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
-import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Type } from "lucide-react";
+import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Type, Upload } from "lucide-react";
 
 const Index = () => {
   return (
@@ -86,6 +86,13 @@ const Index = () => {
               <Button className="w-full h-32 text-xl bg-[#475569] hover:bg-[#475569]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
                 <Type className="w-6 h-6" />
                 Fill in the Blank
+              </Button>
+            </Link>
+
+            <Link to="/bulk-import" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#475569] hover:bg-[#475569]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Upload className="w-6 h-6" />
+                Bulk Import Words
               </Button>
             </Link>
           </div>

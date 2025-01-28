@@ -1,46 +1,39 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Flashcards from "./pages/Flashcards";
-import MultipleChoice from "./pages/MultipleChoice";
-import WordSearch from "./pages/WordSearch";
-import LetterMatching from "./pages/LetterMatching";
-import FillInTheBlank from "./pages/FillInTheBlank";
-import SentenceBuilder from "./pages/SentenceBuilder";
-import Hangman from "./pages/Hangman";
-import MemoryGame from "./pages/MemoryGame";
-import PronunciationChallenge from "./pages/PronunciationChallenge";
-import Login from "./pages/Login";
+import BulkImport from "./pages/BulkImport";
 import Greetings from "./pages/Greetings";
+import LetterMatching from "./pages/LetterMatching";
+import Flashcards from "./pages/Flashcards";
+import WordSearch from "./pages/WordSearch";
+import Hangman from "./pages/Hangman";
+import SentenceBuilder from "./pages/SentenceBuilder";
+import MultipleChoice from "./pages/MultipleChoice";
+import Pronunciation from "./pages/Pronunciation";
+import MemoryGame from "./pages/MemoryGame";
+import FillInTheBlank from "./pages/FillInTheBlank";
+import Login from "./pages/Login";
 import ImportWords from "./pages/ImportWords";
-import "./App.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-
-// Create a new client
-const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/flashcards" element={<Flashcards />} />
-          <Route path="/multiple-choice" element={<MultipleChoice />} />
-          <Route path="/word-search" element={<WordSearch />} />
-          <Route path="/letter-matching" element={<LetterMatching />} />
-          <Route path="/fill-in-the-blank" element={<FillInTheBlank />} />
-          <Route path="/sentence-builder" element={<SentenceBuilder />} />
-          <Route path="/hangman" element={<Hangman />} />
-          <Route path="/memory-game" element={<MemoryGame />} />
-          <Route path="/pronunciation-challenge" element={<PronunciationChallenge />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/greetings" element={<Greetings />} />
-          <Route path="/import-words" element={<ImportWords />} />
-        </Routes>
-        <Toaster />
-      </Router>
-    </QueryClientProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/bulk-import" element={<BulkImport />} />
+        <Route path="/greetings" element={<Greetings />} />
+        <Route path="/letter-matching" element={<LetterMatching />} />
+        <Route path="/flashcards" element={<Flashcards />} />
+        <Route path="/word-search" element={<WordSearch />} />
+        <Route path="/hangman" element={<Hangman />} />
+        <Route path="/sentence-builder" element={<SentenceBuilder />} />
+        <Route path="/multiple-choice" element={<MultipleChoice />} />
+        <Route path="/pronunciation" element={<Pronunciation />} />
+        <Route path="/memory-game" element={<MemoryGame />} />
+        <Route path="/fill-in-the-blank" element={<FillInTheBlank />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/import" element={<ImportWords />} />
+      </Routes>
+    </Router>
   );
 }
 
