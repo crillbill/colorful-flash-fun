@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
-import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Type } from "lucide-react";
+import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Type, RotateCw } from "lucide-react";
 
 const Index = () => {
   return (
@@ -93,6 +93,13 @@ const Index = () => {
               <Button className="w-full h-32 text-xl bg-[#EA580C] hover:bg-[#EA580C]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
                 <Search className="w-6 h-6" />
                 Scavenger Hunt
+              </Button>
+            </Link>
+
+            <Link to="/spin-the-wheel" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <RotateCw className="w-6 h-6" />
+                Spin The Wheel
               </Button>
             </Link>
           </div>

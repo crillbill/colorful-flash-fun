@@ -12,9 +12,9 @@ import PronunciationChallenge from "./pages/PronunciationChallenge";
 import Login from "./pages/Login";
 import Greetings from "./pages/Greetings";
 import ImportWords from "./pages/ImportWords";
+import SpinTheWheel from "./pages/SpinTheWheel";
 import "./App.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "sonner";
 
 // Create a new client
 const queryClient = new QueryClient();
@@ -37,6 +37,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/greetings" element={<Greetings />} />
           <Route path="/import-words" element={<ImportWords />} />
+          <Route path="/spin-the-wheel" element={<SpinTheWheel />} />
         </Routes>
         <Toaster />
       </Router>
