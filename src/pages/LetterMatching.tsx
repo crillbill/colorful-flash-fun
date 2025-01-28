@@ -14,6 +14,8 @@ interface HebrewLetter {
   name: string;
   sound_description: string | null;
   transliteration: string | null;
+  hebrew: string;
+  english: string;
 }
 
 const LetterMatching = () => {
@@ -37,16 +39,22 @@ const LetterMatching = () => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('hebrew_alphabet')
-        .select('letter, name, sound_description, transliteration');
+        .select('letter, name, sound_description, transliteration, hebrew, english');
       
       if (error) {
+        console.error('Supabase error:', error);
+        toast.error("Failed to load Hebrew letters. Please try refreshing the page.");
         throw error;
       }
 
-      if (data) {
-        setLetters(data);
-        setTotalRounds(data.length);
+      if (!data || data.length === 0) {
+        toast.error("No Hebrew letters found in the database.");
+        return;
       }
+
+      console.log('Fetched letters:', data);
+      setLetters(data);
+      setTotalRounds(data.length);
     } catch (error) {
       console.error('Error fetching Hebrew letters:', error);
       toast.error("Failed to load Hebrew letters. Please try refreshing the page.");
