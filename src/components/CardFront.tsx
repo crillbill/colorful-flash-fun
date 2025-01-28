@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Volume2, ArrowLeft, ArrowRight } from "lucide-react";
+import { AudioButton } from "./AudioButton";
 
 interface CardFrontProps {
   question: string;
@@ -55,15 +56,11 @@ export const CardFront = ({
             <ArrowLeft className="h-6 w-6 text-primaryPurple" />
           </Button>
         )}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={onPlayAudio}
-          disabled={isPlaying}
-          className="bg-white/80 hover:bg-white border-primaryPurple/20 hover:border-primaryPurple transition-all duration-300"
-        >
-          <Volume2 className="h-6 w-6 text-primaryPurple" />
-        </Button>
+        <AudioButton
+          isPlaying={isPlaying}
+          onToggle={onPlayAudio}
+          disabled={isListening || isProcessing}
+        />
         {showNext && (
           <Button
             variant="outline"
