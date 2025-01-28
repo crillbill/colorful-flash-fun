@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import BulkImport from "./pages/BulkImport";
 import Greetings from "./pages/Greetings";
 import LetterMatching from "./pages/LetterMatching";
 import Flashcards from "./pages/Flashcards";
@@ -19,7 +18,6 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/bulk-import" element={<BulkImport />} />
         <Route path="/greetings" element={<Greetings />} />
         <Route path="/letter-matching" element={<LetterMatching />} />
         <Route path="/flashcards" element={<Flashcards />} />
