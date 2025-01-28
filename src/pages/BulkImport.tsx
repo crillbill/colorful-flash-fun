@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Header1 } from "@/components/ui/header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const BulkImport = () => {
+  const navigate = useNavigate();
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,86 +18,69 @@ const BulkImport = () => {
     return hebrewRegex.test(text);
   };
 
-  const validateEnglishText = (text: string): boolean => {
-    const englishRegex = /^[a-zA-Z0-9\s.,!?'"-]+$/;
-    return englishRegex.test(text);
-  };
-
   const parseInput = (text: string) => {
-    setError(null);
-    const lines = text.split('\n').filter(line => line.trim());
+    const lines = text.trim().split('\n');
+    const words = [];
     
-    const parsedEntries = lines.map((line, index) => {
-      const parts = line.split(/\s{2,}/).map(part => part.trim());
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
       
-      if (parts.length < 3) {
-        throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Word Number, Hebrew, and English separated by two spaces.`);
-      }
-
-      const [wordNumber, hebrew, english, transliteration] = parts;
+      const [hebrew, english, transliteration] = line.split(',').map(item => item?.trim());
       
-      if (!wordNumber || !hebrew || !english) {
-        throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Number  Hebrew  English  Transliteration`);
-      }
-
-      const numberValue = parseInt(wordNumber);
-      if (isNaN(numberValue)) {
-        throw new Error(`Line ${index + 1}: Word number must be a valid number`);
+      if (!hebrew || !english) {
+        throw new Error(`Invalid format at line ${i + 1}. Each line must contain at least Hebrew and English words separated by commas.`);
       }
       
       if (!validateHebrewText(hebrew)) {
-        throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
-      }
-
-      if (!validateEnglishText(english)) {
-        throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters`);
+        throw new Error(`Invalid Hebrew text at line ${i + 1}`);
       }
       
-      return {
-        word_number: numberValue,
+      words.push({
+        word_number: i + 1,
         hebrew,
         english,
-        transliteration: transliteration || null,
-      };
-    });
-
-    return parsedEntries;
+        transliteration: transliteration || null
+      });
+    }
+    
+    return words;
   };
 
   const handleImport = async () => {
     try {
       setIsLoading(true);
       setError(null);
+
+      const words = parseInput(inputText);
       
-      const entries = parseInput(inputText);
-      
-      if (entries.length === 0) {
-        toast.error("No valid entries found");
-        return;
+      if (words.length === 0) {
+        throw new Error("No valid words found to import");
       }
 
       const { error: supabaseError } = await supabase
         .from('hebrew_bulk_words')
-        .insert(entries);
+        .insert(words);
 
       if (supabaseError) throw supabaseError;
 
-      toast.success(`Successfully imported ${entries.length} entries`);
+      toast.success("Words imported successfully!");
       setInputText("");
-    } catch (error: any) {
-      console.error('Import error:', error);
-      setError(error.message);
-      toast.error(error.message || "Failed to import entries");
+      navigate("/");
+    } catch (err) {
+      console.error('Import error:', err);
+      setError(err instanceof Error ? err.message : "Failed to import words");
+      toast.error("Failed to import words");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-softPurple via-white to-softPeach p-8">
       <Header1 />
-      <div className="min-h-screen bg-white p-8 pt-24">
-        <div className="max-w-2xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto mt-16">
+        <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">Import Bulk Words</h2>
             
@@ -106,23 +91,22 @@ const BulkImport = () => {
             )}
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Paste your content (separate fields with TWO spaces)
-              </label>
-              <p className="text-sm text-muted-foreground">
-                Each entry on a new line. Format: Word Number  Hebrew  English  Transliteration (optional)
+              <p className="text-sm text-gray-600">
+                Enter your words in the following format (one per line):
+                <br />
+                Hebrew word, English translation, Transliteration (optional)
               </p>
-              <pre className="bg-gray-100 p-2 rounded text-sm">
-                1  שָׁלוֹם  Hello  sha-LOM
-                2  תּוֹדָה  Thank you  to-DAH
-              </pre>
-              <Textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="1  שָׁלוֹם  Hello  sha-LOM"
-                className="min-h-[200px] font-mono"
-              />
+              <p className="text-sm text-gray-500 italic">
+                Example: שָׁלוֹם, hello, shalom
+              </p>
             </div>
+
+            <Textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Enter your words here..."
+              className="min-h-[200px]"
+            />
 
             <Button 
               onClick={handleImport}
@@ -133,7 +117,7 @@ const BulkImport = () => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
