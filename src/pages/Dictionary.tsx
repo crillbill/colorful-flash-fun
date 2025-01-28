@@ -188,7 +188,7 @@ const Dictionary = () => {
                                 {Array.from(result.transliterations).join(', ') || 'N/A'}
                               </div>
                             </div>
-                            <div className="flex justify-between items-center">
+                            <div className="flex flex-col space-y-4">
                               <div className="flex flex-col">
                                 {Array.from(result.translations).map((translation, i) => (
                                   <span key={i} className="text-gray-700">
@@ -197,24 +197,24 @@ const Dictionary = () => {
                                   </span>
                                 ))}
                               </div>
-                              <div className="flex items-center gap-6">
-                                <div className="flex gap-4">
-                                  <button
-                                    onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], true)}
-                                    className="p-2 hover:bg-green-50 rounded-full transition-colors"
-                                    aria-label="Correct translation"
-                                  >
-                                    <ThumbsUp className="h-5 w-5 text-green-600" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], false)}
-                                    className="p-2 hover:bg-red-50 rounded-full transition-colors"
-                                    aria-label="Incorrect translation"
-                                  >
-                                    <ThumbsDown className="h-5 w-5 text-red-600" />
-                                  </button>
-                                </div>
-                                <span className="text-2xl font-bold text-gray-800 mr-2" dir="rtl">{result.hebrew}</span>
+                              <div className="flex justify-center gap-4">
+                                <button
+                                  onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], true)}
+                                  className="p-2 hover:bg-green-50 rounded-full transition-colors"
+                                  aria-label="Correct translation"
+                                >
+                                  <ThumbsUp className="h-5 w-5 text-green-600" />
+                                </button>
+                                <button
+                                  onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], false)}
+                                  className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                                  aria-label="Incorrect translation"
+                                >
+                                  <ThumbsDown className="h-5 w-5 text-red-600" />
+                                </button>
+                              </div>
+                              <div className="text-center">
+                                <span className="text-2xl font-bold text-gray-800" dir="rtl">{result.hebrew}</span>
                               </div>
                             </div>
                           </div>
