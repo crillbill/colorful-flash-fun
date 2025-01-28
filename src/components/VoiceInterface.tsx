@@ -3,7 +3,7 @@ import { WebRTCManager } from '@/utils/webrtc/WebRTCManager';
 
 interface VoiceInterfaceProps {
   currentWord: string;
-  onPronunciationResult: (text: string) => void;  // Changed from boolean to string
+  onPronunciationResult: (text: string) => void;
   isListening: boolean;
 }
 
@@ -28,7 +28,6 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       console.log('VoiceInterface: Sending stop_recording command');
       managerRef.current.sendData({ type: 'stop_recording' });
 
-      // Forcefully stop all media tracks
       const mediaStream = managerRef.current.getMediaStream();
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => {
@@ -78,103 +77,31 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     console.log('VoiceInterface: Received message:', event);
 
     if (event.text) {
-      const transcribedText = event.text.toLowerCase().trim();
-      console.log('VoiceInterface: Transcribed text:', transcribedText);
-      onPronunciationResult(transcribedText);
+      // Clean up the transcribed text by removing common phrases and punctuation
+      let transcribedText = event.text.toLowerCase()
+        .replace(/thanks for watching!?/gi, '')
+        .replace(/thank you!?/gi, '')
+        .replace(/goodbye!?/gi, '')
+        .replace(/hello!?/gi, '')
+        .trim();
+
+      // Remove any remaining punctuation
+      transcribedText = transcribedText.replace(/[.,!?]/g, '').trim();
+
+      console.log('VoiceInterface: Cleaned transcribed text:', transcribedText);
+      
+      if (transcribedText) {
+        onPronunciationResult(transcribedText);
+      } else {
+        // If after cleaning there's no text, try using the original text
+        const originalText = event.text.toLowerCase().trim();
+        console.log('VoiceInterface: Using original text:', originalText);
+        onPronunciationResult(originalText);
+      }
     } else if (event.type === 'error') {
       console.error('VoiceInterface: Error event received:', event);
       onPronunciationResult('');
     }
-  };
-
-  const evaluatePronunciation = async (transcribed: string, expected: string): Promise<boolean> => {
-    const normalizedTranscribed = transcribed.toLowerCase().trim();
-    const transliterations = await getHebrewTransliteration(expected);
-    
-    // More lenient matching logic
-    const isMatch = transliterations.some(transliteration => {
-      const normalizedTransliteration = transliteration.toLowerCase().trim();
-      
-      // Split into words for partial matching
-      const transcribedWords = normalizedTranscribed.split(/\s+/);
-      const transliterationWords = normalizedTransliteration.split(/\s+/);
-      
-      // Check for partial matches in either direction
-      const hasMatch = transcribedWords.some(word => 
-        transliterationWords.some(expectedWord => 
-          word.includes(expectedWord) || 
-          expectedWord.includes(word) ||
-          // Levenshtein distance for fuzzy matching
-          levenshteinDistance(word, expectedWord) <= 2
-        )
-      );
-
-      // Log the matching process for debugging
-      console.log('VoiceInterface: Matching details:', {
-        transcribed: transcribedWords,
-        expected: transliterationWords,
-        hasMatch
-      });
-
-      return hasMatch;
-    });
-
-    console.log('VoiceInterface: Pronunciation evaluation:', {
-      transcribed: normalizedTranscribed,
-      expectedVariations: transliterations,
-      isMatch
-    });
-
-    return isMatch;
-  };
-
-  // Helper function for fuzzy matching
-  const levenshteinDistance = (a: string, b: string): number => {
-    if (a.length === 0) return b.length;
-    if (b.length === 0) return a.length;
-
-    const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
-
-    for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
-    for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
-
-    for (let j = 1; j <= b.length; j++) {
-      for (let i = 1; i <= a.length; i++) {
-        const substitutionCost = a[i - 1] === b[j - 1] ? 0 : 1;
-        matrix[j][i] = Math.min(
-          matrix[j][i - 1] + 1,
-          matrix[j - 1][i] + 1,
-          matrix[j - 1][i - 1] + substitutionCost
-        );
-      }
-    }
-
-    return matrix[b.length][a.length];
-  };
-
-  const getHebrewTransliteration = async (hebrewWord: string): Promise<string[]> => {
-    // Map of Hebrew words to their acceptable pronunciation variations
-    const transliterations: { [key: string]: string[] } = {
-      'שלום': [
-        'shalom', 'shalum', 'shalem', 'shulem', 
-        'shallom', 'shallum', 'sholom', 'sholum',
-        'sha lom', 'sha lum', 'sho lom', 'sho lum'
-      ],
-      'מה שלומך היום': [
-        'ma shlomcha hayom', 'mah shlomcha hayom',
-        'ma shlomha hayom', 'ma schlomcha hayom',
-        'ma shalom hayom', 'mah shalom hayom',
-        'ma shlomech hayom', 'ma shlomha',
-        'ma schlom', 'ma shalom'
-      ],
-      'מתי ארוחת צהריים': [
-        'matai aruchat tzohorayim', 'matay aruhat tzohorayim',
-        'matai aruhat zohorayim', 'matai aruchat tsohorayim',
-        'matai aruha', 'matai tzohorayim', 'matai lunch',
-        'matai aruchat', 'matai tsohoraim', 'mata aruchat'
-      ],
-    };
-    return transliterations[hebrewWord.trim()] || [hebrewWord];
   };
 
   useEffect(() => {
