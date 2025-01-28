@@ -192,9 +192,9 @@ const MemoryGame = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-4 pt-16">
-        <div className="max-w-4xl mx-auto space-y-4">
+        <div className="max-w-4xl mx-auto">
           {/* Game controls section */}
-          <div className="flex flex-col gap-2">
+          <div className="mb-6">
             <div className="flex items-center justify-between">
               <CategorySelector value={category} onChange={setCategory} />
               <div className="flex items-center gap-6">
