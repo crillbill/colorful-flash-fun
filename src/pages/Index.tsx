@@ -5,23 +5,23 @@ import { cn } from "@/lib/utils";
 
 const Index = () => {
   const buttonVariants = [
-    "bg-gradient-to-r from-primaryPurple to-vividPurple hover:from-vividPurple hover:to-primaryPurple",
-    "bg-gradient-to-r from-magentaPink to-brightOrange hover:from-brightOrange hover:to-magentaPink",
-    "bg-gradient-to-r from-oceanBlue to-brightBlue hover:from-brightBlue hover:to-oceanBlue",
-    "bg-gradient-to-r from-softPurple to-softPink hover:from-softPink hover:to-softPurple",
+    "bg-gradient-to-r from-primaryPurple to-secondaryPurple hover:from-secondaryPurple hover:to-primaryPurple",
+    "bg-gradient-to-r from-vividPurple to-magentaPink hover:from-magentaPink hover:to-vividPurple",
+    "bg-gradient-to-r from-brightOrange to-oceanBlue hover:from-oceanBlue hover:to-brightOrange",
+    "bg-gradient-to-r from-softPurple to-lightPurple hover:from-lightPurple hover:to-softPurple",
     "bg-gradient-to-r from-softGreen to-softYellow hover:from-softYellow hover:to-softGreen",
     "bg-gradient-to-r from-softOrange to-softPeach hover:from-softPeach hover:to-softOrange",
-    "bg-gradient-to-r from-softBlue to-softPurple hover:from-softPurple hover:to-softBlue",
-    "bg-gradient-to-r from-primaryPurple to-magentaPink hover:from-magentaPink hover:to-primaryPurple",
-    "bg-gradient-to-r from-brightOrange to-oceanBlue hover:from-oceanBlue hover:to-brightOrange",
-    "bg-gradient-to-r from-vividPurple to-brightBlue hover:from-brightBlue hover:to-vividPurple",
-    "bg-gradient-to-r from-softPink to-softPurple hover:from-softPurple hover:to-softPink"
+    "bg-gradient-to-r from-softBlue to-brightBlue hover:from-brightBlue hover:to-softBlue",
+    "bg-gradient-to-r from-primaryPurple to-tertiaryPurple hover:from-tertiaryPurple hover:to-primaryPurple",
+    "bg-gradient-to-r from-vividPurple to-oceanBlue hover:from-oceanBlue hover:to-vividPurple",
+    "bg-gradient-to-r from-magentaPink to-brightOrange hover:from-brightOrange hover:to-magentaPink",
+    "bg-gradient-to-r from-softPurple to-primaryPurple hover:from-primaryPurple hover:to-softPurple"
   ];
 
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-gradient-to-b from-white to-softGray">
+      <div className="min-h-screen bg-gradient-to-b from-pureWhite to-softGray">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl font-bold text-center mb-8 gradient-text animate-float">
             Hebrew Learning Games
