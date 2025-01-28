@@ -117,26 +117,22 @@ function Header1({ children, className }: Header1Props) {
 
     return (
         <header className={`w-full z-40 fixed top-0 left-0 bg-background ${className || ''}`}>
-            <div className="container relative mx-auto min-h-20 flex gap-4 flex-row lg:grid lg:grid-cols-3 items-center">
-                <div className="justify-start items-center gap-4 lg:flex hidden flex-row">
-                    <NavigationMenu className="flex justify-start items-start">
-                        <NavigationMenuList className="flex justify-start gap-4 flex-row">
+            <div className="container relative mx-auto min-h-20 flex items-center justify-between">
+                <div className="flex-1 lg:flex hidden">
+                    <NavigationMenu>
+                        <NavigationMenuList className="flex gap-4">
                             {navigationItems.map((item) => (
                                 <NavigationMenuItem key={item.title}>
                                     {item.href ? (
-                                        <>
-                                            <NavigationMenuLink asChild>
-                                                <Link to={item.href}>
-                                                    <Button variant="ghost">{item.title}</Button>
-                                                </Link>
-                                            </NavigationMenuLink>
-                                        </>
+                                        <NavigationMenuLink asChild>
+                                            <Link to={item.href}>
+                                                <Button variant="ghost">{item.title}</Button>
+                                            </Link>
+                                        </NavigationMenuLink>
                                     ) : (
                                         <>
-                                            <NavigationMenuTrigger className="font-medium text-sm">
-                                                {item.title}
-                                            </NavigationMenuTrigger>
-                                            <NavigationMenuContent className="!w-[450px] p-4">
+                                            <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
+                                            <NavigationMenuContent>
                                                 <div className="flex flex-col lg:grid grid-cols-2 gap-4">
                                                     <div className="flex flex-col h-full justify-between">
                                                         <div className="flex flex-col">
@@ -167,7 +163,8 @@ function Header1({ children, className }: Header1Props) {
                         </NavigationMenuList>
                     </NavigationMenu>
                 </div>
-                <div className="flex-1 lg:col-span-1 max-w-xl mx-auto w-full">
+
+                <div className="flex-1 max-w-xl mx-auto px-4">
                     <div className="relative">
                         <div className="relative flex items-center">
                             <Search className="absolute left-3 h-4 w-4 text-gray-400" />
@@ -236,10 +233,12 @@ function Header1({ children, className }: Header1Props) {
                         )}
                     </div>
                 </div>
-                <div className="flex justify-end w-full gap-4">
+
+                <div className="flex-1 flex justify-end">
                     <Button>Get started</Button>
                 </div>
-                <div className="flex w-12 shrink lg:hidden items-end justify-end">
+
+                <div className="lg:hidden">
                     <Button variant="ghost" onClick={() => setOpen(!isOpen)}>
                         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </Button>
