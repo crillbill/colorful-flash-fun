@@ -20,6 +20,8 @@ const BulkImport = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [importedCount, setImportedCount] = useState(0);
 
   const validateHebrewText = (text: string): boolean => {
     const hebrewRegex = /[\u0590-\u05FF]/;
@@ -30,6 +32,7 @@ const BulkImport = () => {
     if (event.target.files && event.target.files[0]) {
       setFile(event.target.files[0]);
       setError(null);
+      setSuccess(false);
     }
   };
 
@@ -67,6 +70,7 @@ const BulkImport = () => {
 
       setIsLoading(true);
       setError(null);
+      setSuccess(false);
 
       const fileContent = await file.text();
       const words = parseJsonFile(fileContent);
@@ -84,8 +88,16 @@ const BulkImport = () => {
         throw new Error("Failed to import words to database");
       }
 
+      setSuccess(true);
+      setImportedCount(words.length);
       toast.success(`Successfully imported ${words.length} words!`);
-      setTimeout(() => navigate("/"), 1500); // Give time for the toast to be seen
+      
+      // Clear the form
+      setFile(null);
+      if (event?.target) {
+        (event.target as HTMLFormElement).reset();
+      }
+      
     } catch (err) {
       console.error('Import error:', err);
       const errorMessage = err instanceof Error ? err.message : "Failed to import words";
@@ -107,6 +119,14 @@ const BulkImport = () => {
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert>
+                <AlertDescription className="text-green-600">
+                  Successfully imported {importedCount} words!
+                </AlertDescription>
               </Alert>
             )}
 
@@ -134,20 +154,30 @@ const BulkImport = () => {
               disabled={isLoading}
             />
 
-            <Button 
-              onClick={handleImport}
-              disabled={isLoading || !file}
-              className="w-full"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Importing...
-                </>
-              ) : (
-                "Import"
-              )}
-            </Button>
+            <div className="flex gap-4">
+              <Button 
+                onClick={handleImport}
+                disabled={isLoading || !file}
+                className="flex-1"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  "Import"
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => navigate("/")}
+                className="flex-1"
+              >
+                Back to Home
+              </Button>
+            </div>
           </div>
         </div>
       </div>
