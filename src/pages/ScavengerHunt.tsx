@@ -14,35 +14,31 @@ interface ScavengerItem {
   hebrew: string;
   english: string;
   transliteration: string | null;
-  category: 'animals' | 'objects';
+  category: string;
   hint: string | null;
 }
 
 const PLACEHOLDER_IMAGES = [
-  'https://images.unsplash.com/photo-1582562124811-c09040d0a901',
-  'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9',
-  'https://images.unsplash.com/photo-1466721591366-2d5fba72006d',
-  'https://images.unsplash.com/photo-1493962853295-0fd70327578a',
-  'https://images.unsplash.com/photo-1485833077593-4278bba3f11f'
+  'https://images.unsplash.com/photo-1582562124811-c09040d0a901', // table
+  'https://images.unsplash.com/photo-1721322800607-8c38375eef04', // chair
+  'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d', // computer
+  'https://images.unsplash.com/photo-1460925895917-afdab827c52f', // book
+  'https://images.unsplash.com/photo-1483058712412-4245e9b90334'  // desk
 ];
 
 const ScavengerHunt = () => {
-  const [category, setCategory] = useState<Category>("all");
+  const [category, setCategory] = useState<Category>("words");
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [score, setScore] = useState({ correct: 0, total: 0 });
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['scavengerHuntItems', category],
     queryFn: async () => {
-      const query = supabase
-        .from('hebrew_scavenger_hunt')
-        .select('*');
+      const { data, error } = await supabase
+        .from('hebrew_words')
+        .select('*')
+        .in('english', ['table', 'chair', 'computer', 'book', 'desk']);
 
-      if (category !== 'all') {
-        query.eq('category', category);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
       return data as ScavengerItem[];
     },
@@ -63,7 +59,6 @@ const ScavengerHunt = () => {
       toast.error(`Incorrect. The correct answer was ${currentItem.english}`);
     }
 
-    // Move to next item
     if (currentItemIndex < items.length - 1) {
       setCurrentItemIndex(prev => prev + 1);
     } else {
@@ -101,8 +96,8 @@ const ScavengerHunt = () => {
       <div className="min-h-screen bg-white p-8 pt-24">
         <div className="max-w-2xl mx-auto space-y-8">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold">Scavenger Hunt</h1>
-            <CategorySelector value={category} onChange={setCategory} />
+            <h1 className="text-4xl font-bold">Find the Object</h1>
+            <p className="text-lg text-gray-600">Click on the image that matches the Hebrew word</p>
           </div>
 
           <ScoreDisplay correct={score.correct} total={score.total} />
@@ -114,9 +109,6 @@ const ScavengerHunt = () => {
               <p className="text-lg text-gray-600">
                 {currentItem.transliteration && `(${currentItem.transliteration})`}
               </p>
-              {currentItem.hint && (
-                <p className="text-sm text-gray-500 mt-2">Hint: {currentItem.hint}</p>
-              )}
             </div>
 
             <div className="grid grid-cols-3 gap-4">
