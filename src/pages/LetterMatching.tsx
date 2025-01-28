@@ -29,6 +29,7 @@ const LetterMatching = () => {
   const [remainingLetters, setRemainingLetters] = useState<HebrewLetter[]>([]);
   const [totalRounds, setTotalRounds] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [showTransliteration, setShowTransliteration] = useState(false);
 
   useEffect(() => {
     fetchHebrewLetters();
@@ -81,6 +82,7 @@ const LetterMatching = () => {
     setCurrentRound(1);
     setGameActive(true);
     setRemainingLetters(shuffleArray([...letters]));
+    setShowTransliteration(false);
     setupRound();
     toast("New game started! Match all Hebrew letters to their names.");
   };
@@ -121,6 +123,7 @@ const LetterMatching = () => {
     }
 
     setRemainingLetters(prev => prev.slice(1));
+    setShowTransliteration(false);
 
     if (currentRound < totalRounds) {
       setCurrentRound(prev => prev + 1);
@@ -172,22 +175,39 @@ const LetterMatching = () => {
                       >
                         {currentLetter.letter}
                       </div>
-                      <div 
-                        className="text-2xl font-medium"
-                        style={{ color: colors.secondaryPurple }}
-                      >
-                        {currentLetter.transliteration || "No transliteration available"}
+                      
+                      <div className="relative my-4 text-center w-full">
+                        <button 
+                          className={`w-full bg-gray-700/80 backdrop-blur-sm rounded-lg p-4 cursor-pointer transition-all duration-300 ${
+                            showTransliteration ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                          }`}
+                          onClick={() => setShowTransliteration(true)}
+                        >
+                          <span className="text-white font-medium">Show Pronunciation Guide</span>
+                        </button>
+                        <div 
+                          className={`absolute inset-0 bg-white rounded-lg p-4 transition-all duration-300 ${
+                            showTransliteration ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                          }`}
+                        >
+                          <div className="flex flex-col gap-2">
+                            <span className="text-black font-medium text-lg">
+                              {currentLetter.transliteration || "Pronunciation guide not available"}
+                            </span>
+                            <span className="text-gray-500 text-xs">How to pronounce this letter</span>
+                          </div>
+                        </div>
                       </div>
+                      
+                      {currentLetter.sound_description && (
+                        <div 
+                          className="text-md mt-2"
+                          style={{ color: colors.secondaryPurple }}
+                        >
+                          Sound: {currentLetter.sound_description}
+                        </div>
+                      )}
                     </div>
-                    
-                    {currentLetter.sound_description && (
-                      <div 
-                        className="text-md mt-2"
-                        style={{ color: colors.secondaryPurple }}
-                      >
-                        Sound: {currentLetter.sound_description}
-                      </div>
-                    )}
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
