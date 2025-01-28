@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Path, Circle, Text, Triangle } from "fabric";
+import { Canvas as FabricCanvas, Path, Circle, Text, Triangle, Group } from "fabric";
 
 interface WheelProps {
   onSpinEnd: (category: string) => void;
@@ -62,12 +62,15 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
         stroke: '#2D3748',
         strokeWidth: 1,
         selectable: false,
-        shadow: {
+        shadow: new fabric.Shadow({
           color: 'rgba(0,0,0,0.2)',
           blur: 4,
           offsetX: 2,
           offsetY: 2,
-        },
+          affectStroke: false,
+          includeDefaultValues: true,
+          nonScaling: false
+        })
       });
 
       const textAngle = startAngle + anglePerSegment / 2;
@@ -100,12 +103,15 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       originX: 'center',
       originY: 'center',
       selectable: false,
-      shadow: {
+      shadow: new fabric.Shadow({
         color: 'rgba(0,0,0,0.3)',
         blur: 10,
         offsetX: 2,
         offsetY: 2,
-      },
+        affectStroke: false,
+        includeDefaultValues: true,
+        nonScaling: false
+      })
     });
 
     const innerCircle = new Circle({
@@ -132,12 +138,15 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       originX: 'center',
       originY: 'center',
       selectable: false,
-      shadow: {
+      shadow: new fabric.Shadow({
         color: 'rgba(0,0,0,0.2)',
         blur: 4,
         offsetX: 0,
         offsetY: 2,
-      },
+        affectStroke: false,
+        includeDefaultValues: true,
+        nonScaling: false
+      })
     });
 
     canvas.add(wheelGroup);
