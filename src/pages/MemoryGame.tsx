@@ -191,25 +191,25 @@ const MemoryGame = () => {
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white p-4 pt-16">
+      <div className="min-h-screen bg-white p-4 pt-24">
         <div className="max-w-4xl mx-auto">
           {/* Game controls section */}
-          <div className="mb-6">
+          <div className="mb-8">
             <div className="flex items-center justify-between">
               <CategorySelector value={category} onChange={setCategory} />
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2 text-sm font-semibold">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
                   <Timer className="w-4 h-4" />
                   {formatTime(timer)}
                 </div>
                 <Button 
                   onClick={shuffleCards} 
                   size="sm"
-                  className="bg-primary h-8 text-sm font-semibold"
+                  className="h-8 text-sm font-medium"
                 >
                   {isGameStarted ? "Restart Game" : "Start Game"}
                 </Button>
-                <div className="text-sm font-semibold">
+                <div className="text-sm font-medium text-gray-600 min-w-[80px]">
                   Pairs: {matchedPairs}/8
                 </div>
               </div>
