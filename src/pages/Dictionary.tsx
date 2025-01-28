@@ -9,6 +9,29 @@ interface HebrewWord {
   transliteration: string | null;
 }
 
+// Helper function to group results by Hebrew word
+const groupByHebrew = (words: HebrewWord[]) => {
+  return words.reduce((acc, curr) => {
+    if (!acc[curr.hebrew]) {
+      acc[curr.hebrew] = {
+        hebrew: curr.hebrew,
+        translations: new Set([curr.english]),
+        transliterations: new Set([curr.transliteration].filter(Boolean))
+      };
+    } else {
+      acc[curr.hebrew].translations.add(curr.english);
+      if (curr.transliteration) {
+        acc[curr.hebrew].transliterations.add(curr.transliteration);
+      }
+    }
+    return acc;
+  }, {} as Record<string, { 
+    hebrew: string, 
+    translations: Set<string>, 
+    transliterations: Set<string> 
+  }>);
+};
+
 const Dictionary = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isActive, setIsActive] = useState(false);
@@ -18,31 +41,29 @@ const Dictionary = () => {
     queryFn: async () => {
       if (!searchTerm) return [];
       
-      console.log('Searching for:', searchTerm); // Debug log
+      console.log('Searching for:', searchTerm);
       
-      // Trim the search term and ensure it's not empty
       const trimmedSearch = searchTerm.trim();
       if (!trimmedSearch) return [];
 
       const { data, error } = await supabase
         .from('hebrew_bulk_words')
         .select('hebrew, english, transliteration')
-        .textSearch('english', trimmedSearch, {
-          type: 'plain',
-          config: 'english'
-        })
-        .limit(10);
+        .or(`english.ilike.%${trimmedSearch}%,transliteration.ilike.%${trimmedSearch}%`)
+        .order('word_number', { ascending: true });
 
       if (error) {
         console.error('Error fetching words:', error);
         throw error;
       }
 
-      console.log('Search results:', data); // Debug log
+      console.log('Search results:', data);
       return data || [];
     },
     enabled: searchTerm.length > 0
   });
+
+  const groupedResults = searchResults ? groupByHebrew(searchResults) : {};
 
   const handleSearchFocus = () => {
     setIsActive(true);
@@ -61,19 +82,16 @@ const Dictionary = () => {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6 flex flex-col items-center">
-      {/* Main Container */}
       <div className="w-full max-w-3xl">
-        {/* Header */}
         <div className={`transition-all duration-300 ${isActive ? 'mb-6' : 'mb-32'}`}>
           <h1 className={`text-center font-bold transition-all duration-300 ${isActive ? 'text-2xl mb-2' : 'text-5xl mb-6'}`}>
             Hebrew Dictionary
           </h1>
           <p className={`text-center text-gray-600 transition-all duration-300 ${isActive ? 'text-sm' : 'text-lg'}`}>
-            Discover the meaning of Hebrew words
+            Search by English or transliteration
           </p>
         </div>
 
-        {/* Search Box */}
         <div className="relative group">
           <div className={`absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-70 blur transition-all duration-300 group-hover:opacity-100 ${isActive ? 'blur-md' : 'blur'}`} />
           <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
@@ -82,7 +100,7 @@ const Dictionary = () => {
               <input
                 type="text"
                 className="w-full px-4 py-2 text-lg focus:outline-none"
-                placeholder="Type in English..."
+                placeholder="Type in English or transliteration..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={handleSearchFocus}
@@ -95,7 +113,6 @@ const Dictionary = () => {
               )}
             </div>
 
-            {/* Results Section - only shown when active */}
             {isActive && (
               <div className="border-t border-gray-100">
                 {searchTerm ? (
@@ -104,16 +121,25 @@ const Dictionary = () => {
                       <div className="p-4 text-center text-gray-500">
                         Searching...
                       </div>
-                    ) : searchResults && searchResults.length > 0 ? (
-                      searchResults.map((result, index) => (
+                    ) : Object.values(groupedResults).length > 0 ? (
+                      Object.values(groupedResults).map((result, index) => (
                         <div key={index} className="p-4 hover:bg-gray-50 transition-colors duration-150">
-                          <div className="flex justify-between items-center mb-2">
+                          <div className="flex justify-between items-start mb-2">
                             <span className="text-sm text-purple-500 font-medium">word</span>
-                            <span className="text-sm text-gray-500">{result.transliteration || 'N/A'}</span>
+                            <div className="text-sm text-gray-500 text-right">
+                              {Array.from(result.transliterations).join(', ') || 'N/A'}
+                            </div>
                           </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-700">{result.english}</span>
-                            <span className="text-2xl font-bold text-gray-800" dir="rtl">{result.hebrew}</span>
+                          <div className="flex justify-between items-start">
+                            <div className="flex flex-col">
+                              {Array.from(result.translations).map((translation, i) => (
+                                <span key={i} className="text-gray-700">
+                                  {translation}
+                                  {i < result.translations.size - 1 && ','}
+                                </span>
+                              ))}
+                            </div>
+                            <span className="text-2xl font-bold text-gray-800 mr-2" dir="rtl">{result.hebrew}</span>
                           </div>
                         </div>
                       ))
