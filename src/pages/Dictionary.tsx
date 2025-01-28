@@ -18,10 +18,12 @@ const Dictionary = () => {
     queryFn: async () => {
       if (!searchTerm) return [];
       
+      console.log('Searching for:', searchTerm); // Debug log
+      
       const { data, error } = await supabase
         .from('hebrew_bulk_words')
         .select('hebrew, english, transliteration')
-        .ilike('english', `%${searchTerm}%`)
+        .or(`english.ilike.%${searchTerm}%,hebrew.ilike.%${searchTerm}%`)
         .limit(10);
 
       if (error) {
@@ -29,6 +31,7 @@ const Dictionary = () => {
         return [];
       }
 
+      console.log('Search results:', data); // Debug log
       return data || [];
     },
     enabled: searchTerm.length > 0
@@ -72,7 +75,7 @@ const Dictionary = () => {
               <input
                 type="text"
                 className="w-full px-4 py-2 text-lg focus:outline-none"
-                placeholder="Type in English..."
+                placeholder="Type in English or Hebrew..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={handleSearchFocus}
