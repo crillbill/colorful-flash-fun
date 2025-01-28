@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Path, Circle, Text, Triangle, Shadow, Group } from "fabric";
+import { Canvas as FabricCanvas, Path, Circle, Text, Triangle } from "fabric";
 
 interface WheelProps {
   onSpinEnd: (category: string) => void;
@@ -51,7 +51,7 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       originY: 'center',
       selectable: false,
     });
-    wheelGroup.addWithUpdate(outerCircle);
+    wheelGroup.add(outerCircle);
 
     CATEGORIES.forEach((category, index) => {
       const startAngle = index * anglePerSegment;
@@ -62,12 +62,12 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
         stroke: '#2D3748',
         strokeWidth: 1,
         selectable: false,
-        shadow: new Shadow({
+        shadow: {
           color: 'rgba(0,0,0,0.2)',
           blur: 4,
           offsetX: 2,
           offsetY: 2,
-        }),
+        },
       });
 
       const textAngle = startAngle + anglePerSegment / 2;
@@ -85,8 +85,8 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
         selectable: false,
       });
 
-      wheelGroup.addWithUpdate(path);
-      wheelGroup.addWithUpdate(text);
+      wheelGroup.add(path);
+      wheelGroup.add(text);
     });
 
     // Add center decoration
@@ -100,12 +100,12 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       originX: 'center',
       originY: 'center',
       selectable: false,
-      shadow: new Shadow({
+      shadow: {
         color: 'rgba(0,0,0,0.3)',
         blur: 10,
         offsetX: 2,
         offsetY: 2,
-      }),
+      },
     });
 
     const innerCircle = new Circle({
@@ -118,8 +118,8 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       selectable: false,
     });
 
-    wheelGroup.addWithUpdate(centerCircle);
-    wheelGroup.addWithUpdate(innerCircle);
+    wheelGroup.add(centerCircle);
+    wheelGroup.add(innerCircle);
 
     // Add pointer (outside the wheel group since it shouldn't rotate)
     const pointer = new Triangle({
@@ -132,12 +132,12 @@ export const WheelOfFortune = ({ onSpinEnd, isSpinning, setIsSpinning }: WheelPr
       originX: 'center',
       originY: 'center',
       selectable: false,
-      shadow: new Shadow({
+      shadow: {
         color: 'rgba(0,0,0,0.2)',
         blur: 4,
         offsetX: 0,
         offsetY: 2,
-      }),
+      },
     });
 
     canvas.add(wheelGroup);
