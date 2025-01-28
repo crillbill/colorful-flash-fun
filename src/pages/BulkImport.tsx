@@ -3,42 +3,13 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useNavigate } from "react-router-dom";
 import { Header1 } from "@/components/ui/header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const BulkImport = () => {
-  const navigate = useNavigate();
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const checkAuthorization = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setIsAuthorized(false);
-        toast.error("Please log in to import data");
-        return;
-      }
-      
-      if (session.user.email === 'crillbill@gmail.com') {
-        setIsAuthorized(true);
-      } else {
-        setIsAuthorized(false);
-        toast.error("You are not authorized to import data");
-      }
-    } catch (error) {
-      console.error('Authorization check error:', error);
-      setIsAuthorized(false);
-      toast.error("Error checking authorization");
-    }
-  };
-
-  const handleSignIn = () => {
-    navigate("/login");
-  };
 
   const validateHebrewText = (text: string): boolean => {
     const hebrewRegex = /[\u0590-\u05FF]/;
@@ -92,11 +63,6 @@ const BulkImport = () => {
   };
 
   const handleImport = async () => {
-    if (!isAuthorized) {
-      toast.error("You are not authorized to import data");
-      return;
-    }
-
     try {
       setIsLoading(true);
       setError(null);
@@ -133,15 +99,6 @@ const BulkImport = () => {
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">Import Bulk Words</h2>
             
-            {!isAuthorized && (
-              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 space-y-4" role="alert">
-                <p>Only admin users (crillbill@gmail.com) can import data. Please log in with the correct account.</p>
-                <Button onClick={handleSignIn}>
-                  Sign In
-                </Button>
-              </div>
-            )}
-            
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
@@ -169,7 +126,7 @@ const BulkImport = () => {
 
             <Button 
               onClick={handleImport}
-              disabled={isLoading || !inputText.trim() || !isAuthorized}
+              disabled={isLoading || !inputText.trim()}
             >
               {isLoading ? "Importing..." : "Import"}
             </Button>
