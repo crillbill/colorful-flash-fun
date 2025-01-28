@@ -6,7 +6,8 @@ import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3
 const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
-      <div className="container mx-auto px-4 py-16">
+      <Header1 />
+      <div className="container mx-auto px-4 py-16 mt-20">
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-8">Learn Hebrew</h2>
         </div>
