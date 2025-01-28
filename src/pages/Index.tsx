@@ -8,9 +8,6 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
       <Header1 />
       <div className="container mx-auto px-4 py-16 mt-20">
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-8">Learn Hebrew</h2>
-        </div>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Link to="/greetings" className="transform transition-all duration-300 hover:scale-105">
