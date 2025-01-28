@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Puzzle, Shuffle, Check, X, Eye } from "lucide-react";
+import { Puzzle, Shuffle, Check, X } from "lucide-react";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { toast } from "sonner";
@@ -24,9 +24,9 @@ const LetterMatching = () => {
   const [options, setOptions] = useState<string[]>([]);
   const [gameActive, setGameActive] = useState(false);
   const [letters, setLetters] = useState<HebrewLetter[]>([]);
-  const [showHint, setShowHint] = useState(false);
   const [remainingLetters, setRemainingLetters] = useState<HebrewLetter[]>([]);
   const [totalRounds, setTotalRounds] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchHebrewLetters();
@@ -34,6 +34,7 @@ const LetterMatching = () => {
 
   const fetchHebrewLetters = async () => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('hebrew_alphabet')
         .select('letter, name, sound_description, transliteration');
@@ -48,7 +49,9 @@ const LetterMatching = () => {
       }
     } catch (error) {
       console.error('Error fetching Hebrew letters:', error);
-      toast.error("Failed to load Hebrew letters");
+      toast.error("Failed to load Hebrew letters. Please try refreshing the page.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,7 +72,6 @@ const LetterMatching = () => {
     setScore({ correct: 0, total: 0 });
     setCurrentRound(1);
     setGameActive(true);
-    setShowHint(false);
     setRemainingLetters(shuffleArray([...letters]));
     setupRound();
     toast("New game started! Match all Hebrew letters to their names.");
@@ -80,11 +82,13 @@ const LetterMatching = () => {
     
     const nextLetter = remainingLetters[0];
     setCurrentLetter(nextLetter);
-    setShowHint(false);
     
+    // Get wrong options from the letters array, excluding the correct answer
     const wrongOptions = letters
       .filter(l => l.name !== nextLetter.name)
       .map(l => l.name);
+    
+    // Take 3 random wrong options and add the correct answer
     const shuffledOptions = shuffleArray([nextLetter.name, ...wrongOptions.slice(0, 3)]);
     setOptions(shuffledOptions);
   };
@@ -122,6 +126,18 @@ const LetterMatching = () => {
   const shuffleOptions = () => {
     setOptions(shuffleArray([...options]));
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white p-8 pt-24">
+        <div className="max-w-2xl mx-auto text-center">
+          <p className="text-lg" style={{ color: colors.darkPurple }}>
+            Loading Hebrew letters...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
