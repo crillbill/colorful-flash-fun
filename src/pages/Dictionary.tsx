@@ -3,6 +3,7 @@ import { Search, Book, X, Mic } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import VoiceInterface from '@/components/VoiceInterface';
+import { toast } from "sonner";
 
 interface HebrewWord {
   hebrew: string;
@@ -98,13 +99,21 @@ const Dictionary = () => {
   };
 
   const handleStartListening = () => {
-    setIsListening(true);
+    if (!isListening) {
+      setIsListening(true);
+      toast.info("Listening...", {
+        description: "Speak the word you want to search for"
+      });
+    }
   };
 
   const handlePronunciationResult = (text: string) => {
     setIsListening(false);
-    setSearchTerm(text);
-    setIsActive(true);
+    if (text) {
+      console.log('Setting search term to:', text);
+      setSearchTerm(text);
+      setIsActive(true);
+    }
   };
 
   return (
