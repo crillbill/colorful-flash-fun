@@ -1,15 +1,21 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Header1 } from "@/components/ui/header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+interface WordEntry {
+  hebrew: string;
+  english: string;
+  transliteration?: string;
+}
+
 const BulkImport = () => {
   const navigate = useNavigate();
-  const [inputText, setInputText] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,41 +24,50 @@ const BulkImport = () => {
     return hebrewRegex.test(text);
   };
 
-  const parseInput = (text: string) => {
-    const lines = text.trim().split('\n');
-    const words = [];
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setFile(event.target.files[0]);
+      setError(null);
+    }
+  };
+
+  const parseJsonFile = (jsonContent: string) => {
+    const words: WordEntry[] = JSON.parse(jsonContent);
     
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-      
-      const [hebrew, english, transliteration] = line.split(',').map(item => item?.trim());
-      
-      if (!hebrew || !english) {
-        throw new Error(`Invalid format at line ${i + 1}. Each line must contain at least Hebrew and English words separated by commas.`);
-      }
-      
-      if (!validateHebrewText(hebrew)) {
-        throw new Error(`Invalid Hebrew text at line ${i + 1}`);
-      }
-      
-      words.push({
-        word_number: i + 1,
-        hebrew,
-        english,
-        transliteration: transliteration || null
-      });
+    if (!Array.isArray(words)) {
+      throw new Error("JSON content must be an array of word entries");
     }
     
-    return words;
+    return words.map((entry, index) => {
+      if (!entry.hebrew || !entry.english) {
+        throw new Error(`Invalid entry at index ${index}. Each entry must contain hebrew and english fields.`);
+      }
+      
+      if (!validateHebrewText(entry.hebrew)) {
+        throw new Error(`Invalid Hebrew text at index ${index}`);
+      }
+      
+      return {
+        word_number: index + 1,
+        hebrew: entry.hebrew,
+        english: entry.english,
+        transliteration: entry.transliteration || null
+      };
+    });
   };
 
   const handleImport = async () => {
     try {
+      if (!file) {
+        setError("Please select a file to import");
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
 
-      const words = parseInput(inputText);
+      const fileContent = await file.text();
+      const words = parseJsonFile(fileContent);
       
       if (words.length === 0) {
         throw new Error("No valid words found to import");
@@ -65,7 +80,6 @@ const BulkImport = () => {
       if (supabaseError) throw supabaseError;
 
       toast.success("Words imported successfully!");
-      setInputText("");
       navigate("/");
     } catch (err) {
       console.error('Import error:', err);
@@ -92,25 +106,34 @@ const BulkImport = () => {
 
             <div className="space-y-2">
               <p className="text-sm text-gray-600">
-                Enter your words in the following format (one per line):
-                <br />
-                Hebrew word, English translation, Transliteration (optional)
+                Upload a JSON file containing an array of word entries in the following format:
               </p>
-              <p className="text-sm text-gray-500 italic">
-                Example: שָׁלוֹם, hello, shalom
-              </p>
+              <pre className="bg-gray-100 p-4 rounded-md text-sm">
+{`[
+  {
+    "hebrew": "שָׁלוֹם",
+    "english": "hello",
+    "transliteration": "shalom"
+  },
+  {
+    "hebrew": "תּוֹדָה",
+    "english": "thank you",
+    "transliteration": "toda"
+  }
+]`}
+              </pre>
             </div>
 
-            <Textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="Enter your words here..."
-              className="min-h-[200px]"
+            <Input
+              type="file"
+              accept=".json"
+              onChange={handleFileChange}
+              className="cursor-pointer"
             />
 
             <Button 
               onClick={handleImport}
-              disabled={isLoading || !inputText.trim()}
+              disabled={isLoading || !file}
             >
               {isLoading ? "Importing..." : "Import"}
             </Button>
