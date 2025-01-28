@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Search, Book, X } from 'lucide-react';
+import { Search, Book, X, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import SearchMicrophone from '@/components/SearchMicrophone';
 import { Header1 } from '@/components/ui/header';
+import { useToast } from '@/hooks/use-toast';
 
 interface HebrewWord {
   hebrew: string;
@@ -36,6 +37,7 @@ const groupByHebrew = (words: HebrewWord[]) => {
 const Dictionary = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isActive, setIsActive] = useState(false);
+  const { toast } = useToast();
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ['hebrewWords', searchTerm],
@@ -79,6 +81,32 @@ const Dictionary = () => {
     },
     enabled: searchTerm.length > 0
   });
+
+  const handleFeedback = async (hebrew: string, english: string, isPositive: boolean) => {
+    try {
+      const { error } = await supabase.rpc('update_word_feedback', {
+        p_hebrew: hebrew,
+        p_english: english,
+        p_is_positive: isPositive
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Thank you for your feedback!",
+        description: `Your ${isPositive ? 'positive' : 'negative'} feedback has been recorded.`,
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit feedback. Please try again.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
 
   const groupedResults = searchResults ? groupByHebrew(searchResults) : {};
 
@@ -160,7 +188,7 @@ const Dictionary = () => {
                                 {Array.from(result.transliterations).join(', ') || 'N/A'}
                               </div>
                             </div>
-                            <div className="flex justify-between items-start">
+                            <div className="flex justify-between items-center">
                               <div className="flex flex-col">
                                 {Array.from(result.translations).map((translation, i) => (
                                   <span key={i} className="text-gray-700">
@@ -169,7 +197,25 @@ const Dictionary = () => {
                                   </span>
                                 ))}
                               </div>
-                              <span className="text-2xl font-bold text-gray-800 mr-2" dir="rtl">{result.hebrew}</span>
+                              <div className="flex items-center gap-6">
+                                <div className="flex gap-4">
+                                  <button
+                                    onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], true)}
+                                    className="p-2 hover:bg-green-50 rounded-full transition-colors"
+                                    aria-label="Correct translation"
+                                  >
+                                    <ThumbsUp className="h-5 w-5 text-green-600" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], false)}
+                                    className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                                    aria-label="Incorrect translation"
+                                  >
+                                    <ThumbsDown className="h-5 w-5 text-red-600" />
+                                  </button>
+                                </div>
+                                <span className="text-2xl font-bold text-gray-800 mr-2" dir="rtl">{result.hebrew}</span>
+                              </div>
                             </div>
                           </div>
                         ))

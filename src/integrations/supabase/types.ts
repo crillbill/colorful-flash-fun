@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      dictionary_word_feedback: {
+        Row: {
+          created_at: string
+          english: string
+          hebrew: string
+          id: string
+          negative_votes: number | null
+          positive_votes: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          english: string
+          hebrew: string
+          id?: string
+          negative_votes?: number | null
+          positive_votes?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          english?: string
+          hebrew?: string
+          id?: string
+          negative_votes?: number | null
+          positive_votes?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hebrew_alphabet: {
         Row: {
           created_at: string
@@ -346,7 +376,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_word_feedback: {
+        Args: {
+          p_hebrew: string
+          p_english: string
+          p_is_positive: boolean
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
