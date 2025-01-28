@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
-import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Type, Book } from "lucide-react";
+import { Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Type, Book } from "lucide-react";
 
 const Index = () => {
   return (
@@ -10,13 +10,6 @@ const Index = () => {
       <div className="container mx-auto px-4 py-16 mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Link to="/greetings" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#6B46C1] hover:bg-[#6B46C1]/90 text-white shadow-lg hover:shadow-xl">
-                <Smile className="w-6 h-6 mr-2" />
-                Greetings
-              </Button>
-            </Link>
-
             <Link to="/letter-matching" className="transform transition-all duration-300 hover:scale-105">
               <Button variant="ghost" className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl">
                 <Puzzle className="w-6 h-6 mr-2" />
