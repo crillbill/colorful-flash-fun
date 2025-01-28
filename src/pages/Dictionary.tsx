@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Search, Book, X } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { VoiceRecordButton } from '@/components/VoiceRecordButton';
+import VoiceInterface from '@/components/VoiceInterface';
 
 interface HebrewWord {
   hebrew: string;
@@ -35,6 +37,8 @@ const groupByHebrew = (words: HebrewWord[]) => {
 const Dictionary = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isActive, setIsActive] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ['hebrewWords', searchTerm],
@@ -96,6 +100,17 @@ const Dictionary = () => {
     setIsActive(false);
   };
 
+  const handleStartListening = () => {
+    setIsListening(true);
+  };
+
+  const handlePronunciationResult = (text: string) => {
+    setIsListening(false);
+    setIsProcessing(false);
+    setSearchTerm(text);
+    setIsActive(true);
+  };
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6 flex flex-col items-center">
       <div className="w-full max-w-3xl">
@@ -108,7 +123,7 @@ const Dictionary = () => {
           </p>
         </div>
 
-        <div className="relative group">
+        <div className="relative group mb-8">
           <div className={`absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-70 blur transition-all duration-300 group-hover:opacity-100 ${isActive ? 'blur-md' : 'blur'}`} />
           <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
             <div className="flex items-center px-6 py-4">
@@ -128,6 +143,23 @@ const Dictionary = () => {
                 </button>
               )}
             </div>
+
+            <div className="flex justify-center pb-4">
+              <VoiceRecordButton
+                isListening={isListening}
+                isProcessing={isProcessing}
+                timeLeft={3}
+                question="Search for a word"
+                isPlaying={false}
+                onStartListening={handleStartListening}
+              />
+            </div>
+
+            <VoiceInterface
+              currentWord=""
+              onPronunciationResult={handlePronunciationResult}
+              isListening={isListening}
+            />
 
             {isActive && (
               <div className="border-t border-gray-100">
