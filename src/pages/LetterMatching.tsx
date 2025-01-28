@@ -176,14 +176,14 @@ const LetterMatching = () => {
                         {currentLetter.letter}
                       </div>
                       
-                      <div className="relative my-4 text-center w-full">
+                      <div className="relative my-4 text-center">
                         <button 
-                          className={`w-full bg-gray-700/80 backdrop-blur-sm rounded-lg p-4 cursor-pointer transition-all duration-300 ${
+                          className={`inline-flex px-4 py-2 bg-gray-700/80 backdrop-blur-sm rounded-lg cursor-pointer transition-all duration-300 ${
                             showTransliteration ? 'opacity-0 pointer-events-none' : 'opacity-100'
                           }`}
                           onClick={() => setShowTransliteration(true)}
                         >
-                          <span className="text-white font-medium">Show Pronunciation Guide</span>
+                          <span className="text-white font-medium">Reveal Hint</span>
                         </button>
                         <div 
                           className={`absolute inset-0 bg-white rounded-lg p-4 transition-all duration-300 ${
