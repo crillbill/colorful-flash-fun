@@ -102,6 +102,39 @@ export type Database = {
         }
         Relationships: []
       }
+      hebrew_scavenger_hunt: {
+        Row: {
+          category: string
+          created_at: string
+          english: string
+          hebrew: string
+          hint: string | null
+          id: string
+          transliteration: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          english: string
+          hebrew: string
+          hint?: string | null
+          id?: string
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          english?: string
+          hebrew?: string
+          hint?: string | null
+          id?: string
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hebrew_sentences: {
         Row: {
           created_at: string

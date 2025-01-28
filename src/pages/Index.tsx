@@ -88,6 +88,13 @@ const Index = () => {
                 Fill in the Blank
               </Button>
             </Link>
+
+            <Link to="/scavenger-hunt" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#EA580C] hover:bg-[#EA580C]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Search className="w-6 h-6" />
+                Scavenger Hunt
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
