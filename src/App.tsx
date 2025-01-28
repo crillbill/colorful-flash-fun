@@ -8,7 +8,7 @@ import WordSearch from "./pages/WordSearch";
 import Hangman from "./pages/Hangman";
 import SentenceBuilder from "./pages/SentenceBuilder";
 import MultipleChoice from "./pages/MultipleChoice";
-import Pronunciation from "./pages/Pronunciation";
+import PronunciationChallenge from "./pages/PronunciationChallenge";
 import MemoryGame from "./pages/MemoryGame";
 import FillInTheBlank from "./pages/FillInTheBlank";
 import Login from "./pages/Login";
@@ -27,7 +27,7 @@ function App() {
         <Route path="/hangman" element={<Hangman />} />
         <Route path="/sentence-builder" element={<SentenceBuilder />} />
         <Route path="/multiple-choice" element={<MultipleChoice />} />
-        <Route path="/pronunciation" element={<Pronunciation />} />
+        <Route path="/pronunciation" element={<PronunciationChallenge />} />
         <Route path="/memory-game" element={<MemoryGame />} />
         <Route path="/fill-in-the-blank" element={<FillInTheBlank />} />
         <Route path="/login" element={<Login />} />
