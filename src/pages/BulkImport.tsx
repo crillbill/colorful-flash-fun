@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface WordEntry {
-  rank?: number;
+  word_number: number;
   hebrew: string;
   english: string;
   transliteration?: string;
@@ -24,27 +24,34 @@ const BulkImport = () => {
   const [importedCount, setImportedCount] = useState(0);
 
   const validateHebrewText = (text: string): boolean => {
-    const hebrewRegex = /[\u0590-\u05FF]/;
+    // Hebrew Unicode range including vowel marks and special characters
+    const hebrewRegex = /[\u0590-\u05FF\u0600-\u06FF\u200f\u200e]/;
     return hebrewRegex.test(text);
   };
 
   const sanitizeText = (text: string): string => {
-    // Remove special characters but keep spaces, letters, numbers, and basic punctuation
-    return text.replace(/[^\w\s\u0590-\u05FF.,'-]/g, '').trim();
+    // Remove special characters but keep Hebrew, English, spaces, and basic punctuation
+    return text.replace(/[^\w\s\u0590-\u05FF\u0600-\u06FF.,'-]/g, '').trim();
   };
 
   const parseDelimitedText = (content: string): WordEntry[] => {
     console.log("Parsing delimited content:", content);
     
     const lines = content.split('\n').filter(line => line.trim());
+    const words: WordEntry[] = [];
+    let currentWordNumber = 1;
     
-    return lines.map((line, index) => {
-      console.log(`Processing line ${index}:`, line);
+    for (const line of lines) {
+      // Skip category headers (lines ending with :)
+      if (line.trim().endsWith(':')) continue;
       
-      const [hebrew = '', english = '', transliteration = ''] = line.split('|').map(part => part.trim());
+      console.log(`Processing line ${currentWordNumber - 1}:`, line);
       
-      if (!hebrew || !english) {
-        throw new Error(`Invalid entry at line ${index + 1}. Each line must contain hebrew and english text separated by |`);
+      const [english = '', hebrew = '', transliteration = ''] = line.split('|').map(part => part.trim());
+      
+      if (!english || !hebrew) {
+        console.log("Skipping invalid line:", line);
+        continue;
       }
       
       // Sanitize both Hebrew and English text
@@ -53,16 +60,21 @@ const BulkImport = () => {
       const sanitizedTransliteration = transliteration ? sanitizeText(transliteration) : null;
       
       if (!validateHebrewText(sanitizedHebrew)) {
-        throw new Error(`Invalid Hebrew text at line ${index + 1}`);
+        console.log("Invalid Hebrew text:", sanitizedHebrew);
+        continue;
       }
       
-      return {
-        word_number: index + 1,
+      words.push({
+        word_number: currentWordNumber,
         hebrew: sanitizedHebrew,
         english: sanitizedEnglish,
         transliteration: sanitizedTransliteration
-      };
-    });
+      });
+      
+      currentWordNumber++;
+    }
+    
+    return words;
   };
 
   const handleImport = async () => {
@@ -85,21 +97,27 @@ const BulkImport = () => {
         throw new Error("No valid words found to import");
       }
 
-      const { data, error: supabaseError } = await supabase
-        .from('hebrew_word_dump')
-        .insert(words)
-        .select();
+      // Insert words in chunks to handle large datasets
+      const CHUNK_SIZE = 50;
+      let successCount = 0;
+      
+      for (let i = 0; i < words.length; i += CHUNK_SIZE) {
+        const chunk = words.slice(i, i + CHUNK_SIZE);
+        const { error: supabaseError } = await supabase
+          .from('hebrew_word_dump')
+          .insert(chunk);
 
-      console.log("Supabase response:", { data, error: supabaseError });
-
-      if (supabaseError) {
-        console.error('Supabase error:', supabaseError);
-        throw new Error("Failed to import words to database");
+        if (supabaseError) {
+          console.error('Supabase error:', supabaseError);
+          throw new Error(`Failed to import words (chunk ${i / CHUNK_SIZE + 1})`);
+        }
+        
+        successCount += chunk.length;
       }
 
       setSuccess(true);
-      setImportedCount(words.length);
-      toast.success(`Successfully imported ${words.length} words to dump table!`);
+      setImportedCount(successCount);
+      toast.success(`Successfully imported ${successCount} words to dump table!`);
       
       // Clear the form
       setText("");
@@ -141,12 +159,12 @@ const BulkImport = () => {
                 Paste your word list below with each word on a new line in the following format:
               </p>
               <pre className="bg-gray-100 p-4 rounded-md text-sm">
-{`hebrew_word | english_translation | transliteration
-של | of / belongs to | shel
-בית | house | bayit`}
+{`english|hebrew|transliteration
+fish|דג|Dag
+bird|ציפור|Tzipor`}
               </pre>
               <p className="text-sm text-gray-500">
-                Note: Special characters will be automatically removed from the text.
+                Note: Special characters will be automatically removed from the text. Category headers ending with ':' will be skipped.
               </p>
             </div>
 
@@ -154,7 +172,7 @@ const BulkImport = () => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Paste your word list here..."
-              className="min-h-[200px]"
+              className="min-h-[400px] font-mono"
               disabled={isLoading}
             />
 
