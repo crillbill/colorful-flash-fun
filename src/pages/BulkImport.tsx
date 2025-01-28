@@ -37,6 +37,7 @@ const BulkImport = () => {
   };
 
   const parseJsonFile = (jsonContent: string) => {
+    console.log("Parsing JSON content:", jsonContent);
     const words: WordEntry[] = JSON.parse(jsonContent);
     
     if (!Array.isArray(words)) {
@@ -44,6 +45,8 @@ const BulkImport = () => {
     }
     
     return words.map((entry, index) => {
+      console.log(`Processing entry ${index}:`, entry);
+      
       if (!entry.hebrew || !entry.english) {
         throw new Error(`Invalid entry at index ${index}. Each entry must contain hebrew and english fields.`);
       }
@@ -73,15 +76,21 @@ const BulkImport = () => {
       setSuccess(false);
 
       const fileContent = await file.text();
+      console.log("File content:", fileContent);
+      
       const words = parseJsonFile(fileContent);
+      console.log("Parsed words:", words);
       
       if (words.length === 0) {
         throw new Error("No valid words found to import");
       }
 
-      const { error: supabaseError } = await supabase
+      const { data, error: supabaseError } = await supabase
         .from('hebrew_bulk_words')
-        .insert(words);
+        .insert(words)
+        .select();
+
+      console.log("Supabase response:", { data, error: supabaseError });
 
       if (supabaseError) {
         console.error('Supabase error:', supabaseError);
