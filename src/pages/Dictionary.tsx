@@ -213,7 +213,7 @@ const Dictionary = () => {
                                   <ThumbsDown className="h-5 w-5 text-red-600" />
                                 </button>
                               </div>
-                              <div className="text-center">
+                              <div className="flex justify-end">
                                 <span className="text-2xl font-bold text-gray-800" dir="rtl">{result.hebrew}</span>
                               </div>
                             </div>
