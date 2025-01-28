@@ -12,6 +12,7 @@ import MemoryGame from "./pages/MemoryGame";
 import FillInTheBlank from "./pages/FillInTheBlank";
 import Login from "./pages/Login";
 import ImportWords from "./pages/ImportWords";
+import Dictionary from "./pages/Dictionary";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/fill-in-the-blank" element={<FillInTheBlank />} />
         <Route path="/login" element={<Login />} />
         <Route path="/import" element={<ImportWords />} />
+        <Route path="/dictionary" element={<Dictionary />} />
       </Routes>
     </Router>
   );
