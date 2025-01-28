@@ -15,28 +15,36 @@ import Login from "./pages/Login";
 import Greetings from "./pages/Greetings";
 import ImportWords from "./pages/ImportWords";
 import "./App.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
+
+// Create a new client
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/flashcards" element={<Flashcards />} />
-        <Route path="/multiple-choice" element={<MultipleChoice />} />
-        <Route path="/word-search" element={<WordSearch />} />
-        <Route path="/letter-matching" element={<LetterMatching />} />
-        <Route path="/fill-in-the-blank" element={<FillInTheBlank />} />
-        <Route path="/sentence-builder" element={<SentenceBuilder />} />
-        <Route path="/hangman" element={<Hangman />} />
-        <Route path="/memory-game" element={<MemoryGame />} />
-        <Route path="/pronunciation-challenge" element={<PronunciationChallenge />} />
-        <Route path="/scavenger-hunt" element={<ScavengerHunt />} />
-        <Route path="/scavenger-hunt-admin" element={<ScavengerHuntAdmin />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/greetings" element={<Greetings />} />
-        <Route path="/import-words" element={<ImportWords />} />
-      </Routes>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/flashcards" element={<Flashcards />} />
+          <Route path="/multiple-choice" element={<MultipleChoice />} />
+          <Route path="/word-search" element={<WordSearch />} />
+          <Route path="/letter-matching" element={<LetterMatching />} />
+          <Route path="/fill-in-the-blank" element={<FillInTheBlank />} />
+          <Route path="/sentence-builder" element={<SentenceBuilder />} />
+          <Route path="/hangman" element={<Hangman />} />
+          <Route path="/memory-game" element={<MemoryGame />} />
+          <Route path="/pronunciation-challenge" element={<PronunciationChallenge />} />
+          <Route path="/scavenger-hunt" element={<ScavengerHunt />} />
+          <Route path="/scavenger-hunt-admin" element={<ScavengerHuntAdmin />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/greetings" element={<Greetings />} />
+          <Route path="/import-words" element={<ImportWords />} />
+        </Routes>
+        <Toaster />
+      </Router>
+    </QueryClientProvider>
   );
 }
 
