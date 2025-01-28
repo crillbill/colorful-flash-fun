@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Search, Book, X, Mic } from 'lucide-react';
+import { Search, Book, X } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import VoiceInterface from '@/components/VoiceInterface';
-import { toast } from "sonner";
+import SearchMicrophone from '@/components/SearchMicrophone';
 
 interface HebrewWord {
   hebrew: string;
@@ -36,7 +35,6 @@ const groupByHebrew = (words: HebrewWord[]) => {
 const Dictionary = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isActive, setIsActive] = useState(false);
-  const [isListening, setIsListening] = useState(false);
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ['hebrewWords', searchTerm],
@@ -98,17 +96,7 @@ const Dictionary = () => {
     setIsActive(false);
   };
 
-  const handleStartListening = () => {
-    if (!isListening) {
-      setIsListening(true);
-      toast.info("Listening...", {
-        description: "Speak the word you want to search for"
-      });
-    }
-  };
-
-  const handlePronunciationResult = (text: string) => {
-    setIsListening(false);
+  const handleVoiceResult = (text: string) => {
     if (text) {
       console.log('Setting search term to:', text);
       setSearchTerm(text);
@@ -143,13 +131,7 @@ const Dictionary = () => {
                 onBlur={handleSearchBlur}
               />
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleStartListening}
-                  className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${isListening ? 'text-purple-500' : 'text-gray-400'}`}
-                  title="Search by voice"
-                >
-                  <Mic className={`h-5 w-5 ${isListening ? 'animate-pulse' : ''}`} />
-                </button>
+                <SearchMicrophone onTranscription={handleVoiceResult} />
                 {searchTerm && (
                   <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
                     <X className="h-5 w-5" />
@@ -157,12 +139,6 @@ const Dictionary = () => {
                 )}
               </div>
             </div>
-
-            <VoiceInterface
-              currentWord=""
-              onPronunciationResult={handlePronunciationResult}
-              isListening={isListening}
-            />
 
             {isActive && (
               <div className="border-t border-gray-100">
