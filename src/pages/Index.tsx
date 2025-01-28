@@ -1,46 +1,92 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
+import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Type } from "lucide-react";
 
 const Index = () => {
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <Link to="/flashcards">
-              <Button className="w-full">Flashcards</Button>
+      <div className="min-h-screen bg-gradient-to-br from-softPurple via-white to-softPeach p-8 pt-24">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold gradient-text animate-float">
+              Learn Hebrew
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Choose your learning adventure
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link to="/greetings" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#F97316] hover:bg-[#F97316]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Smile className="w-6 h-6" />
+                Practice Greetings
+              </Button>
             </Link>
-            <Link to="/multiple-choice">
-              <Button className="w-full">Multiple Choice</Button>
+            
+            <Link to="/letter-matching" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Puzzle className="w-6 h-6" />
+                Letter Matching Game
+              </Button>
             </Link>
-            <Link to="/word-search">
-              <Button className="w-full">Word Search</Button>
+            
+            <Link to="/flashcards" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#22C55E] hover:bg-[#22C55E]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <BookOpen className="w-6 h-6" />
+                Flashcards
+              </Button>
             </Link>
-            <Link to="/letter-matching">
-              <Button className="w-full">Letter Matching</Button>
+            
+            <Link to="/word-search" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Search className="w-6 h-6" />
+                Word Search
+              </Button>
             </Link>
-            <Link to="/fill-in-the-blank">
-              <Button className="w-full">Fill in the Blank</Button>
+            
+            <Link to="/hangman" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#D946EF] hover:bg-[#D946EF]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Brain className="w-6 h-6" />
+                Hangman
+              </Button>
             </Link>
-            <Link to="/sentence-builder">
-              <Button className="w-full">Sentence Builder</Button>
+            
+            <Link to="/sentence-builder" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#6366F1] hover:bg-[#6366F1]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <PenTool className="w-6 h-6" />
+                Sentence Builder
+              </Button>
             </Link>
-            <Link to="/hangman">
-              <Button className="w-full">Hangman</Button>
+            
+            <Link to="/multiple-choice" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#EC4899] hover:bg-[#EC4899]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <ListChecks className="w-6 h-6" />
+                Multiple Choice
+              </Button>
             </Link>
-            <Link to="/memory-game">
-              <Button className="w-full">Memory Game</Button>
+            
+            <Link to="/pronunciation" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Mic className="w-6 h-6" />
+                Pronunciation Challenge
+              </Button>
             </Link>
-            <Link to="/pronunciation-challenge">
-              <Button className="w-full">Pronunciation Challenge</Button>
+
+            <Link to="/memory-game" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#14B8A6] hover:bg-[#14B8A6]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Grid3X3 className="w-6 h-6" />
+                Memory Game
+              </Button>
             </Link>
-            <Link to="/import-words">
-              <Button className="w-full">Import Words</Button>
-            </Link>
-            <Link to="/import-bulk-words">
-              <Button className="w-full">Import Bulk Words</Button>
+
+            <Link to="/fill-in-the-blank" className="transform transition-all duration-300 hover:scale-105">
+              <Button className="w-full h-32 text-xl bg-[#475569] hover:bg-[#475569]/90 text-white shadow-lg hover:shadow-xl flex gap-2">
+                <Type className="w-6 h-6" />
+                Fill in the Blank
+              </Button>
             </Link>
           </div>
         </div>

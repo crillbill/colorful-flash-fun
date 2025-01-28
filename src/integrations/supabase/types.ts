@@ -45,36 +45,6 @@ export type Database = {
         }
         Relationships: []
       }
-      hebrew_bulk_words: {
-        Row: {
-          created_at: string
-          english: string
-          hebrew: string
-          id: number
-          transliteration: string | null
-          updated_at: string
-          word_number: number
-        }
-        Insert: {
-          created_at?: string
-          english: string
-          hebrew: string
-          id?: number
-          transliteration?: string | null
-          updated_at?: string
-          word_number: number
-        }
-        Update: {
-          created_at?: string
-          english?: string
-          hebrew?: string
-          id?: number
-          transliteration?: string | null
-          updated_at?: string
-          word_number?: number
-        }
-        Relationships: []
-      }
       hebrew_fill_blanks: {
         Row: {
           created_at: string
