@@ -276,6 +276,38 @@ export type Database = {
         }
         Relationships: []
       }
+      scavenger_hunt_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_path: string
+          updated_at: string
+          word_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_path: string
+          updated_at?: string
+          word_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_path?: string
+          updated_at?: string
+          word_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scavenger_hunt_images_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "hebrew_words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

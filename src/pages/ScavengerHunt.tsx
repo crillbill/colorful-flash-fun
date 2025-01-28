@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { CategorySelector, Category } from "@/components/CategorySelector";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
+import { Loader2 } from "lucide-react";
 
 interface ScavengerItem {
   id: string;
@@ -18,20 +19,18 @@ interface ScavengerItem {
   updated_at: string;
 }
 
-const PLACEHOLDER_IMAGES = [
-  'https://images.unsplash.com/photo-1582562124811-c09040d0a901', // table
-  'https://images.unsplash.com/photo-1721322800607-8c38375eef04', // chair
-  'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d', // computer
-  'https://images.unsplash.com/photo-1460925895917-afdab827c52f', // book
-  'https://images.unsplash.com/photo-1483058712412-4245e9b90334'  // desk
-];
+interface ImageItem {
+  id: string;
+  word_id: string;
+  image_path: string;
+}
 
 const ScavengerHunt = () => {
   const [category, setCategory] = useState<Category>("words");
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [score, setScore] = useState({ correct: 0, total: 0 });
 
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isLoading: isLoadingItems } = useQuery({
     queryKey: ['scavengerHuntItems', category],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -40,13 +39,25 @@ const ScavengerHunt = () => {
         .in('english', ['table', 'chair', 'computer', 'book', 'desk']);
 
       if (error) throw error;
-      return data;
+      return data as ScavengerItem[];
     },
   });
 
-  const handleImageClick = (imageIndex: number) => {
+  const { data: images = [], isLoading: isLoadingImages } = useQuery({
+    queryKey: ['scavengerHuntImages'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('scavenger_hunt_images')
+        .select('*');
+
+      if (error) throw error;
+      return data as ImageItem[];
+    },
+  });
+
+  const handleImageClick = async (imageId: string) => {
     const currentItem = items[currentItemIndex];
-    const isCorrect = imageIndex === 0; // First image is always correct for demo
+    const isCorrect = images.find(img => img.id === imageId)?.word_id === currentItem.id;
     
     setScore(prev => ({
       correct: prev.correct + (isCorrect ? 1 : 0),
@@ -72,8 +83,12 @@ const ScavengerHunt = () => {
     toast("New game started! Find the matching images!");
   };
 
+  const isLoading = isLoadingItems || isLoadingImages;
+
   if (isLoading) {
-    return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">Loading...</div>;
+    return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin" />
+    </div>;
   }
 
   const currentItem = items[currentItemIndex];
@@ -111,20 +126,26 @@ const ScavengerHunt = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              {PLACEHOLDER_IMAGES.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleImageClick(index)}
-                  className="relative aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
-                >
-                  <img
-                    src={`${image}?w=300&h=300&fit=crop`}
-                    alt={`Option ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {images.map((image) => {
+                const imageUrl = supabase.storage
+                  .from('scavenger_hunt_images')
+                  .getPublicUrl(image.image_path).data.publicUrl;
+
+                return (
+                  <button
+                    key={image.id}
+                    onClick={() => handleImageClick(image.id)}
+                    className="relative aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
+                  >
+                    <img
+                      src={imageUrl}
+                      alt="Game option"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                );
+              })}
             </div>
           </Card>
 
