@@ -41,7 +41,6 @@ const fetchHebrewData = async (category: Category) => {
       query = supabase.from('hebrew_verbs').select('*');
       break;
     case "all":
-      // Fetch from all tables and combine results
       const [phrases, words, letters, verbs] = await Promise.all([
         supabase.from('hebrew_phrases').select('*'),
         supabase.from('hebrew_words').select('*'),
@@ -96,20 +95,30 @@ const MemoryGame = () => {
       return;
     }
 
-    // Take a random subset of the data if we have more than 10 items
-    const selectedData = hebrewData.length > 10 
-      ? hebrewData.sort(() => Math.random() - 0.5).slice(0, 10)
-      : hebrewData;
+    // Take 8 random items for 16 cards (8 pairs) in a 4x4 grid
+    const selectedData = hebrewData.length > 8 
+      ? hebrewData.sort(() => Math.random() - 0.5).slice(0, 8)
+      : hebrewData.slice(0, 8);
 
     // Create pairs of cards
-    const cardPairs = selectedData.map((word: HebrewWord, index) => ({
-      id: index,
-      hebrew: word.hebrew,
-      english: word.english,
-      transliteration: word.transliteration,
-      isFlipped: false,
-      isMatched: false,
-    }));
+    const cardPairs = selectedData.flatMap((word: HebrewWord, index) => [
+      {
+        id: index * 2,
+        hebrew: word.hebrew,
+        english: word.english,
+        transliteration: word.transliteration,
+        isFlipped: false,
+        isMatched: false,
+      },
+      {
+        id: index * 2 + 1,
+        hebrew: word.hebrew,
+        english: word.english,
+        transliteration: word.transliteration,
+        isFlipped: false,
+        isMatched: false,
+      }
+    ]);
 
     // Shuffle the cards
     const shuffledCards = [...cardPairs].sort(() => Math.random() - 0.5);
@@ -122,11 +131,7 @@ const MemoryGame = () => {
   };
 
   const handleCardClick = (cardId: number) => {
-    if (
-      !isGameStarted ||
-      isProcessingMatch ||
-      flippedCards.includes(cardId)
-    ) {
+    if (!isGameStarted || isProcessingMatch || flippedCards.includes(cardId)) {
       return;
     }
 
@@ -135,7 +140,6 @@ const MemoryGame = () => {
       return;
     }
 
-    // If we already have one card flipped
     if (flippedCards.length === 1) {
       setIsProcessingMatch(true);
       const [firstId] = flippedCards;
@@ -144,7 +148,6 @@ const MemoryGame = () => {
       setFlippedCards([firstId, cardId]);
 
       if (firstCard && firstCard.hebrew === clickedCard.hebrew) {
-        // Match found
         setCards(cards.map((card) =>
           card.id === firstId || card.id === cardId
             ? { ...card, isMatched: true }
@@ -152,7 +155,7 @@ const MemoryGame = () => {
         ));
         setMatchedPairs((prev) => {
           const newMatchedPairs = prev + 1;
-          if (newMatchedPairs === hebrewData.length) {
+          if (newMatchedPairs === 8) { // Updated to match 4x4 grid (8 pairs)
             toast.success("Congratulations! You've completed the game!");
             setIsGameStarted(false);
           }
@@ -161,14 +164,12 @@ const MemoryGame = () => {
         setFlippedCards([]);
         setIsProcessingMatch(false);
       } else {
-        // No match, flip cards back after delay
         setTimeout(() => {
           setFlippedCards([]);
           setIsProcessingMatch(false);
         }, 1000);
       }
     } else {
-      // First card flip
       setFlippedCards([cardId]);
     }
   };
@@ -205,7 +206,7 @@ const MemoryGame = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-4 gap-3">
             {cards.map((card) => (
               <div
                 key={card.id}
@@ -214,21 +215,21 @@ const MemoryGame = () => {
                 }`}
                 onClick={() => handleCardClick(card.id)}
               >
-                <Card className="w-full h-48 cursor-pointer">
+                <Card className="w-full h-32 cursor-pointer">
                   <div className="flip-card-inner w-full h-full">
                     {/* Front of card (blank) */}
                     <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF]">
                       <span className="text-white text-2xl font-bold">?</span>
                     </div>
                     {/* Back of card (content) */}
-                    <div className="flip-card-back w-full h-full flex flex-col items-center justify-center p-4 bg-white text-center gap-2">
-                      <span className="text-2xl font-bold text-gray-900" dir="rtl">
+                    <div className="flip-card-back w-full h-full flex flex-col items-center justify-center p-2 bg-white text-center gap-1">
+                      <span className="text-xl font-bold text-gray-900" dir="rtl">
                         {card.hebrew}
                       </span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-xs text-gray-600">
                         {card.transliteration}
                       </span>
-                      <span className="text-base text-gray-800">
+                      <span className="text-sm text-gray-800">
                         {card.english}
                       </span>
                     </div>
@@ -239,7 +240,7 @@ const MemoryGame = () => {
           </div>
 
           <div className="text-center text-lg font-semibold">
-            Matched Pairs: {matchedPairs} / {hebrewData?.length || 0}
+            Matched Pairs: {matchedPairs} / 8
           </div>
         </div>
       </div>
