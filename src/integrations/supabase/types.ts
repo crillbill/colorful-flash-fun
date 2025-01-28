@@ -45,6 +45,36 @@ export type Database = {
         }
         Relationships: []
       }
+      hebrew_fill_blanks: {
+        Row: {
+          created_at: string
+          hint: string | null
+          id: string
+          missing_word: string
+          sentence: string
+          translation: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hint?: string | null
+          id?: string
+          missing_word: string
+          sentence: string
+          translation: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hint?: string | null
+          id?: string
+          missing_word?: string
+          sentence?: string
+          translation?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hebrew_phrases: {
         Row: {
           created_at: string

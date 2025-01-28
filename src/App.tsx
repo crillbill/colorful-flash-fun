@@ -9,6 +9,7 @@ import MultipleChoice from "./pages/MultipleChoice";
 import SentenceBuilder from "./pages/SentenceBuilder";
 import WordSearch from "./pages/WordSearch";
 import MemoryGame from "./pages/MemoryGame";
+import FillInTheBlank from "./pages/FillInTheBlank";
 import Index from "./pages/Index";
 import ImportWords from "./pages/ImportWords";
 import { Toaster } from "@/components/ui/toaster";
@@ -34,6 +35,7 @@ function App() {
             <Route path="/sentence-builder" element={<SentenceBuilder />} />
             <Route path="/word-search" element={<WordSearch />} />
             <Route path="/memory-game" element={<MemoryGame />} />
+            <Route path="/fill-in-the-blank" element={<FillInTheBlank />} />
             <Route path="/import" element={<ImportWords />} />
             <Route path="/" element={<Index />} />
           </Routes>
