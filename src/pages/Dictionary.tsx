@@ -43,22 +43,38 @@ const Dictionary = () => {
       
       console.log('Searching for:', searchTerm);
       
-      const trimmedSearch = searchTerm.trim();
+      const trimmedSearch = searchTerm.trim().toLowerCase();
       if (!trimmedSearch) return [];
 
-      const { data, error } = await supabase
+      // First, try to find exact matches
+      const { data: exactMatches, error: exactError } = await supabase
         .from('hebrew_bulk_words')
         .select('hebrew, english, transliteration')
-        .or(`english.ilike.%${trimmedSearch}%,transliteration.ilike.%${trimmedSearch}%`)
+        .ilike('english', trimmedSearch)
         .order('word_number', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching words:', error);
-        throw error;
+      if (exactError) {
+        console.error('Error fetching exact matches:', exactError);
+        throw exactError;
       }
 
-      console.log('Search results:', data);
-      return data || [];
+      // Then, find partial matches if we don't have exact matches
+      if (!exactMatches?.length) {
+        const { data: partialMatches, error: partialError } = await supabase
+          .from('hebrew_bulk_words')
+          .select('hebrew, english, transliteration')
+          .or(`english.ilike.%${trimmedSearch}%,transliteration.ilike.%${trimmedSearch}%`)
+          .order('word_number', { ascending: true });
+
+        if (partialError) {
+          console.error('Error fetching partial matches:', partialError);
+          throw partialError;
+        }
+
+        return partialMatches || [];
+      }
+
+      return exactMatches;
     },
     enabled: searchTerm.length > 0
   });
