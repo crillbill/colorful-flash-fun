@@ -6,12 +6,12 @@ import { Smile, Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3
 const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <Header1>Learn Hebrew</Header1>
+      <div className="container mx-auto px-4 py-16">
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-8">Learn Hebrew</h2>
         </div>
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Link to="/greetings" className="transform transition-all duration-300 hover:scale-105">
               <Button variant="ghost" className="w-full h-32 text-xl bg-[#6B46C1] hover:bg-[#6B46C1]/90 text-white shadow-lg hover:shadow-xl">
                 <Smile className="w-6 h-6 mr-2" />
