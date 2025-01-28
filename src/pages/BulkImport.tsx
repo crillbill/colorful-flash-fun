@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Header1 } from "@/components/ui/header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface WordEntry {
   rank?: number;
@@ -17,7 +17,7 @@ interface WordEntry {
 
 const BulkImport = () => {
   const navigate = useNavigate();
-  const [file, setFile] = useState<File | null>(null);
+  const [text, setText] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -29,44 +29,35 @@ const BulkImport = () => {
   };
 
   const sanitizeText = (text: string): string => {
-    // Remove special characters but keep spaces, letters, and numbers
+    // Remove special characters but keep spaces, letters, numbers, and basic punctuation
     return text.replace(/[^\w\s\u0590-\u05FF.,'-]/g, '').trim();
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setFile(event.target.files[0]);
-      setError(null);
-      setSuccess(false);
-    }
-  };
-
-  const parseJsonFile = (jsonContent: string) => {
-    console.log("Parsing JSON content:", jsonContent);
-    const words: WordEntry[] = JSON.parse(jsonContent);
+  const parseDelimitedText = (content: string): WordEntry[] => {
+    console.log("Parsing delimited content:", content);
     
-    if (!Array.isArray(words)) {
-      throw new Error("JSON content must be an array of word entries");
-    }
+    const lines = content.split('\n').filter(line => line.trim());
     
-    return words.map((entry, index) => {
-      console.log(`Processing entry ${index}:`, entry);
+    return lines.map((line, index) => {
+      console.log(`Processing line ${index}:`, line);
       
-      if (!entry.hebrew || !entry.english) {
-        throw new Error(`Invalid entry at index ${index}. Each entry must contain hebrew and english fields.`);
+      const [hebrew = '', english = '', transliteration = ''] = line.split('|').map(part => part.trim());
+      
+      if (!hebrew || !english) {
+        throw new Error(`Invalid entry at line ${index + 1}. Each line must contain hebrew and english text separated by |`);
       }
       
       // Sanitize both Hebrew and English text
-      const sanitizedHebrew = sanitizeText(entry.hebrew);
-      const sanitizedEnglish = sanitizeText(entry.english);
-      const sanitizedTransliteration = entry.transliteration ? sanitizeText(entry.transliteration) : null;
+      const sanitizedHebrew = sanitizeText(hebrew);
+      const sanitizedEnglish = sanitizeText(english);
+      const sanitizedTransliteration = transliteration ? sanitizeText(transliteration) : null;
       
       if (!validateHebrewText(sanitizedHebrew)) {
-        throw new Error(`Invalid Hebrew text at index ${index}`);
+        throw new Error(`Invalid Hebrew text at line ${index + 1}`);
       }
       
       return {
-        word_number: entry.rank || index + 1,
+        word_number: index + 1,
         hebrew: sanitizedHebrew,
         english: sanitizedEnglish,
         transliteration: sanitizedTransliteration
@@ -76,8 +67,8 @@ const BulkImport = () => {
 
   const handleImport = async () => {
     try {
-      if (!file) {
-        setError("Please select a file to import");
+      if (!text.trim()) {
+        setError("Please enter some text to import");
         return;
       }
 
@@ -85,10 +76,9 @@ const BulkImport = () => {
       setError(null);
       setSuccess(false);
 
-      const fileContent = await file.text();
-      console.log("File content:", fileContent);
+      console.log("Processing text content:", text);
       
-      const words = parseJsonFile(fileContent);
+      const words = parseDelimitedText(text);
       console.log("Parsed words:", words);
       
       if (words.length === 0) {
@@ -96,7 +86,7 @@ const BulkImport = () => {
       }
 
       const { data, error: supabaseError } = await supabase
-        .from('hebrew_word_dump')  // Changed to use the dump table
+        .from('hebrew_word_dump')
         .insert(words)
         .select();
 
@@ -112,10 +102,7 @@ const BulkImport = () => {
       toast.success(`Successfully imported ${words.length} words to dump table!`);
       
       // Clear the form
-      setFile(null);
-      if (event?.target) {
-        (event.target as HTMLFormElement).reset();
-      }
+      setText("");
       
     } catch (err) {
       console.error('Import error:', err);
@@ -151,35 +138,30 @@ const BulkImport = () => {
 
             <div className="space-y-2">
               <p className="text-sm text-gray-600">
-                Upload a JSON file containing an array of word entries in the following format:
+                Paste your word list below with each word on a new line in the following format:
               </p>
               <pre className="bg-gray-100 p-4 rounded-md text-sm">
-{`[
-  {
-    "rank": 1,
-    "hebrew": "של",
-    "english": "of / belongs to",
-    "transliteration": "shel"
-  }
-]`}
+{`hebrew_word | english_translation | transliteration
+של | of / belongs to | shel
+בית | house | bayit`}
               </pre>
               <p className="text-sm text-gray-500">
                 Note: Special characters will be automatically removed from the text.
               </p>
             </div>
 
-            <Input
-              type="file"
-              accept=".json"
-              onChange={handleFileChange}
-              className="cursor-pointer"
+            <Textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Paste your word list here..."
+              className="min-h-[200px]"
               disabled={isLoading}
             />
 
             <div className="flex gap-4">
               <Button 
                 onClick={handleImport}
-                disabled={isLoading || !file}
+                disabled={isLoading || !text.trim()}
                 className="flex-1"
               >
                 {isLoading ? (
