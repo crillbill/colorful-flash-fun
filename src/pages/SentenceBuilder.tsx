@@ -7,6 +7,7 @@ import { GameTimer } from "@/components/GameTimer";
 import { SentenceBuilderLeaderboard } from "@/components/SentenceBuilderLeaderboard";
 import { supabase } from "@/integrations/supabase/client";
 import { GameArea } from "@/components/sentence-builder/GameArea";
+import { Leaf, Trophy } from "lucide-react";
 
 interface Word {
   id: string;
@@ -123,14 +124,14 @@ const SentenceBuilder = () => {
             });
           } else {
             toast({
-              title: "Success",
+              title: "🎉 Success!",
               description: "Game complete! Score saved."
             });
           }
         }
       } else {
         toast({
-          title: "Correct!",
+          title: "✨ Correct!",
           description: `Great job! "${currentSentence.translation}"`,
         });
         nextSentence();
@@ -138,7 +139,7 @@ const SentenceBuilder = () => {
     } else {
       toast({
         variant: "destructive",
-        title: "Try again",
+        title: "❌ Try again",
         description: "The word order is not correct.",
       });
       setScore((prev) => ({ ...prev, total: prev.total + 1 }));
@@ -165,9 +166,9 @@ const SentenceBuilder = () => {
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white p-8 pt-24">
+      <div className="min-h-screen bg-gradient-to-br from-softOrange to-brightOrange p-8 pt-24">
         <div className="max-w-2xl mx-auto space-y-8">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center bg-white/80 p-4 rounded-lg shadow-md">
             <ScoreDisplay 
               correct={score.correct} 
               total={score.total} 
@@ -182,7 +183,13 @@ const SentenceBuilder = () => {
           />
 
           {isGameComplete ? (
-            <SentenceBuilderLeaderboard />
+            <div className="bg-white/90 p-6 rounded-xl shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <Trophy className="w-6 h-6 text-vividPurple" />
+                <h2 className="text-2xl font-bold text-primaryPurple">Sentence Champions 🏆</h2>
+              </div>
+              <SentenceBuilderLeaderboard />
+            </div>
           ) : (
             <GameArea
               currentSentence={sentences[currentSentenceIndex]}

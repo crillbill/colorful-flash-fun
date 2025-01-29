@@ -18,7 +18,7 @@ export const DraggableWord = ({ word, index }: DraggableWordProps) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className="bg-primary text-primary-foreground p-3 rounded-md cursor-move hover:opacity-80 transition-opacity"
+          className="bg-brightOrange text-white p-3 rounded-md cursor-move hover:bg-orange-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-1"
         >
           {word.content}
         </div>
