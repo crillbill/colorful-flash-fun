@@ -5,6 +5,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AudioButton } from "@/components/AudioButton";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
+import { GameTimer } from "@/components/GameTimer";
 import { useToast } from "@/hooks/use-toast";
 import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
@@ -17,6 +18,8 @@ interface Question {
   options: string[];
 }
 
+const GAME_TIME = 120; // 2 minutes in seconds
+
 const MultipleChoice = () => {
   const colors = useColors();
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -24,12 +27,40 @@ const MultipleChoice = () => {
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(GAME_TIME);
+  const [isGameActive, setIsGameActive] = useState(false);
   const { toast } = useToast();
   const { isPlaying, playAudio } = useAudioPlayback();
 
   useEffect(() => {
     fetchWords();
   }, []);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isGameActive && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            handleTimeUp();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isGameActive, timeLeft]);
+
+  const handleTimeUp = () => {
+    setIsGameActive(false);
+    toast({
+      title: "Time's up!",
+      description: `Final score: ${score.correct} out of ${score.total}`,
+      variant: "destructive",
+    });
+  };
 
   const fetchWords = async () => {
     try {
@@ -72,6 +103,7 @@ const MultipleChoice = () => {
 
       setQuestions(gameQuestions);
       setIsLoading(false);
+      setIsGameActive(true);
     } catch (error) {
       console.error("Error fetching words:", error);
       toast({
@@ -109,6 +141,7 @@ const MultipleChoice = () => {
       setCurrentQuestion((prev) => prev + 1);
       setSelectedAnswer("");
     } else {
+      setIsGameActive(false);
       toast({
         title: "Quiz completed!",
         description: `You scored ${score.correct + (isCorrect ? 1 : 0)} out of ${
@@ -135,6 +168,8 @@ const MultipleChoice = () => {
     setCurrentQuestion(0);
     setSelectedAnswer("");
     setScore({ correct: 0, total: 0 });
+    setTimeLeft(GAME_TIME);
+    setIsGameActive(true);
     fetchWords();
   };
 
@@ -166,7 +201,10 @@ const MultipleChoice = () => {
       <Header1 />
       <div className="min-h-screen bg-white p-8 pt-24">
         <div className="max-w-2xl mx-auto space-y-8">
-          <ScoreDisplay correct={score.correct} total={score.total} />
+          <div className="flex justify-between items-center">
+            <ScoreDisplay correct={score.correct} total={score.total} />
+            <GameTimer timeLeft={timeLeft} />
+          </div>
           <ProgressBar current={currentQuestion + 1} total={questions.length} />
 
           <Card>
@@ -208,7 +246,7 @@ const MultipleChoice = () => {
                 <Button variant="outline" onClick={resetQuiz}>
                   Reset Quiz
                 </Button>
-                <Button onClick={handleAnswer}>
+                <Button onClick={handleAnswer} disabled={!isGameActive}>
                   {currentQuestion === questions.length - 1
                     ? "Finish Quiz"
                     : "Next Question"}
