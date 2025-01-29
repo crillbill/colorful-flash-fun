@@ -135,9 +135,7 @@ const Dictionary = () => {
             </p>
           </div>
 
-          <div className="relative group space-y-12">
-            <div className={`absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-70 blur transition-all duration-300 group-hover:opacity-100 ${isActive ? 'blur-md' : 'blur'}`} />
-            
+          <div className="relative space-y-12">
             {/* English to Hebrew Search */}
             <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
               <div className="flex items-center px-6 py-4">
@@ -163,13 +161,13 @@ const Dictionary = () => {
             </div>
 
             {/* Hebrew to English Title */}
-            <div className="text-center mt-12 mb-4">
+            <div className="text-center">
               <h2 className="text-xl font-semibold text-gray-700">Hebrew to English</h2>
               <p className="text-lg font-medium text-gray-600" dir="rtl">עברית לאנגלית</p>
             </div>
 
             {/* Hebrew to English Search */}
-            <div className="relative bg-white rounded-xl shadow-xl overflow-hidden mt-4">
+            <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
               <div className="flex items-center px-6 py-4">
                 <Search className={`h-6 w-6 transition-all duration-300 ${isActive ? 'text-purple-500' : 'text-gray-400'}`} />
                 <input
