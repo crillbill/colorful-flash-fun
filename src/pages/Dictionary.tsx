@@ -36,25 +36,22 @@ const groupByHebrew = (words: HebrewWord[]) => {
 };
 
 const Dictionary = () => {
-  const [englishSearchTerm, setEnglishSearchTerm] = useState('');
-  const [hebrewSearchTerm, setHebrewSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isActive, setIsActive] = useState(false);
   const { toast } = useToast();
 
   const { data: searchResults, isLoading } = useQuery({
-    queryKey: ['hebrewWords', englishSearchTerm, hebrewSearchTerm],
+    queryKey: ['hebrewWords', searchTerm],
     queryFn: async () => {
-      if (!englishSearchTerm && !hebrewSearchTerm) return [];
+      if (!searchTerm) return [];
       
-      const trimmedEnglishSearch = englishSearchTerm.trim().toLowerCase();
-      const trimmedHebrewSearch = hebrewSearchTerm.trim();
-      
-      if (!trimmedEnglishSearch && !trimmedHebrewSearch) return [];
+      const trimmedSearch = searchTerm.trim().toLowerCase();
+      if (!trimmedSearch) return [];
 
       const { data: matches, error } = await supabase
         .from('hebrew_bulk_words')
         .select('hebrew, english, transliteration')
-        .or(`english.ilike.%${trimmedEnglishSearch}%,english.ilike.% ${trimmedEnglishSearch}%,english.ilike.${trimmedEnglishSearch}%`)
+        .or(`english.ilike.%${trimmedSearch}%,hebrew.ilike.%${trimmedSearch}%`)
         .order('word_number', { ascending: true });
 
       if (error) {
@@ -64,7 +61,7 @@ const Dictionary = () => {
 
       return matches || [];
     },
-    enabled: englishSearchTerm.length > 0 || hebrewSearchTerm.length > 0
+    enabled: searchTerm.length > 0
   });
 
   const handleFeedback = async (hebrew: string, english: string, isPositive: boolean) => {
@@ -95,24 +92,18 @@ const Dictionary = () => {
 
   const groupedResults = searchResults ? groupByHebrew(searchResults) : {};
 
-  const handleSearchFocus = () => {
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
     setIsActive(true);
   };
 
-  const handleSearchBlur = () => {
-    if (!englishSearchTerm && !hebrewSearchTerm) {
-      setIsActive(false);
-    }
-  };
-
   const clearSearch = () => {
-    setEnglishSearchTerm('');
-    setHebrewSearchTerm('');
+    setSearchTerm('');
     setIsActive(false);
   };
 
   const handleVoiceResult = (text: string) => {
-    setEnglishSearchTerm(text);
+    setSearchTerm(text);
     setIsActive(true);
   };
 
@@ -132,8 +123,8 @@ const Dictionary = () => {
 
           <div className="relative space-y-12">
             <SearchBar
-              searchTerm={englishSearchTerm}
-              onSearchChange={setEnglishSearchTerm}
+              searchTerm={searchTerm}
+              onSearchChange={handleSearchChange}
               onClear={clearSearch}
               onVoiceResult={handleVoiceResult}
               isActive={isActive}
