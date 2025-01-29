@@ -57,6 +57,7 @@ const ImportWords = () => {
     try {
       // Try to parse as JSON first
       const jsonData = JSON.parse(text);
+      console.log("Parsed JSON data:", jsonData); // Debug log
       
       // Check if it's the new categories format
       if (jsonData.categories) {
@@ -82,6 +83,7 @@ const ImportWords = () => {
           });
         });
         
+        console.log("Processed words:", words); // Debug log
         return words;
       }
       
@@ -157,15 +159,18 @@ const ImportWords = () => {
       setError(null);
       
       const entries = parseInput(inputText);
+      console.log("Entries to insert:", entries); // Debug log
       
       if (!entries || entries.length === 0) {
         toast.error("No valid entries found");
         return;
       }
 
-      const { error: supabaseError } = await supabase
+      const { data, error: supabaseError } = await supabase
         .from(selectedTable)
         .insert(entries as any);
+
+      console.log("Supabase response:", { data, error: supabaseError }); // Debug log
 
       if (supabaseError) throw supabaseError;
 

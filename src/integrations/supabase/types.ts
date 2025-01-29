@@ -160,6 +160,7 @@ export type Database = {
           english: string
           hebrew: string
           id: string
+          rank: number | null
           transliteration: string | null
           updated_at: string
         }
@@ -169,6 +170,7 @@ export type Database = {
           english: string
           hebrew: string
           id?: string
+          rank?: number | null
           transliteration?: string | null
           updated_at?: string
         }
@@ -178,6 +180,7 @@ export type Database = {
           english?: string
           hebrew?: string
           id?: string
+          rank?: number | null
           transliteration?: string | null
           updated_at?: string
         }
