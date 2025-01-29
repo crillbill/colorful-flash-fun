@@ -2,14 +2,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { formatTime } from "@/utils/wordSearchUtils";
 import { Trophy } from "lucide-react";
 
 interface LeaderboardEntry {
   user_id: string;
-  best_time: number;
-  attempts: number;
   average_score: number;
+  attempts: number;
 }
 
 export const Leaderboard = () => {
@@ -20,31 +18,16 @@ export const Leaderboard = () => {
     const fetchLeaderboard = async () => {
       try {
         const { data, error } = await supabase
-          .from('pronunciation_scores')
-          .select(`
-            user_id,
-            time_taken,
-            score
-          `)
-          .eq('word', 'hangman')
-          .eq('score', 100)
-          .order('time_taken', { ascending: true })
+          .from('pronunciation_leaderboard')
+          .select('user_id, average_score, attempts')
+          .order('average_score', { ascending: false })
           .limit(10);
 
         if (error) throw error;
-
-        // Process and aggregate the data
-        const processedEntries = data.map(entry => ({
-          user_id: entry.user_id,
-          best_time: entry.time_taken || 0,
-          attempts: 1, // Since we're looking at individual scores
-          average_score: entry.score
-        }));
-
-        setEntries(processedEntries);
+        setEntries(data || []);
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
-        toast.error("Failed to load leaderboard");
+        toast("Failed to load leaderboard");
       } finally {
         setLoading(false);
       }
@@ -63,16 +46,16 @@ export const Leaderboard = () => {
 
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-4 text-center">Hangman Champions</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Pronunciation Champions</h2>
       <p className="text-center text-muted-foreground mb-4">
-        Players who completed with 100% accuracy
+        Top 10 players by average score
       </p>
       {entries.length === 0 ? (
         <div className="text-center py-8 space-y-4">
           <Trophy className="mx-auto h-12 w-12 text-muted-foreground" />
           <p className="text-lg font-medium">No Champions Yet</p>
           <p className="text-muted-foreground">
-            Be the first to complete the game with 100% accuracy!
+            Be the first to complete some pronunciation challenges!
           </p>
         </div>
       ) : (
@@ -87,16 +70,16 @@ export const Leaderboard = () => {
                 <div>
                   <p className="font-semibold">User {entry.user_id.slice(0, 8)}</p>
                   <p className="text-sm text-muted-foreground">
-                    Perfect score
+                    {entry.attempts} attempts
                   </p>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-bold text-lg">
-                  {formatTime(entry.best_time)}
+                  {Math.round(entry.average_score)}%
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  100% accuracy
+                  Average Score
                 </p>
               </div>
             </div>
