@@ -3,12 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
 import { useToast } from "@/hooks/use-toast";
-import { CategorySelector, type Category } from "@/components/CategorySelector";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioButton } from "@/components/AudioButton";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { FillInBlankLeaderboard } from "@/components/FillInBlankLeaderboard";
 import { GameTimer } from "@/components/GameTimer";
+import { ScoreDisplay } from "@/components/ScoreDisplay";
 
 interface Option {
   hebrew: string;
@@ -23,14 +23,17 @@ interface Question {
   options: Option[];
 }
 
+const GAMES_PER_ROUND = 5;
+
 const FillInTheBlank = () => {
-  const [category, setCategory] = useState<Category>("words");
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [showAnswer, setShowAnswer] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [gamesPlayed, setGamesPlayed] = useState(0);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
   const { toast } = useToast();
   const { playAudio, isPlaying } = useAudioPlayback();
 
@@ -45,40 +48,33 @@ const FillInTheBlank = () => {
   }, [startTime, showAnswer]);
 
   useEffect(() => {
-    fetchNewQuestion();
-  }, [category]);
+    if (gamesPlayed === 0) {
+      fetchNewQuestion();
+    }
+  }, [gamesPlayed]);
 
   const fetchNewQuestion = async () => {
     try {
       setIsLoading(true);
       setShowAnswer(false);
       setSelectedAnswer("");
-      setStartTime(Date.now());
-      setTimeElapsed(0);
-
-      let tableQuery;
-      switch (category) {
-        case "words":
-          tableQuery = supabase.from("hebrew_words").select("*");
-          break;
-        case "verbs":
-          tableQuery = supabase.from("hebrew_verbs").select("*");
-          break;
-        case "phrases":
-          tableQuery = supabase.from("hebrew_phrases").select("*");
-          break;
-        default:
-          tableQuery = supabase.from("hebrew_words").select("*");
+      
+      if (gamesPlayed === 0) {
+        setStartTime(Date.now());
+        setTimeElapsed(0);
+        setCorrectAnswers(0);
       }
 
-      const { data, error } = await tableQuery;
+      const { data, error } = await supabase
+        .from("hebrew_phrases")
+        .select("*");
 
       if (error) throw error;
 
       if (!data || data.length < 4) {
         toast({
           title: "Error",
-          description: "Not enough words available for the game",
+          description: "Not enough phrases available for the game",
           variant: "destructive",
         });
         return;
@@ -125,20 +121,33 @@ const FillInTheBlank = () => {
     setShowAnswer(true);
 
     const isCorrect = hebrew === currentQuestion?.missingWord;
-    const timeTaken = Math.floor((Date.now() - (startTime || 0)) / 1000);
-
-    // Save score to database
     if (isCorrect) {
+      setCorrectAnswers(prev => prev + 1);
+    }
+
+    const newGamesPlayed = gamesPlayed + 1;
+    setGamesPlayed(newGamesPlayed);
+
+    if (newGamesPlayed === GAMES_PER_ROUND) {
+      const timeTaken = Math.floor((Date.now() - (startTime || 0)) / 1000);
+      const finalScore = Math.round((correctAnswers + (isCorrect ? 1 : 0)) / GAMES_PER_ROUND * 100);
+
       try {
         const { error } = await supabase
           .from('fill_in_blank_scores')
           .insert({
-            score: 100,
+            score: finalScore,
             time_taken: timeTaken,
             user_id: (await supabase.auth.getUser()).data.user?.id
           });
 
         if (error) throw error;
+
+        toast({
+          title: "Round Complete!",
+          description: `Score: ${finalScore}% - Time: ${timeTaken} seconds`,
+          variant: "default",
+        });
       } catch (error) {
         console.error('Error saving score:', error);
       }
@@ -146,7 +155,11 @@ const FillInTheBlank = () => {
 
     toast({
       title: isCorrect ? "Correct!" : "Incorrect",
-      description: isCorrect ? `Completed in ${timeTaken} seconds!` : `The correct answer was: ${currentQuestion?.missingWord}`,
+      description: isCorrect 
+        ? newGamesPlayed === GAMES_PER_ROUND 
+          ? "Round complete!" 
+          : "Keep going!"
+        : `The correct answer was: ${currentQuestion?.missingWord}`,
       variant: isCorrect ? "default" : "destructive",
     });
   };
@@ -162,6 +175,11 @@ const FillInTheBlank = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const startNewRound = () => {
+    setGamesPlayed(0);
+    fetchNewQuestion();
   };
 
   if (isLoading) {
@@ -182,16 +200,16 @@ const FillInTheBlank = () => {
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-8">
-              <CategorySelector
-                value={category}
-                onChange={setCategory}
-              />
-
               {currentQuestion && (
                 <Card>
                   <CardContent className="p-6 space-y-6">
                     <div className="flex justify-between items-center">
                       <GameTimer timeLeft={timeElapsed} />
+                      <ScoreDisplay 
+                        correct={correctAnswers} 
+                        total={gamesPlayed} 
+                        totalWords={GAMES_PER_ROUND} 
+                      />
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
@@ -229,12 +247,21 @@ const FillInTheBlank = () => {
                       ))}
                     </div>
 
-                    {showAnswer && (
+                    {showAnswer && gamesPlayed < GAMES_PER_ROUND && (
                       <Button
                         onClick={fetchNewQuestion}
                         className="w-full mt-4"
                       >
                         Next Question
+                      </Button>
+                    )}
+
+                    {gamesPlayed === GAMES_PER_ROUND && (
+                      <Button
+                        onClick={startNewRound}
+                        className="w-full mt-4"
+                      >
+                        Start New Round
                       </Button>
                     )}
                   </CardContent>
