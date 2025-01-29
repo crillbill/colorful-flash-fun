@@ -96,7 +96,10 @@ const Dictionary = () => {
 
   const groupedResults = searchResults ? groupByHebrew(searchResults) : {};
 
-  const handleSearchFocus = () => setIsActive(true);
+  const handleSearchFocus = () => {
+    setIsActive(true);
+  };
+
   const handleSearchBlur = () => {
     if (!englishSearchTerm && !hebrewSearchTerm) {
       setIsActive(false);
@@ -117,21 +120,22 @@ const Dictionary = () => {
   return (
     <>
       <Header1 />
-      <div className="w-full min-h-screen bg-gradient-to-br from-softPurple to-white pt-20 p-6 flex flex-col items-center">
+      <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 pt-20 p-6 flex flex-col items-center">
         <div className="w-full max-w-3xl">
           <div className={`transition-all duration-300 ${isActive ? 'mb-6' : 'mb-32'}`}>
             <h1 className={`text-center font-bold transition-all duration-300 ${isActive ? 'text-2xl mb-2' : 'text-5xl mb-6'}`}>
-              <span className="gradient-text">📚 Hebrew Dictionary</span>
+              Hebrew Dictionary
             </h1>
             <p className={`text-center text-gray-600 transition-all duration-300 ${isActive ? 'text-sm' : 'text-lg'}`}>
-              🔍 Search in English or Hebrew
+              Search in English or Hebrew
             </p>
           </div>
 
           <div className="relative space-y-12">
-            <div className="relative bg-white rounded-xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+            {/* English to Hebrew Search */}
+            <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
               <div className="flex items-center px-6 py-4">
-                <Search className={`h-6 w-6 transition-all duration-300 ${isActive ? 'text-primaryPurple' : 'text-gray-400'}`} />
+                <Search className={`h-6 w-6 transition-all duration-300 ${isActive ? 'text-purple-500' : 'text-gray-400'}`} />
                 <input
                   type="text"
                   className="w-full px-4 py-2 text-lg focus:outline-none"
@@ -144,10 +148,7 @@ const Dictionary = () => {
                 <div className="flex items-center gap-2">
                   <SearchMicrophone onTranscription={handleVoiceResult} />
                   {englishSearchTerm && (
-                    <button 
-                      onClick={clearSearch} 
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
+                    <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
                       <X className="h-5 w-5" />
                     </button>
                   )}
@@ -155,20 +156,22 @@ const Dictionary = () => {
               </div>
             </div>
 
+          {/* Hebrew to English section temporarily hidden */}
+
             {isActive && (
               <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border-t border-gray-100">
                 {searchResults ? (
                   <div className="divide-y divide-gray-100">
                     {isLoading ? (
                       <div className="p-4 text-center text-gray-500">
-                        🔄 Searching...
+                        Searching...
                       </div>
                     ) : Object.values(groupedResults).length > 0 ? (
                       Object.values(groupedResults).map((result, index) => (
-                        <div key={index} className="p-4 hover:bg-softPurple/10 transition-colors duration-150">
+                        <div key={index} className="p-4 hover:bg-gray-50 transition-colors duration-150">
                           <div className="flex justify-between items-center gap-4">
                             <div className="flex-1">
-                              <span className="text-sm text-primaryPurple font-medium">📖 word</span>
+                              <span className="text-sm text-purple-500 font-medium">word</span>
                               <div className="text-sm text-gray-500">
                                 {Array.from(result.transliterations).join(', ') || 'N/A'}
                               </div>
@@ -200,23 +203,21 @@ const Dictionary = () => {
                             </div>
 
                             <div className="min-w-[120px] text-right">
-                              <span className="text-2xl font-bold text-gray-800 animate-float" dir="rtl">
-                                {result.hebrew}
-                              </span>
+                              <span className="text-2xl font-bold text-gray-800" dir="rtl">{result.hebrew}</span>
                             </div>
                           </div>
                         </div>
                       ))
                     ) : (
                       <div className="p-4 text-center text-gray-500">
-                        😕 No results found
+                        No results found
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="p-8 text-center text-gray-500">
-                    <Book className="h-12 w-12 mx-auto mb-4 text-primaryPurple" />
-                    <p>✨ Start typing to search for Hebrew words</p>
+                    <Book className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p>Start typing to search for Hebrew words</p>
                   </div>
                 )}
               </div>
