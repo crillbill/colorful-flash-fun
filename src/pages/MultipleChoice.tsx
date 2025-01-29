@@ -8,6 +8,7 @@ import { QuestionCard } from "@/components/multiple-choice/QuestionCard";
 import { GameControls } from "@/components/multiple-choice/GameControls";
 import { GameStats } from "@/components/multiple-choice/GameStats";
 import { Question } from "@/components/multiple-choice/types";
+import { Award, Brain, CheckCircle2 } from "lucide-react";
 
 const GAME_TIME = 120; // 2 minutes in seconds
 
@@ -61,7 +62,7 @@ const MultipleChoice = () => {
     }
 
     toast({
-      title: "Time's up!",
+      title: "⏰ Time's up!",
       description: `Final score: ${score.correct} out of ${score.total}`,
       variant: "destructive",
     });
@@ -78,7 +79,7 @@ const MultipleChoice = () => {
 
       if (!words || words.length < 4) {
         toast({
-          title: "Error",
+          title: "❌ Error",
           description: "Not enough words available for the game",
           variant: "destructive",
         });
@@ -105,7 +106,7 @@ const MultipleChoice = () => {
     } catch (error) {
       console.error("Error fetching words:", error);
       toast({
-        title: "Error",
+        title: "❌ Error",
         description: "Failed to load words. Please try again.",
         variant: "destructive",
       });
@@ -115,7 +116,7 @@ const MultipleChoice = () => {
   const handleAnswer = async () => {
     if (!selectedAnswer) {
       toast({
-        title: "Please select an answer",
+        title: "⚠️ Please select an answer",
         variant: "destructive",
       });
       return;
@@ -129,9 +130,9 @@ const MultipleChoice = () => {
     setScore(newScore);
 
     toast({
-      title: isCorrect ? "Correct!" : "Incorrect",
+      title: isCorrect ? "✨ Correct!" : "❌ Incorrect",
       description: isCorrect
-        ? "Great job!"
+        ? "Great job! 🎉"
         : `The correct answer was: ${questions[currentQuestion].translation}`,
       variant: isCorrect ? "default" : "destructive",
     });
@@ -158,7 +159,7 @@ const MultipleChoice = () => {
       }
 
       toast({
-        title: "Quiz completed!",
+        title: "🎯 Quiz completed!",
         description: `You scored ${newScore.correct} out of ${questions.length}`,
       });
     }
@@ -175,8 +176,9 @@ const MultipleChoice = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white p-8 pt-24">
+      <div className="min-h-screen bg-gradient-to-br from-softGreen to-softYellow p-8 pt-24">
         <div className="max-w-2xl mx-auto text-center">
+          <Brain className="animate-pulse w-12 h-12 mx-auto mb-4 text-primaryPurple" />
           Loading questions...
         </div>
       </div>
@@ -185,7 +187,7 @@ const MultipleChoice = () => {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-white p-8 pt-24">
+      <div className="min-h-screen bg-gradient-to-br from-softGreen to-softYellow p-8 pt-24">
         <div className="max-w-2xl mx-auto text-center">
           <p>No questions available. Please try again later.</p>
           <Button onClick={fetchWords} className="mt-4">
@@ -199,10 +201,14 @@ const MultipleChoice = () => {
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white p-4 pt-20">
+      <div className="min-h-screen bg-gradient-to-br from-softGreen to-softYellow p-4 pt-20">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="md:col-span-2">
-            <div className="space-y-3">
+          <div className="md:col-span-2 space-y-6">
+            <div className="bg-white/90 rounded-lg p-6 shadow-lg">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <CheckCircle2 className="w-6 h-6 text-primaryPurple" />
+                <h2 className="text-2xl font-bold text-primaryPurple">Multiple Choice Quiz</h2>
+              </div>
               <GameStats correct={score.correct} total={score.total} />
               <GameControls
                 timeLeft={timeLeft}
@@ -221,7 +227,13 @@ const MultipleChoice = () => {
             </div>
           </div>
           <div className="md:col-span-1">
-            <MultipleChoiceLeaderboard />
+            <div className="bg-white/90 rounded-lg shadow-lg">
+              <div className="flex items-center justify-center gap-2 p-4 border-b border-gray-100">
+                <Award className="w-5 h-5 text-primaryPurple" />
+                <h3 className="text-lg font-semibold text-primaryPurple">Top Players 🏆</h3>
+              </div>
+              <MultipleChoiceLeaderboard />
+            </div>
           </div>
         </div>
       </div>
