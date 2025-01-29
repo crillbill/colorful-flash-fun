@@ -35,51 +35,42 @@ const groupByHebrew = (words: HebrewWord[]) => {
 };
 
 const Dictionary = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [englishSearchTerm, setEnglishSearchTerm] = useState('');
+  const [hebrewSearchTerm, setHebrewSearchTerm] = useState('');
   const [isActive, setIsActive] = useState(false);
   const { toast } = useToast();
 
   const { data: searchResults, isLoading } = useQuery({
-    queryKey: ['hebrewWords', searchTerm],
+    queryKey: ['hebrewWords', englishSearchTerm, hebrewSearchTerm],
     queryFn: async () => {
-      if (!searchTerm) return [];
+      if (!englishSearchTerm && !hebrewSearchTerm) return [];
       
-      console.log('Searching for:', searchTerm);
+      console.log('Searching for:', { english: englishSearchTerm, hebrew: hebrewSearchTerm });
       
-      const trimmedSearch = searchTerm.trim().toLowerCase();
-      if (!trimmedSearch) return [];
+      const trimmedEnglishSearch = englishSearchTerm.trim().toLowerCase();
+      const trimmedHebrewSearch = hebrewSearchTerm.trim();
+      
+      if (!trimmedEnglishSearch && !trimmedHebrewSearch) return [];
 
-      // First, try to find exact matches
-      const { data: exactMatches, error: exactError } = await supabase
+      // Try to find matches based on either English or Hebrew search terms
+      const { data: matches, error } = await supabase
         .from('hebrew_bulk_words')
         .select('hebrew, english, transliteration')
-        .ilike('english', trimmedSearch)
+        .or(
+          `english.ilike.%${trimmedEnglishSearch}%,` +
+          `hebrew.ilike.%${trimmedHebrewSearch}%,` +
+          `transliteration.ilike.%${trimmedEnglishSearch}%`
+        )
         .order('word_number', { ascending: true });
 
-      if (exactError) {
-        console.error('Error fetching exact matches:', exactError);
-        throw exactError;
+      if (error) {
+        console.error('Error fetching matches:', error);
+        throw error;
       }
 
-      // Then, find partial matches if we don't have exact matches
-      if (!exactMatches?.length) {
-        const { data: partialMatches, error: partialError } = await supabase
-          .from('hebrew_bulk_words')
-          .select('hebrew, english, transliteration')
-          .or(`english.ilike.%${trimmedSearch}%,transliteration.ilike.%${trimmedSearch}%`)
-          .order('word_number', { ascending: true });
-
-        if (partialError) {
-          console.error('Error fetching partial matches:', partialError);
-          throw partialError;
-        }
-
-        return partialMatches || [];
-      }
-
-      return exactMatches;
+      return matches || [];
     },
-    enabled: searchTerm.length > 0
+    enabled: englishSearchTerm.length > 0 || hebrewSearchTerm.length > 0
   });
 
   const handleFeedback = async (hebrew: string, english: string, isPositive: boolean) => {
@@ -115,22 +106,20 @@ const Dictionary = () => {
   };
 
   const handleSearchBlur = () => {
-    if (!searchTerm) {
+    if (!englishSearchTerm && !hebrewSearchTerm) {
       setIsActive(false);
     }
   };
 
   const clearSearch = () => {
-    setSearchTerm('');
+    setEnglishSearchTerm('');
+    setHebrewSearchTerm('');
     setIsActive(false);
   };
 
   const handleVoiceResult = (text: string) => {
-    if (text) {
-      console.log('Setting search term to:', text);
-      setSearchTerm(text);
-      setIsActive(true);
-    }
+    setEnglishSearchTerm(text);
+    setIsActive(true);
   };
 
   return (
@@ -143,99 +132,123 @@ const Dictionary = () => {
               Hebrew Dictionary
             </h1>
             <p className={`text-center text-gray-600 transition-all duration-300 ${isActive ? 'text-sm' : 'text-lg'}`}>
-              Search by English or transliteration
+              Search in English or Hebrew
             </p>
           </div>
 
-          <div className="relative group">
-            <div className={`absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-70 blur transition-all duration-300 group-hover:opacity-100 ${isActive ? 'blur-md' : 'blur'}`} />
+          <div className="relative group space-y-4">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-70 blur transition-all duration-300 group-hover:opacity-100 ${isActive ? 'blur-md' : 'blur'}`} />
+            
+            {/* English to Hebrew Search */}
             <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
               <div className="flex items-center px-6 py-4">
                 <Search className={`h-6 w-6 transition-all duration-300 ${isActive ? 'text-purple-500' : 'text-gray-400'}`} />
                 <input
                   type="text"
                   className="w-full px-4 py-2 text-lg focus:outline-none"
-                  placeholder="Type in English or transliteration..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="English to Hebrew..."
+                  value={englishSearchTerm}
+                  onChange={(e) => setEnglishSearchTerm(e.target.value)}
                   onFocus={handleSearchFocus}
                   onBlur={handleSearchBlur}
                 />
                 <div className="flex items-center gap-2">
                   <SearchMicrophone onTranscription={handleVoiceResult} />
-                  {searchTerm && (
+                  {englishSearchTerm && (
                     <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
                       <X className="h-5 w-5" />
                     </button>
                   )}
                 </div>
               </div>
+            </div>
 
-              {isActive && (
-                <div className="border-t border-gray-100">
-                  {searchTerm ? (
-                    <div className="divide-y divide-gray-100">
-                      {isLoading ? (
-                        <div className="p-4 text-center text-gray-500">
-                          Searching...
-                        </div>
-                      ) : Object.values(groupedResults).length > 0 ? (
-                        Object.values(groupedResults).map((result, index) => (
-                          <div key={index} className="p-4 hover:bg-gray-50 transition-colors duration-150">
-                            <div className="flex justify-between items-center gap-4">
-                              <div className="flex-1">
-                                <span className="text-sm text-purple-500 font-medium">word</span>
-                                <div className="text-sm text-gray-500">
-                                  {Array.from(result.transliterations).join(', ') || 'N/A'}
-                                </div>
-                                <div className="mt-1">
-                                  {Array.from(result.translations).map((translation, i) => (
-                                    <span key={i} className="text-gray-700">
-                                      {translation}
-                                      {i < result.translations.size - 1 && ', '}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-4">
-                                <button
-                                  onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], true)}
-                                  className="p-2 hover:bg-green-50 rounded-full transition-colors"
-                                  aria-label="Correct translation"
-                                >
-                                  <ThumbsUp className="h-5 w-5 text-green-600" />
-                                </button>
-                                <button
-                                  onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], false)}
-                                  className="p-2 hover:bg-red-50 rounded-full transition-colors"
-                                  aria-label="Incorrect translation"
-                                >
-                                  <ThumbsDown className="h-5 w-5 text-red-600" />
-                                </button>
-                              </div>
+            {/* Hebrew to English Search */}
+            <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
+              <div className="flex items-center px-6 py-4">
+                <Search className={`h-6 w-6 transition-all duration-300 ${isActive ? 'text-purple-500' : 'text-gray-400'}`} />
+                <input
+                  type="text"
+                  dir="rtl"
+                  className="w-full px-4 py-2 text-lg focus:outline-none text-right"
+                  placeholder="חיפוש מעברית לאנגלית..."
+                  value={hebrewSearchTerm}
+                  onChange={(e) => setHebrewSearchTerm(e.target.value)}
+                  onFocus={handleSearchFocus}
+                  onBlur={handleSearchBlur}
+                />
+                {hebrewSearchTerm && (
+                  <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+            </div>
 
-                              <div className="min-w-[120px] text-right">
-                                <span className="text-2xl font-bold text-gray-800" dir="rtl">{result.hebrew}</span>
+            {isActive && (
+              <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border-t border-gray-100">
+                {searchResults ? (
+                  <div className="divide-y divide-gray-100">
+                    {isLoading ? (
+                      <div className="p-4 text-center text-gray-500">
+                        Searching...
+                      </div>
+                    ) : Object.values(groupedResults).length > 0 ? (
+                      Object.values(groupedResults).map((result, index) => (
+                        <div key={index} className="p-4 hover:bg-gray-50 transition-colors duration-150">
+                          <div className="flex justify-between items-center gap-4">
+                            <div className="flex-1">
+                              <span className="text-sm text-purple-500 font-medium">word</span>
+                              <div className="text-sm text-gray-500">
+                                {Array.from(result.transliterations).join(', ') || 'N/A'}
+                              </div>
+                              <div className="mt-1">
+                                {Array.from(result.translations).map((translation, i) => (
+                                  <span key={i} className="text-gray-700">
+                                    {translation}
+                                    {i < result.translations.size - 1 && ', '}
+                                  </span>
+                                ))}
                               </div>
                             </div>
+                            
+                            <div className="flex items-center gap-4">
+                              <button
+                                onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], true)}
+                                className="p-2 hover:bg-green-50 rounded-full transition-colors"
+                                aria-label="Correct translation"
+                              >
+                                <ThumbsUp className="h-5 w-5 text-green-600" />
+                              </button>
+                              <button
+                                onClick={() => handleFeedback(result.hebrew, Array.from(result.translations)[0], false)}
+                                className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                                aria-label="Incorrect translation"
+                              >
+                                <ThumbsDown className="h-5 w-5 text-red-600" />
+                              </button>
+                            </div>
+
+                            <div className="min-w-[120px] text-right">
+                              <span className="text-2xl font-bold text-gray-800" dir="rtl">{result.hebrew}</span>
+                            </div>
                           </div>
-                        ))
-                      ) : (
-                        <div className="p-4 text-center text-gray-500">
-                          No results found
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="p-8 text-center text-gray-500">
-                      <Book className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                      <p>Start typing to search for Hebrew words</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-gray-500">
+                        No results found
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center text-gray-500">
+                    <Book className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p>Start typing to search for Hebrew words</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
