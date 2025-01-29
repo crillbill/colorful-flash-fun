@@ -34,13 +34,13 @@ export const CardFront = ({
     <div className="bg-gradient-to-br from-softPurple via-softBlue to-softPink rounded-xl shadow-lg p-8 flex flex-col items-center justify-between h-full border border-white/20 backdrop-blur-sm transition-all duration-300 hover:shadow-xl">
       <div className="text-center space-y-6 w-full">
         <p className="text-lg text-gray-600 font-medium">
-          How to say <span className="text-primaryPurple">"{english}"</span> in Hebrew
+          How to say <span className="text-primaryPurple">"{english}"</span> in Hebrew 📖
         </p>
         <h2 
-          className="text-5xl font-bold text-darkPurple mb-2 transition-all duration-300 hover:scale-105" 
+          className="text-5xl font-bold text-darkPurple mb-2 transition-all duration-300 hover:scale-105 animate-float" 
           dir="rtl"
         >
-          {question}
+          {question} ✨
         </h2>
       </div>
       
@@ -52,7 +52,7 @@ export const CardFront = ({
             onClick={onPrevious}
             className="bg-white/80 hover:bg-white border-primaryPurple/20 hover:border-primaryPurple transition-all duration-300"
           >
-            <ArrowLeft className="h-6 w-6 text-primaryPurple" />
+            <ArrowLeft className="h-6 w-6 text-primaryPurple" /> 
           </Button>
         )}
         {showNext && (

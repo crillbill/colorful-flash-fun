@@ -18,7 +18,7 @@ export const CardBack = ({
   return (
     <Card className="flip-card-back p-8 flex flex-col items-center justify-between bg-gradient-to-br from-softPeach via-softYellow to-softOrange text-gray-800 shadow-xl rounded-xl border border-white/30 h-[250px] backdrop-blur-sm">
       <h3 className="text-3xl font-bold bg-gradient-to-r from-brightOrange to-oceanBlue text-transparent bg-clip-text">
-        {answer}
+        {answer} 🎯
       </h3>
       <div className="flex flex-col gap-6 items-center">
         <AudioButton isPlaying={isPlaying} onToggle={onPlayAudio} />
@@ -31,7 +31,7 @@ export const CardBack = ({
               onAnswer(false);
             }}
           >
-            Incorrect
+            Incorrect ❌
           </Button>
           <Button
             variant="default"
@@ -41,7 +41,7 @@ export const CardBack = ({
               onAnswer(true);
             }}
           >
-            Correct
+            Correct ✅
           </Button>
         </div>
       </div>
