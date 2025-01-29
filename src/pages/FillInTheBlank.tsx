@@ -7,6 +7,8 @@ import { CategorySelector, type Category } from "@/components/CategorySelector";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioButton } from "@/components/AudioButton";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
+import { FillInBlankLeaderboard } from "@/components/FillInBlankLeaderboard";
+import { GameTimer } from "@/components/GameTimer";
 
 interface Option {
   hebrew: string;
@@ -27,8 +29,20 @@ const FillInTheBlank = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [showAnswer, setShowAnswer] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [timeElapsed, setTimeElapsed] = useState(0);
   const { toast } = useToast();
   const { playAudio, isPlaying } = useAudioPlayback();
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (startTime && !showAnswer) {
+      timer = setInterval(() => {
+        setTimeElapsed(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [startTime, showAnswer]);
 
   useEffect(() => {
     fetchNewQuestion();
@@ -39,6 +53,8 @@ const FillInTheBlank = () => {
       setIsLoading(true);
       setShowAnswer(false);
       setSelectedAnswer("");
+      setStartTime(Date.now());
+      setTimeElapsed(0);
 
       let tableQuery;
       switch (category) {
@@ -104,14 +120,33 @@ const FillInTheBlank = () => {
     }
   };
 
-  const handleAnswer = (hebrew: string) => {
+  const handleAnswer = async (hebrew: string) => {
     setSelectedAnswer(hebrew);
     setShowAnswer(true);
 
     const isCorrect = hebrew === currentQuestion?.missingWord;
+    const timeTaken = Math.floor((Date.now() - (startTime || 0)) / 1000);
+
+    // Save score to database
+    if (isCorrect) {
+      try {
+        const { error } = await supabase
+          .from('fill_in_blank_scores')
+          .insert({
+            score: 100,
+            time_taken: timeTaken,
+            user_id: (await supabase.auth.getUser()).data.user?.id
+          });
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error saving score:', error);
+      }
+    }
+
     toast({
       title: isCorrect ? "Correct!" : "Incorrect",
-      description: isCorrect ? "Great job!" : `The correct answer was: ${currentQuestion?.missingWord}`,
+      description: isCorrect ? `Completed in ${timeTaken} seconds!` : `The correct answer was: ${currentQuestion?.missingWord}`,
       variant: isCorrect ? "default" : "destructive",
     });
   };
@@ -144,62 +179,70 @@ const FillInTheBlank = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-8 pt-24">
-        <div className="max-w-2xl mx-auto space-y-8">
-          <CategorySelector
-            value={category}
-            onChange={setCategory}
-          />
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-8">
+              <CategorySelector
+                value={category}
+                onChange={setCategory}
+              />
 
-          {currentQuestion && (
-            <Card>
-              <CardContent className="p-6 space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-semibold text-center">
-                      {currentQuestion.sentence}
-                    </h2>
-                    <AudioButton
-                      isPlaying={isPlaying}
-                      onToggle={() => handlePlayAudio(currentQuestion.sentence)}
-                      disabled={isPlaying}
-                    />
-                  </div>
-                  <p className="text-gray-600 text-center">
-                    {currentQuestion.translation}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                  {currentQuestion.options.map((option) => (
-                    <Button
-                      key={option.hebrew}
-                      onClick={() => handleAnswer(option.hebrew)}
-                      variant={showAnswer ? (option.hebrew === currentQuestion.missingWord ? "default" : "outline") : "outline"}
-                      className="w-full p-4 h-auto"
-                      disabled={showAnswer}
-                    >
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="text-lg">{option.hebrew}</span>
-                        <span className="text-sm text-gray-600">
-                          {option.english}
-                          {option.transliteration && ` (${option.transliteration})`}
-                        </span>
+              {currentQuestion && (
+                <Card>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="flex justify-between items-center">
+                      <GameTimer timeLeft={timeElapsed} />
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-2xl font-semibold text-center">
+                          {currentQuestion.sentence}
+                        </h2>
+                        <AudioButton
+                          isPlaying={isPlaying}
+                          onToggle={() => handlePlayAudio(currentQuestion.sentence)}
+                          disabled={isPlaying}
+                        />
                       </div>
-                    </Button>
-                  ))}
-                </div>
+                      <p className="text-gray-600 text-center">
+                        {currentQuestion.translation}
+                      </p>
+                    </div>
 
-                {showAnswer && (
-                  <Button
-                    onClick={fetchNewQuestion}
-                    className="w-full mt-4"
-                  >
-                    Next Question
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                    <div className="grid grid-cols-1 gap-4">
+                      {currentQuestion.options.map((option) => (
+                        <Button
+                          key={option.hebrew}
+                          onClick={() => handleAnswer(option.hebrew)}
+                          variant={showAnswer ? (option.hebrew === currentQuestion.missingWord ? "default" : "outline") : "outline"}
+                          className="w-full p-4 h-auto"
+                          disabled={showAnswer}
+                        >
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-lg">{option.hebrew}</span>
+                            <span className="text-sm text-gray-600">
+                              {option.english}
+                              {option.transliteration && ` (${option.transliteration})`}
+                            </span>
+                          </div>
+                        </Button>
+                      ))}
+                    </div>
+
+                    {showAnswer && (
+                      <Button
+                        onClick={fetchNewQuestion}
+                        className="w-full mt-4"
+                      >
+                        Next Question
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+            <FillInBlankLeaderboard />
+          </div>
         </div>
       </div>
     </>
