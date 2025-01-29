@@ -51,7 +51,7 @@ const Dictionary = () => {
       const { data: matches, error } = await supabase
         .from('hebrew_bulk_words')
         .select('hebrew, english, transliteration')
-        .or(`english.ilike.%${trimmedSearch}%,hebrew.ilike.%${trimmedSearch}%`)
+        .or(`english.ilike.%${trimmedSearch}%,transliteration.ilike.%${trimmedSearch}%`)
         .order('word_number', { ascending: true });
 
       if (error) {
@@ -117,7 +117,7 @@ const Dictionary = () => {
               Hebrew Dictionary 📚
             </h1>
             <p className={`text-center text-gray-600 transition-all duration-300 ${isActive ? 'text-sm' : 'text-lg'}`}>
-              Search in English or Hebrew 🔍
+              Search in English or by transliteration 🔍
             </p>
           </div>
 
