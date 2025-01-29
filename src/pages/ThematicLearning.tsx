@@ -6,9 +6,7 @@ import {
   Rotate3D, 
   ChevronRight, 
   ChevronLeft,
-  Volume2,
-  Check,
-  X
+  Volume2
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
@@ -208,35 +206,38 @@ const ThematicLearning = () => {
         />
       </div>
 
-      {/* Flashcard */}
-      <FlashCard 
-        word={currentWordData}
-        isFlipped={isFlipped}
-        onFlip={() => setIsFlipped(!isFlipped)}
-      />
+      {/* Flashcard and Navigation Container */}
+      <div className="flex flex-col items-center gap-6">
+        {/* Flashcard */}
+        <FlashCard 
+          word={currentWordData}
+          isFlipped={isFlipped}
+          onFlip={() => setIsFlipped(!isFlipped)}
+        />
 
-      {/* Navigation Controls */}
-      <div className="flex justify-between mt-6">
-        <Button
-          onClick={prevWord}
-          disabled={currentCategory === 0 && currentWord === 0}
-          className="w-32"
-        >
-          <ChevronLeft className="mr-2" />
-          Previous
-        </Button>
+        {/* Navigation Controls */}
+        <div className="flex gap-4">
+          <Button
+            onClick={prevWord}
+            disabled={currentCategory === 0 && currentWord === 0}
+            className="w-32"
+          >
+            <ChevronLeft className="mr-2" />
+            Previous
+          </Button>
 
-        <Button
-          onClick={nextWord}
-          disabled={
-            currentCategory === words.length - 1 &&
-            currentWord === words[currentCategory].words.length - 1
-          }
-          className="w-32"
-        >
-          Next
-          <ChevronRight className="ml-2" />
-        </Button>
+          <Button
+            onClick={nextWord}
+            disabled={
+              currentCategory === words.length - 1 &&
+              currentWord === words[currentCategory].words.length - 1
+            }
+            className="w-32"
+          >
+            Next
+            <ChevronRight className="ml-2" />
+          </Button>
+        </div>
       </div>
     </div>
   );
