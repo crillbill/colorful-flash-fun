@@ -21,6 +21,7 @@ export const Leaderboard = () => {
         const { data, error } = await supabase
           .from('pronunciation_leaderboard')
           .select('*')
+          .eq('word', 'letter_matching') // Only letter matching game scores
           .eq('average_score', 100) // Only perfect scores
           .order('best_time', { ascending: true }) // Sort by fastest time
           .limit(10);
