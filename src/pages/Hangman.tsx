@@ -106,12 +106,20 @@ const Hangman = () => {
   }, [isGameActive]);
 
   const saveScore = async (score: number, timeTaken: number) => {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('Error getting user:', authError);
+      return;
+    }
+
     const { error } = await supabase
       .from('pronunciation_scores')
       .insert({
         word: 'hangman',
         score,
         time_taken: timeTaken,
+        user_id: user.id
       });
 
     if (error) {
@@ -134,6 +142,11 @@ const Hangman = () => {
       setTimer(0);
       setIsGameActive(true);
     }
+  };
+
+  const handleRestart = () => {
+    setScore({ correct: 0, total: 0 });
+    getNewWord();
   };
 
   useEffect(() => {
@@ -160,6 +173,8 @@ const Hangman = () => {
     .join(" ");
 
   const handleGuess = async (letter: string) => {
+    if (!currentWord) return;
+    
     if (guessedLetters.has(letter)) {
       toast({
         title: "Already Guessed",
@@ -231,7 +246,7 @@ const Hangman = () => {
           <div className="text-center space-y-4">
             <div className="text-4xl font-bold mb-8">{displayWord}</div>
             
-            <div className="mb-4">
+            <div className="flex justify-center gap-4 mb-4">
               <Button 
                 variant="outline" 
                 onClick={() => setShowHint(true)}
@@ -239,17 +254,24 @@ const Hangman = () => {
               >
                 Show Hint
               </Button>
-              {showHint && (
-                <div className="mt-2 space-y-1">
-                  <p className="text-muted-foreground">
-                    <span className="font-semibold">Hint:</span> {currentWord.transliteration || 'No transliteration available'}
-                  </p>
-                  <p className="text-muted-foreground">
-                    <span className="font-semibold">English:</span> {currentWord.english}
-                  </p>
-                </div>
-              )}
+              <Button 
+                variant="default"
+                onClick={handleRestart}
+              >
+                Restart Game
+              </Button>
             </div>
+
+            {showHint && (
+              <div className="mt-2 space-y-1">
+                <p className="text-muted-foreground">
+                  <span className="font-semibold">Hint:</span> {currentWord.transliteration || 'No transliteration available'}
+                </p>
+                <p className="text-muted-foreground">
+                  <span className="font-semibold">English:</span> {currentWord.english}
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-8 gap-2 md:grid-cols-11">
               {hebrewAlphabet.split("").map((letter) => (
