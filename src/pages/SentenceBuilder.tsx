@@ -120,9 +120,16 @@ const SentenceBuilder = () => {
           
           if (error) {
             console.error('Error saving score:', error);
-            toast.error("Failed to save score");
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Failed to save score"
+            });
           } else {
-            toast.success("Game complete! Score saved.");
+            toast({
+              title: "Success",
+              description: "Game complete! Score saved."
+            });
           }
         }
       } else {
@@ -134,9 +141,9 @@ const SentenceBuilder = () => {
       }
     } else {
       toast({
+        variant: "destructive",
         title: "Try again",
         description: "The word order is not correct.",
-        variant: "destructive",
       });
       setScore((prev) => ({ ...prev, total: prev.total + 1 }));
     }
