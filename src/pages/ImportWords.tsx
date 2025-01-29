@@ -23,16 +23,20 @@ interface BaseWord {
 
 interface CategorizedWord extends BaseWord {
   category: string;
+  rank?: number;
 }
 
-interface AlphabetEntry extends BaseWord {
-  letter: string;
-  name: string;
-  sound_description?: string | null;
+interface CategoryData {
+  [category: string]: {
+    rank?: number;
+    english: string;
+    transliteration?: string;
+    hebrew: string;
+  }[];
 }
 
 const ImportWords = () => {
-  const [selectedTable, setSelectedTable] = useState<TableOption>("hebrew_words");
+  const [selectedTable, setSelectedTable] = useState<TableOption>("hebrew_categorized_words");
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,83 +47,89 @@ const ImportWords = () => {
   };
 
   const validateEnglishText = (text: string): boolean => {
-    const englishRegex = /^[a-zA-Z0-9\s.,!?'"-]+$/;
+    const englishRegex = /^[a-zA-Z0-9\s.,!?'"-()]+$/;
     return englishRegex.test(text);
   };
 
-  const parseInput = (text: string): BaseWord[] | CategorizedWord[] | AlphabetEntry[] => {
+  const parseInput = (text: string): BaseWord[] | CategorizedWord[] => {
     setError(null);
     
-    if (selectedTable === "hebrew_categorized_words") {
-      try {
-        const jsonData = JSON.parse(text);
-        if (!Array.isArray(jsonData)) {
-          throw new Error("JSON must be an array of word objects");
-        }
+    try {
+      // Try to parse as JSON first
+      const jsonData = JSON.parse(text);
+      
+      // Check if it's the new categories format
+      if (jsonData.categories) {
+        const words: CategorizedWord[] = [];
         
-        const validatedData = jsonData.map((item: any, index) => {
-          if (!item.hebrew || !item.english || !item.category) {
-            throw new Error(`Item ${index + 1}: Missing required fields (hebrew, english, category)`);
-          }
-          
-          if (!validateHebrewText(item.hebrew)) {
-            throw new Error(`Item ${index + 1}: Invalid Hebrew text "${item.hebrew}"`);
-          }
-          
-          if (!validateEnglishText(item.english)) {
-            throw new Error(`Item ${index + 1}: Invalid English text "${item.english}"`);
-          }
-          
-          const entry: CategorizedWord = {
-            hebrew: item.hebrew,
-            english: item.english,
-            transliteration: item.transliteration || null,
-            category: item.category
-          };
-          
-          return entry;
+        Object.entries(jsonData.categories).forEach(([category, items]: [string, any[]]) => {
+          items.forEach((item: any) => {
+            if (!item.hebrew || !item.english) {
+              throw new Error(`Missing required fields (hebrew, english) in category ${category}`);
+            }
+            
+            if (!validateHebrewText(item.hebrew)) {
+              throw new Error(`Invalid Hebrew text "${item.hebrew}" in category ${category}`);
+            }
+            
+            words.push({
+              hebrew: item.hebrew,
+              english: item.english,
+              transliteration: item.transliteration || null,
+              category: category,
+              rank: item.rank
+            });
+          });
         });
         
-        return validatedData;
-      } catch (error: any) {
-        throw new Error(`Invalid JSON format: ${error.message}`);
+        return words;
       }
-    } else if (selectedTable === "hebrew_alphabet") {
-      const lines = text.split('\n').filter(line => line.trim());
       
-      return lines.map((line, index) => {
-        const parts = line.split(/\s{2,}/).map(part => part.trim());
-        
-        if (parts.length < 3) {
-          throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Letter, Name, and Transliteration separated by two spaces.`);
-        }
+      // If it's not the categories format, handle as before
+      if (selectedTable === "hebrew_categorized_words") {
+        const lines = text.split('\n').filter(line => line.trim());
+        return lines.map((line, index) => {
+          const parts = line.split(/\s{2,}/).map(part => part.trim());
+          
+          if (parts.length < 2) {
+            throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces.`);
+          }
 
-        const [letter, name, transliteration] = parts;
-        
-        const entry: AlphabetEntry = {
-          letter,
-          name,
-          hebrew: letter,
-          english: name,
-          transliteration: transliteration || null
-        };
-        
-        return entry;
-      });
-    } else {
-      const lines = text.split('\n').filter(line => line.trim());
+          const [hebrew, english, transliteration] = parts;
+          
+          if (!hebrew || !english) {
+            throw new Error(`Line ${index + 1}: Missing required fields`);
+          }
+          
+          if (!validateHebrewText(hebrew)) {
+            throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
+          }
+
+          if (!validateEnglishText(english)) {
+            throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters`);
+          }
+          
+          return {
+            hebrew,
+            english,
+            transliteration: transliteration || null,
+          };
+        });
+      }
       
+      // Handle regular text format
+      const lines = text.split('\n').filter(line => line.trim());
       return lines.map((line, index) => {
         const parts = line.split(/\s{2,}/).map(part => part.trim());
         
         if (parts.length < 2) {
-          throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces. Found: "${line}"`);
+          throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces.`);
         }
 
         const [hebrew, english, transliteration] = parts;
         
         if (!hebrew || !english) {
-          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew  English  Transliteration`);
+          throw new Error(`Line ${index + 1}: Missing required fields`);
         }
         
         if (!validateHebrewText(hebrew)) {
@@ -127,17 +137,17 @@ const ImportWords = () => {
         }
 
         if (!validateEnglishText(english)) {
-          throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters. Only English letters, numbers, and basic punctuation are allowed.`);
+          throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters`);
         }
         
-        const entry: BaseWord = {
+        return {
           hebrew,
           english,
           transliteration: transliteration || null,
         };
-        
-        return entry;
       });
+    } catch (error: any) {
+      throw new Error(`Invalid format: ${error.message}`);
     }
   };
 
@@ -172,20 +182,18 @@ const ImportWords = () => {
 
   const getPlaceholderText = () => {
     if (selectedTable === "hebrew_categorized_words") {
-      return `[
-  {
-    "hebrew": "ספר",
-    "english": "book",
-    "transliteration": "sefer",
-    "category": "objects"
-  },
-  {
-    "hebrew": "שולחן",
-    "english": "table",
-    "transliteration": "shulchan",
-    "category": "furniture"
+      return `{
+  "categories": {
+    "Animal": [
+      {
+        "rank": 649,
+        "english": "the mouse (female)",
+        "transliteration": "ha'akhbara",
+        "hebrew": "העכברה"
+      }
+    ]
   }
-]`;
+}`;
     }
     
     switch (selectedTable) {
@@ -198,74 +206,65 @@ const ImportWords = () => {
     }
   };
 
-  const getInstructions = () => {
-    if (selectedTable === "hebrew_categorized_words") {
-      return "Format: JSON array of objects with hebrew, english, transliteration (optional), and category fields";
-    }
-    return "Format: Hebrew  English  Transliteration (separate fields with TWO spaces)";
-  };
-
   return (
-    <>
+    <div className="min-h-screen bg-white p-8 pt-24">
       <Header1 />
-      <div className="min-h-screen bg-white p-8 pt-24">
-        <div className="max-w-2xl mx-auto space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Import Hebrew Content</h2>
-            
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+      <div className="max-w-2xl mx-auto space-y-8">
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Import Hebrew Content</h2>
+          
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Select Table</label>
-              <Select
-                value={selectedTable}
-                onValueChange={(value) => setSelectedTable(value as TableOption)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a table" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hebrew_words">Words</SelectItem>
-                  <SelectItem value="hebrew_phrases">Phrases</SelectItem>
-                  <SelectItem value="hebrew_alphabet">Alphabet</SelectItem>
-                  <SelectItem value="hebrew_verbs">Verbs</SelectItem>
-                  <SelectItem value="hebrew_categorized_words">Categorized Words</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Paste your content ({getInstructions()})
-              </label>
-              <p className="text-sm text-muted-foreground">
-                Example format:
-              </p>
-              <pre className="bg-gray-100 p-2 rounded text-sm">
-                {getPlaceholderText()}
-              </pre>
-              <Textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder={getPlaceholderText()}
-                className="min-h-[200px] font-mono"
-              />
-            </div>
-
-            <Button 
-              onClick={handleImport}
-              disabled={isLoading || !inputText.trim()}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Select Table</label>
+            <Select
+              value={selectedTable}
+              onValueChange={(value) => setSelectedTable(value as TableOption)}
             >
-              {isLoading ? "Importing..." : "Import"}
-            </Button>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a table" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hebrew_words">Words</SelectItem>
+                <SelectItem value="hebrew_phrases">Phrases</SelectItem>
+                <SelectItem value="hebrew_alphabet">Alphabet</SelectItem>
+                <SelectItem value="hebrew_verbs">Verbs</SelectItem>
+                <SelectItem value="hebrew_categorized_words">Categorized Words</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Paste your content
+            </label>
+            <p className="text-sm text-muted-foreground">
+              Example format:
+            </p>
+            <pre className="bg-gray-100 p-2 rounded text-sm">
+              {getPlaceholderText()}
+            </pre>
+            <Textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={getPlaceholderText()}
+              className="min-h-[200px] font-mono"
+            />
+          </div>
+
+          <Button 
+            onClick={handleImport}
+            disabled={isLoading || !inputText.trim()}
+          >
+            {isLoading ? "Importing..." : "Import"}
+          </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
