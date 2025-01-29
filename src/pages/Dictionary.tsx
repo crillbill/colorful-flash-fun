@@ -121,6 +121,15 @@ const Dictionary = () => {
     setIsActive(true);
   };
 
+  const handleHebrewInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow only Hebrew characters, spaces, and punctuation
+    if (/^[\u0590-\u05FF\s\u0591-\u05C7,.?!]*$/.test(value) || value === '') {
+      setHebrewSearchTerm(value);
+      setIsActive(true);
+    }
+  };
+
   return (
     <>
       <Header1 />
@@ -160,35 +169,35 @@ const Dictionary = () => {
               </div>
             </div>
 
-            {/* Hebrew to English Title */}
-            <div className="text-center">
-              <h2 className="text-xl font-semibold text-gray-700">Hebrew to English</h2>
-              <p className="text-lg font-medium text-gray-600" dir="rtl">עברית לאנגלית</p>
-            </div>
+          {/* Hebrew to English Title */}
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-700">Hebrew to English</h2>
+            <p className="text-lg font-medium text-gray-600" dir="rtl">עברית לאנגלית</p>
+          </div>
 
-            {/* Hebrew to English Search */}
-            <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
-              <div className="flex items-center px-6 py-4">
-                <Search className={`h-6 w-6 transition-all duration-300 ${isActive ? 'text-purple-500' : 'text-gray-400'}`} />
-                <input
-                  type="text"
-                  dir="rtl"
-                  lang="he"
-                  inputMode="text"
-                  className="w-full px-4 py-2 text-lg focus:outline-none text-right"
-                  placeholder="חיפוש מעברית לאנגלית..."
-                  value={hebrewSearchTerm}
-                  onChange={(e) => setHebrewSearchTerm(e.target.value)}
-                  onFocus={handleSearchFocus}
-                  onBlur={handleSearchBlur}
-                />
-                {hebrewSearchTerm && (
-                  <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
-                    <X className="h-5 w-5" />
-                  </button>
-                )}
-              </div>
+          {/* Hebrew to English Search */}
+          <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
+            <div className="flex items-center px-6 py-4">
+              <Search className={`h-6 w-6 transition-all duration-300 ${isActive ? 'text-purple-500' : 'text-gray-400'}`} />
+              <input
+                type="text"
+                dir="rtl"
+                lang="he"
+                inputMode="text"
+                className="w-full px-4 py-2 text-lg focus:outline-none text-right"
+                placeholder="חיפוש מעברית לאנגלית..."
+                value={hebrewSearchTerm}
+                onChange={handleHebrewInput}
+                onFocus={handleSearchFocus}
+                onBlur={handleSearchBlur}
+              />
+              {hebrewSearchTerm && (
+                <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
+                  <X className="h-5 w-5" />
+                </button>
+              )}
             </div>
+          </div>
 
             {isActive && (
               <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border-t border-gray-100">
