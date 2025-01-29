@@ -19,15 +19,28 @@ export const Leaderboard = () => {
     const fetchLeaderboard = async () => {
       try {
         const { data, error } = await supabase
-          .from('pronunciation_leaderboard')
-          .select('*')
-          .eq('word', 'letter_matching') // Only letter matching game scores
-          .eq('average_score', 100) // Only perfect scores
-          .order('best_time', { ascending: true }) // Sort by fastest time
+          .from('pronunciation_scores')
+          .select(`
+            user_id,
+            time_taken,
+            score
+          `)
+          .eq('word', 'letter_matching')
+          .eq('score', 100)
+          .order('time_taken', { ascending: true })
           .limit(10);
 
         if (error) throw error;
-        setEntries(data || []);
+
+        // Process and aggregate the data
+        const processedEntries = data.map(entry => ({
+          user_id: entry.user_id,
+          best_time: entry.time_taken || 0,
+          attempts: 1, // Since we're looking at individual scores
+          average_score: entry.score
+        }));
+
+        setEntries(processedEntries);
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
         toast.error("Failed to load leaderboard");
@@ -64,7 +77,7 @@ export const Leaderboard = () => {
               <div>
                 <p className="font-semibold">User {entry.user_id.slice(0, 8)}</p>
                 <p className="text-sm text-muted-foreground">
-                  {entry.attempts} attempts
+                  Perfect score
                 </p>
               </div>
             </div>
