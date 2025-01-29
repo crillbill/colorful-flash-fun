@@ -42,35 +42,51 @@ const ImportWords = () => {
   const [error, setError] = useState<string | null>(null);
 
   const validateHebrewText = (text: string): boolean => {
+    console.log("Validating Hebrew text:", text);
     const hebrewRegex = /[\u0590-\u05FF]/;
-    return hebrewRegex.test(text);
+    const isValid = hebrewRegex.test(text);
+    console.log("Hebrew validation result:", isValid);
+    return isValid;
   };
 
   const validateEnglishText = (text: string): boolean => {
+    console.log("Validating English text:", text);
     const englishRegex = /^[a-zA-Z0-9\s.,!?'"-()]+$/;
+    const isValid = englishRegex.test(text);
+    console.log("English validation result:", isValid);
     return englishRegex.test(text);
   };
 
   const parseInput = (text: string): BaseWord[] | CategorizedWord[] => {
+    console.log("Starting to parse input text");
     setError(null);
     
     try {
       // Try to parse as JSON first
+      console.log("Attempting to parse JSON");
       const jsonData = JSON.parse(text);
-      console.log("Parsed JSON data:", jsonData); // Debug log
+      console.log("Successfully parsed JSON data:", jsonData);
       
       // Check if it's the new categories format
       if (jsonData.categories) {
+        console.log("Found categories format");
         const words: CategorizedWord[] = [];
         
         Object.entries(jsonData.categories).forEach(([category, items]: [string, any[]]) => {
+          console.log(`Processing category: ${category}`);
           items.forEach((item: any) => {
+            console.log("Processing item:", item);
+            
             if (!item.hebrew || !item.english) {
-              throw new Error(`Missing required fields (hebrew, english) in category ${category}`);
+              const error = `Missing required fields (hebrew, english) in category ${category}`;
+              console.error(error);
+              throw new Error(error);
             }
             
             if (!validateHebrewText(item.hebrew)) {
-              throw new Error(`Invalid Hebrew text "${item.hebrew}" in category ${category}`);
+              const error = `Invalid Hebrew text "${item.hebrew}" in category ${category}`;
+              console.error(error);
+              throw new Error(error);
             }
             
             words.push({
@@ -83,32 +99,42 @@ const ImportWords = () => {
           });
         });
         
-        console.log("Processed words:", words); // Debug log
+        console.log("Processed words:", words);
         return words;
       }
       
       // If it's not the categories format, handle as before
       if (selectedTable === "hebrew_categorized_words") {
+        console.log("Processing non-JSON format for categorized words");
         const lines = text.split('\n').filter(line => line.trim());
         return lines.map((line, index) => {
+          console.log(`Processing line ${index + 1}:`, line);
           const parts = line.split(/\s{2,}/).map(part => part.trim());
           
           if (parts.length < 2) {
-            throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces.`);
+            const error = `Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces.`;
+            console.error(error);
+            throw new Error(error);
           }
 
           const [hebrew, english, transliteration] = parts;
           
           if (!hebrew || !english) {
-            throw new Error(`Line ${index + 1}: Missing required fields`);
+            const error = `Line ${index + 1}: Missing required fields`;
+            console.error(error);
+            throw new Error(error);
           }
           
           if (!validateHebrewText(hebrew)) {
-            throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
+            const error = `Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`;
+            console.error(error);
+            throw new Error(error);
           }
 
           if (!validateEnglishText(english)) {
-            throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters`);
+            const error = `Line ${index + 1}: Text "${english}" contains invalid characters`;
+            console.error(error);
+            throw new Error(error);
           }
           
           return {
@@ -120,26 +146,36 @@ const ImportWords = () => {
       }
       
       // Handle regular text format
+      console.log("Processing regular text format");
       const lines = text.split('\n').filter(line => line.trim());
       return lines.map((line, index) => {
+        console.log(`Processing line ${index + 1}:`, line);
         const parts = line.split(/\s{2,}/).map(part => part.trim());
         
         if (parts.length < 2) {
-          throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces.`);
+          const error = `Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces.`;
+          console.error(error);
+          throw new Error(error);
         }
 
         const [hebrew, english, transliteration] = parts;
         
         if (!hebrew || !english) {
-          throw new Error(`Line ${index + 1}: Missing required fields`);
+          const error = `Line ${index + 1}: Missing required fields`;
+          console.error(error);
+          throw new Error(error);
         }
         
         if (!validateHebrewText(hebrew)) {
-          throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
+          const error = `Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`;
+          console.error(error);
+          throw new Error(error);
         }
 
         if (!validateEnglishText(english)) {
-          throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters`);
+          const error = `Line ${index + 1}: Text "${english}" contains invalid characters`;
+          console.error(error);
+          throw new Error(error);
         }
         
         return {
@@ -149,31 +185,39 @@ const ImportWords = () => {
         };
       });
     } catch (error: any) {
+      console.error("Error parsing input:", error);
       throw new Error(`Invalid format: ${error.message}`);
     }
   };
 
   const handleImport = async () => {
     try {
+      console.log("Starting import process");
       setIsLoading(true);
       setError(null);
       
       const entries = parseInput(inputText);
-      console.log("Entries to insert:", entries); // Debug log
+      console.log("Entries to insert:", entries);
       
       if (!entries || entries.length === 0) {
+        console.error("No valid entries found");
         toast.error("No valid entries found");
         return;
       }
 
+      console.log(`Inserting ${entries.length} entries into ${selectedTable}`);
       const { data, error: supabaseError } = await supabase
         .from(selectedTable)
         .insert(entries as any);
 
-      console.log("Supabase response:", { data, error: supabaseError }); // Debug log
+      console.log("Supabase response:", { data, error: supabaseError });
 
-      if (supabaseError) throw supabaseError;
+      if (supabaseError) {
+        console.error("Supabase error:", supabaseError);
+        throw supabaseError;
+      }
 
+      console.log("Import successful");
       toast.success(`Successfully imported ${entries.length} entries`);
       setInputText("");
     } catch (error: any) {
