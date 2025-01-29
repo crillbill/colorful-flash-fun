@@ -199,18 +199,18 @@ const MultipleChoice = () => {
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white p-8 pt-24">
-        <div className="max-w-2xl mx-auto space-y-8">
-          <div className="flex justify-between items-center">
+      <div className="min-h-screen bg-white p-4 pt-20">
+        <div className="max-w-xl mx-auto space-y-4">
+          <div className="flex justify-between items-center mb-2">
             <ScoreDisplay correct={score.correct} total={score.total} />
             <GameTimer timeLeft={timeLeft} />
           </div>
           <ProgressBar current={currentQuestion + 1} total={questions.length} />
 
-          <Card>
-            <CardContent className="p-6 space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold text-center">
+          <Card className="shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-semibold">
                   {questions[currentQuestion].word}
                 </h2>
                 <AudioButton
@@ -223,18 +223,18 @@ const MultipleChoice = () => {
               <RadioGroup
                 value={selectedAnswer}
                 onValueChange={setSelectedAnswer}
-                className="space-y-4"
+                className="space-y-2"
               >
                 {questions[currentQuestion].options.map((option) => (
                   <div
                     key={option}
-                    className="flex items-center space-x-2 border rounded-lg p-4 hover:bg-accent cursor-pointer"
+                    className="flex items-center space-x-2 border rounded-md p-2 hover:bg-accent cursor-pointer"
                     onClick={() => setSelectedAnswer(option)}
                   >
                     <RadioGroupItem value={option} id={option} />
                     <label
                       htmlFor={option}
-                      className="text-lg cursor-pointer flex-grow"
+                      className="text-base cursor-pointer flex-grow"
                     >
                       {option}
                     </label>
@@ -242,11 +242,11 @@ const MultipleChoice = () => {
                 ))}
               </RadioGroup>
 
-              <div className="flex justify-between pt-4">
-                <Button variant="outline" onClick={resetQuiz}>
+              <div className="flex justify-between mt-4 pt-2 border-t">
+                <Button variant="outline" onClick={resetQuiz} size="sm">
                   Reset Quiz
                 </Button>
-                <Button onClick={handleAnswer} disabled={!isGameActive}>
+                <Button onClick={handleAnswer} disabled={!isGameActive} size="sm">
                   {currentQuestion === questions.length - 1
                     ? "Finish Quiz"
                     : "Next Question"}
