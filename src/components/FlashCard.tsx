@@ -33,6 +33,8 @@ export const FlashCard = ({
 }: FlashCardProps) => {
   const [showHint, setShowHint] = useState(false);
   const [pronunciationScore, setPronunciationScore] = useState(0);
+  const [totalScore, setTotalScore] = useState(0);
+  const [attempts, setAttempts] = useState(0);
   const { isPlaying, playAudio } = useAudioPlayback();
   const { 
     isListening, 
@@ -67,6 +69,8 @@ export const FlashCard = ({
       Math.floor(Math.random() * 20) + 60;  // 60-79 for incorrect
     
     setPronunciationScore(score);
+    setTotalScore(prevTotal => prevTotal + score);
+    setAttempts(prevAttempts => prevAttempts + 1);
     
     setTimeout(() => {
       handleAnswer(isCorrect);
@@ -83,6 +87,8 @@ export const FlashCard = ({
            normalizedExpected.includes(normalizedTranscribed);
   };
 
+  const averageScore = attempts > 0 ? Math.round(totalScore / attempts) : 0;
+
   return (
     <div className="flex flex-col items-center gap-4">
       <motion.div
@@ -91,6 +97,14 @@ export const FlashCard = ({
         exit={{ opacity: 0, y: -20 }}
         className="w-full max-w-sm mx-auto"
       >
+        {attempts > 0 && (
+          <div className="text-center mb-4">
+            <p className="text-sm text-gray-600">
+              Average Pronunciation Score: <span className="font-semibold">{averageScore}%</span>
+              <span className="text-xs ml-2">({attempts} attempts)</span>
+            </p>
+          </div>
+        )}
         <MeterChart score={pronunciationScore} />
         <div className="w-full h-[250px]">
           <CardFront
@@ -100,7 +114,7 @@ export const FlashCard = ({
             isListening={isListening}
             isProcessing={isProcessing}
             timeLeft={timeLeft}
-            onPlayAudio={() => playAudio(question)}
+            onPlayAudio={playAudio}
             onStartListening={startListening}
             onPrevious={onPrevious}
             onNext={onNext}
