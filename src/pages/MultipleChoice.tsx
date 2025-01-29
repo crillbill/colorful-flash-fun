@@ -1,26 +1,16 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ProgressBar } from "@/components/ProgressBar";
-import { ScoreDisplay } from "@/components/ScoreDisplay";
-import { GameTimer } from "@/components/GameTimer";
-import { useToast } from "@/hooks/use-toast";
 import { Header1 } from "@/components/ui/header";
-import { useColors } from "@/contexts/ColorContext";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MultipleChoiceLeaderboard } from "@/components/MultipleChoiceLeaderboard";
-
-interface Question {
-  word: string;
-  translation: string;
-  options: string[];
-}
+import { QuestionCard } from "@/components/multiple-choice/QuestionCard";
+import { GameControls } from "@/components/multiple-choice/GameControls";
+import { GameStats } from "@/components/multiple-choice/GameStats";
+import { Question } from "@/components/multiple-choice/types";
 
 const GAME_TIME = 120; // 2 minutes in seconds
 
 const MultipleChoice = () => {
-  const colors = useColors();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [score, setScore] = useState({ correct: 0, total: 0 });
@@ -94,24 +84,17 @@ const MultipleChoice = () => {
         return;
       }
 
-      // Shuffle words and create questions
       const shuffledWords = words.sort(() => Math.random() - 0.5);
       const gameQuestions = shuffledWords.slice(0, 5).map((word) => {
-        // Get 3 random incorrect options
         const incorrectOptions = shuffledWords
           .filter((w) => w.english !== word.english)
           .slice(0, 3)
           .map((w) => w.english);
 
-        // Add correct answer and shuffle options
-        const options = [...incorrectOptions, word.english].sort(
-          () => Math.random() - 0.5
-        );
-
         return {
           word: word.hebrew,
           translation: word.english,
-          options,
+          options: [...incorrectOptions, word.english].sort(() => Math.random() - 0.5),
         };
       });
 
@@ -157,13 +140,13 @@ const MultipleChoice = () => {
       setSelectedAnswer("");
     } else {
       setIsGameActive(false);
-      const percentage = Math.round((newScore.correct / questions.length) * 100);
+      const finalScore = Math.round((newScore.correct / questions.length) * 100);
       
       try {
         const { error } = await supabase
           .from('multiple_choice_scores')
           .insert({
-            score: percentage,
+            score: finalScore,
             time_taken: GAME_TIME - timeLeft,
             user_id: (await supabase.auth.getUser()).data.user?.id
           });
@@ -219,54 +202,21 @@ const MultipleChoice = () => {
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <ScoreDisplay correct={score.correct} total={score.total} />
-                <GameTimer timeLeft={timeLeft} />
-              </div>
-              <ProgressBar current={currentQuestion + 1} total={questions.length} />
-
-              <Card className="shadow-sm">
-                <CardContent className="p-4">
-                  <div className="mb-2">
-                    <h2 className="text-lg font-semibold">
-                      {questions[currentQuestion]?.word}
-                    </h2>
-                  </div>
-
-                  <RadioGroup
-                    value={selectedAnswer}
-                    onValueChange={setSelectedAnswer}
-                    className="space-y-2"
-                  >
-                    {questions[currentQuestion]?.options.map((option) => (
-                      <div
-                        key={option}
-                        className="flex items-center space-x-2 border rounded-md p-2 hover:bg-accent cursor-pointer"
-                        onClick={() => setSelectedAnswer(option)}
-                      >
-                        <RadioGroupItem value={option} id={option} />
-                        <label
-                          htmlFor={option}
-                          className="text-sm cursor-pointer flex-grow"
-                        >
-                          {option}
-                        </label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-
-                  <div className="flex justify-between mt-3 pt-2 border-t">
-                    <Button variant="outline" onClick={resetQuiz} size="sm">
-                      Reset Quiz
-                    </Button>
-                    <Button onClick={handleAnswer} disabled={!isGameActive} size="sm">
-                      {currentQuestion === questions.length - 1
-                        ? "Finish Quiz"
-                        : "Next Question"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <GameStats correct={score.correct} total={score.total} />
+              <GameControls
+                timeLeft={timeLeft}
+                currentQuestion={currentQuestion}
+                totalQuestions={questions.length}
+              />
+              <QuestionCard
+                currentQuestion={questions[currentQuestion]}
+                selectedAnswer={selectedAnswer}
+                setSelectedAnswer={setSelectedAnswer}
+                onAnswer={handleAnswer}
+                onReset={resetQuiz}
+                isGameActive={isGameActive}
+                isLastQuestion={currentQuestion === questions.length - 1}
+              />
             </div>
           </div>
           <div className="md:col-span-1">
