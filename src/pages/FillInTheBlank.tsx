@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { AudioButton } from "@/components/AudioButton";
-import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { FillInBlankLeaderboard } from "@/components/FillInBlankLeaderboard";
 import { GameTimer } from "@/components/GameTimer";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
@@ -35,7 +33,6 @@ const FillInTheBlank = () => {
   const [gamesPlayed, setGamesPlayed] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const { toast } = useToast();
-  const { playAudio, isPlaying } = useAudioPlayback();
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -164,19 +161,6 @@ const FillInTheBlank = () => {
     });
   };
 
-  const handlePlayAudio = async (text: string) => {
-    try {
-      await playAudio(text);
-    } catch (error) {
-      console.error("Error playing audio:", error);
-      toast({
-        title: "Error playing audio",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    }
-  };
-
   const startNewRound = () => {
     setGamesPlayed(0);
     fetchNewQuestion();
@@ -212,16 +196,9 @@ const FillInTheBlank = () => {
                       />
                     </div>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h2 className="text-2xl font-semibold text-center">
-                          {currentQuestion.sentence}
-                        </h2>
-                        <AudioButton
-                          isPlaying={isPlaying}
-                          onToggle={() => handlePlayAudio(currentQuestion.sentence)}
-                          disabled={isPlaying}
-                        />
-                      </div>
+                      <h2 className="text-2xl font-semibold text-center">
+                        {currentQuestion.sentence}
+                      </h2>
                       <p className="text-gray-600 text-center">
                         {currentQuestion.translation}
                       </p>
