@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { formatTime } from "@/utils/wordSearchUtils";
 
 interface LeaderboardEntry {
   user_id: string;
-  total_score: number;
+  best_time: number;
   attempts: number;
   average_score: number;
 }
@@ -20,7 +21,8 @@ export const Leaderboard = () => {
         const { data, error } = await supabase
           .from('pronunciation_leaderboard')
           .select('*')
-          .order('average_score', { ascending: false })
+          .eq('average_score', 100) // Only perfect scores
+          .order('best_time', { ascending: true }) // Sort by fastest time
           .limit(10);
 
         if (error) throw error;
@@ -46,7 +48,10 @@ export const Leaderboard = () => {
 
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-4 text-center">Top Pronunciations</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Speed Champions</h2>
+      <p className="text-center text-muted-foreground mb-4">
+        Players who completed with 100% accuracy
+      </p>
       <div className="space-y-4">
         {entries.map((entry, index) => (
           <div
@@ -64,10 +69,10 @@ export const Leaderboard = () => {
             </div>
             <div className="text-right">
               <p className="font-bold text-lg">
-                {Math.round(entry.average_score)}%
+                {formatTime(entry.best_time)}
               </p>
               <p className="text-sm text-muted-foreground">
-                Total: {entry.total_score}
+                100% accuracy
               </p>
             </div>
           </div>
