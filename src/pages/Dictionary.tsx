@@ -164,7 +164,7 @@ const Dictionary = () => {
 
             {/* Hebrew to English Title */}
             <div className="text-center mt-12 mb-4">
-              <h2 className="text-xl font-semibold mb-1">Hebrew to English</h2>
+              <h2 className="text-xl font-semibold text-gray-700">Hebrew to English</h2>
               <p className="text-lg font-medium text-gray-600" dir="rtl">עברית לאנגלית</p>
             </div>
 
