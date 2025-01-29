@@ -1,14 +1,16 @@
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { 
   BookOpen, 
   Rotate3D, 
   ChevronRight, 
   ChevronLeft,
   Volume2,
-} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+  Check,
+  X
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 
 interface Word {
@@ -16,6 +18,11 @@ interface Word {
   english: string;
   transliteration: string | null;
   category: string;
+}
+
+interface Category {
+  name: string;
+  words: Word[];
 }
 
 const FlashCard = ({ word, isFlipped, onFlip }: { word: Word; isFlipped: boolean; onFlip: () => void }) => {
