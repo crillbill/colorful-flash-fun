@@ -8,6 +8,7 @@ import { Header1 } from "@/components/ui/header";
 import { supabase } from "@/integrations/supabase/client";
 import { GameTimer } from "@/components/GameTimer";
 import { Leaderboard } from "@/components/Leaderboard";
+import { ColorProvider } from "@/contexts/ColorContext";
 
 interface HebrewLetter {
   letter: string;
@@ -20,7 +21,7 @@ interface HebrewLetter {
 
 const GAME_TIME = 300; // 5 minutes in seconds
 
-const LetterMatching = () => {
+const LetterMatchingContent = () => {
   const colors = useColors();
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [currentRound, setCurrentRound] = useState(1);
@@ -312,6 +313,14 @@ const LetterMatching = () => {
         </div>
       </div>
     </>
+  );
+};
+
+const LetterMatching = () => {
+  return (
+    <ColorProvider>
+      <LetterMatchingContent />
+    </ColorProvider>
   );
 };
 
