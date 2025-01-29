@@ -11,63 +11,90 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Link to="/letter-matching" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
                 <Puzzle className="w-6 h-6 mr-2" />
                 Letter Matching
               </Button>
             </Link>
 
             <Link to="/flashcards" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#D946EF] hover:bg-[#D946EF]/90 text-white shadow-lg hover:shadow-xl">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#D946EF] hover:bg-[#D946EF]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
                 <BookOpen className="w-6 h-6 mr-2" />
                 Flashcards
               </Button>
             </Link>
 
             <Link to="/word-search" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#EC4899] hover:bg-[#EC4899]/90 text-white shadow-lg hover:shadow-xl">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#EC4899] hover:bg-[#EC4899]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
                 <Search className="w-6 h-6 mr-2" />
                 Word Search
               </Button>
             </Link>
 
             <Link to="/hangman" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#F43F5E] hover:bg-[#F43F5E]/90 text-white shadow-lg hover:shadow-xl">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#F43F5E] hover:bg-[#F43F5E]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
                 <Brain className="w-6 h-6 mr-2" />
                 Hangman
               </Button>
             </Link>
 
             <Link to="/sentence-builder" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#F97316] hover:bg-[#F97316]/90 text-white shadow-lg hover:shadow-xl">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#F97316] hover:bg-[#F97316]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
                 <PenTool className="w-6 h-6 mr-2" />
                 Sentence Builder
               </Button>
             </Link>
 
             <Link to="/multiple-choice" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#84CC16] hover:bg-[#84CC16]/90 text-white shadow-lg hover:shadow-xl">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#84CC16] hover:bg-[#84CC16]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
                 <ListChecks className="w-6 h-6 mr-2" />
                 Multiple Choice
               </Button>
             </Link>
 
             <Link to="/pronunciation" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#10B981] hover:bg-[#10B981]/90 text-white shadow-lg hover:shadow-xl">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#10B981] hover:bg-[#10B981]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
                 <Mic className="w-6 h-6 mr-2" />
                 Pronunciation
               </Button>
             </Link>
 
             <Link to="/memory-game" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#06B6D4] hover:bg-[#06B6D4]/90 text-white shadow-lg hover:shadow-xl">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#06B6D4] hover:bg-[#06B6D4]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
                 <Grid3X3 className="w-6 h-6 mr-2" />
                 Memory Game
               </Button>
             </Link>
 
             <Link to="/dictionary" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
                 <Book className="w-6 h-6 mr-2" />
                 Dictionary
               </Button>
