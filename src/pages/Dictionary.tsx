@@ -136,7 +136,7 @@ const Dictionary = () => {
           </div>
 
           <div className="relative group space-y-4">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-70 blur transition-all duration-300 group-hover:opacity-100" />
+            <div className={`absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl opacity-70 blur transition-all duration-300 group-hover:opacity-100 ${isActive ? 'blur-md' : 'blur'}`} />
             
             {/* English to Hebrew Search */}
             <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
