@@ -7,6 +7,7 @@ import FlashCard from "@/components/FlashCard";
 import { Header1 } from "@/components/ui/header";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { LeaderboardCard } from "@/components/LeaderboardCard";
 
 interface FlashcardData {
   hebrew: string;
@@ -34,7 +35,6 @@ const Flashcards = () => {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [gameActive, setGameActive] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const { data: flashcardsData = [], isLoading: isQueryLoading, error } = useQuery({
     queryKey: ['flashcards'],
@@ -113,9 +113,9 @@ const Flashcards = () => {
                 <Button 
                   onClick={startGame} 
                   className="w-full h-12 text-lg"
-                  disabled={isLoading}
+                  disabled={isQueryLoading}
                 >
-                  {isLoading ? "Loading..." : "Start Game"}
+                  {isQueryLoading ? "Loading..." : "Start Game"}
                 </Button>
               </CardContent>
             </Card>
@@ -146,6 +146,11 @@ const Flashcards = () => {
               )}
             </>
           )}
+          
+          {/* Add the leaderboard below the flashcard */}
+          <div className="mt-8">
+            <LeaderboardCard />
+          </div>
         </div>
       </div>
     </>
