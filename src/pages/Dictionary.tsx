@@ -121,15 +121,6 @@ const Dictionary = () => {
     setIsActive(true);
   };
 
-  const handleHebrewInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Allow only Hebrew characters, spaces, and punctuation
-    if (/^[\u0590-\u05FF\s\u0591-\u05C7,.?!]*$/.test(value) || value === '') {
-      setHebrewSearchTerm(value);
-      setIsActive(true);
-    }
-  };
-
   return (
     <>
       <Header1 />
@@ -187,7 +178,7 @@ const Dictionary = () => {
                 className="w-full px-4 py-2 text-lg focus:outline-none text-right"
                 placeholder="חיפוש מעברית לאנגלית..."
                 value={hebrewSearchTerm}
-                onChange={handleHebrewInput}
+                onChange={(e) => setHebrewSearchTerm(e.target.value)}
                 onFocus={handleSearchFocus}
                 onBlur={handleSearchBlur}
               />
