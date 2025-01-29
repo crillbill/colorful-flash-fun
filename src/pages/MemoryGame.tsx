@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { CategorySelector, type Category } from "@/components/CategorySelector";
+import { MemoryGameLeaderboard } from "@/components/MemoryGameLeaderboard";
 
 interface MemoryCard {
   id: number;
@@ -95,12 +96,10 @@ const MemoryGame = () => {
       return;
     }
 
-    // Take 8 random items for 16 cards (8 pairs) in a 4x4 grid
     const selectedData = hebrewData.length > 8 
       ? hebrewData.sort(() => Math.random() - 0.5).slice(0, 8)
       : hebrewData.slice(0, 8);
 
-    // Create pairs of cards
     const cardPairs = selectedData.flatMap((word: HebrewWord, index) => [
       {
         id: index * 2,
@@ -120,7 +119,6 @@ const MemoryGame = () => {
       }
     ]);
 
-    // Shuffle the cards
     const shuffledCards = [...cardPairs].sort(() => Math.random() - 0.5);
     setCards(shuffledCards);
     setFlippedCards([]);
@@ -155,7 +153,7 @@ const MemoryGame = () => {
         ));
         setMatchedPairs((prev) => {
           const newMatchedPairs = prev + 1;
-          if (newMatchedPairs === 8) { // Updated to match 4x4 grid (8 pairs)
+          if (newMatchedPairs === 8) {
             toast.success("Congratulations! You've completed the game!");
             setIsGameStarted(false);
           }
@@ -180,6 +178,31 @@ const MemoryGame = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const saveScore = async (timeTaken: number, pairsMatched: number) => {
+    try {
+      const { error } = await supabase
+        .from('memory_game_scores')
+        .insert({
+          user_id: (await supabase.auth.getUser()).data.user?.id,
+          time_taken: timeTaken,
+          pairs_matched: pairsMatched
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving score:', error);
+      toast.error("Failed to save score");
+    }
+  };
+
+  useEffect(() => {
+    if (matchedPairs === 8 && isGameStarted) {
+      setIsGameStarted(false);
+      toast.success("Congratulations! You've completed the game!");
+      saveScore(timer, matchedPairs);
+    }
+  }, [matchedPairs, isGameStarted, timer]);
+
   if (isLoading) {
     return <div className="min-h-screen bg-white p-4 pt-16 text-center">Loading words...</div>;
   }
@@ -192,8 +215,7 @@ const MemoryGame = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-4 pt-24">
-        <div className="max-w-4xl mx-auto">
-          {/* Game controls section */}
+        <div className="max-w-4xl mx-auto space-y-8">
           <div className="mb-8">
             <div className="flex items-center justify-between w-full">
               <div className="flex-shrink-0">
@@ -217,7 +239,6 @@ const MemoryGame = () => {
             </div>
           </div>
 
-          {/* Game grid */}
           <div className="grid grid-cols-4 gap-3">
             {cards.map((card) => (
               <div
@@ -229,11 +250,9 @@ const MemoryGame = () => {
               >
                 <Card className="w-full h-32 cursor-pointer">
                   <div className="flip-card-inner w-full h-full">
-                    {/* Front of card (blank) */}
                     <div className="flip-card-front w-full h-full flex items-center justify-center bg-gradient-to-br from-[#8B5CF6] to-[#D946EF]">
                       <span className="text-white text-2xl font-bold">?</span>
                     </div>
-                    {/* Back of card (content) */}
                     <div className="flip-card-back w-full h-full flex flex-col items-center justify-center p-2 bg-white text-center gap-1">
                       <span className="text-xl font-bold text-gray-900" dir="rtl">
                         {card.hebrew}
@@ -249,6 +268,10 @@ const MemoryGame = () => {
                 </Card>
               </div>
             ))}
+          </div>
+
+          <div className="mt-8">
+            <MemoryGameLeaderboard />
           </div>
         </div>
       </div>
