@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
-import { Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Book } from "lucide-react";
+import { Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Book, GraduationCap } from "lucide-react";
 
 const Index = () => {
   return (
@@ -17,6 +17,16 @@ const Index = () => {
               >
                 <Book className="w-6 h-6 mr-2" />
                 Dictionary
+              </Button>
+            </Link>
+
+            <Link to="/thematic-learning" className="transform transition-all duration-300 hover:scale-105">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
+                <GraduationCap className="w-6 h-6 mr-2" />
+                Thematic Learning
               </Button>
             </Link>
 

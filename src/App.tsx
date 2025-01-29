@@ -22,6 +22,7 @@ import Login from './pages/Login';
 import Greetings from './pages/Greetings';
 import Hangman from './pages/Hangman';
 import LetterMatching from './pages/LetterMatching';
+import ThematicLearning from './pages/ThematicLearning';
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ function App() {
             <Route path="/greetings" element={<Greetings />} />
             <Route path="/hangman" element={<Hangman />} />
             <Route path="/letter-matching" element={<LetterMatching />} />
+            <Route path="/thematic-learning" element={<ThematicLearning />} />
           </Routes>
           <Toaster />
         </Router>
