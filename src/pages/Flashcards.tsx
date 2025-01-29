@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import FlashCard from "@/components/FlashCard";
-import { ProgressBar } from "@/components/ProgressBar";
 import { Header1 } from "@/components/ui/header";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -122,11 +121,6 @@ const Flashcards = () => {
             </Card>
           ) : (
             <>
-              <ProgressBar 
-                current={currentCardIndex + 1} 
-                total={flashcardsData.length} 
-              />
-
               {!isGameComplete && flashcardsData.length > 0 ? (
                 <FlashCard
                   question={flashcardsData[currentCardIndex].hebrew}
