@@ -17,6 +17,7 @@ interface Word {
 }
 
 const MAX_TRIES = 6;
+const GAME_WORD_COUNT = 3;
 
 const BALLOON_COLORS = [
   "#F2FCE2", // Soft Green
@@ -85,11 +86,19 @@ const Hangman = () => {
   const [showHint, setShowHint] = useState<boolean>(false);
   const [timer, setTimer] = useState<number>(0);
   const [isGameActive, setIsGameActive] = useState<boolean>(false);
+  const [gameWords, setGameWords] = useState<Word[]>([]);
 
   const { data: words = [], isLoading, error } = useQuery({
     queryKey: ['hangmanWords'],
     queryFn: fetchWords,
   });
+
+  useEffect(() => {
+    if (words.length > 0 && gameWords.length === 0) {
+      const shuffled = [...words].sort(() => 0.5 - Math.random());
+      setGameWords(shuffled.slice(0, GAME_WORD_COUNT));
+    }
+  }, [words]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -133,27 +142,46 @@ const Hangman = () => {
   };
 
   const getNewWord = () => {
-    if (words.length > 0) {
-      const randomIndex = Math.floor(Math.random() * words.length);
-      setCurrentWord(words[randomIndex]);
-      setGuessedLetters(new Set());
-      setWrongGuesses(0);
-      setShowHint(false);
-      setTimer(0);
-      setIsGameActive(true);
+    if (gameWords.length > 0) {
+      const remainingWords = gameWords.filter(word => 
+        !score.total || word.hebrew !== currentWord?.hebrew
+      );
+      
+      if (remainingWords.length > 0) {
+        const randomIndex = Math.floor(Math.random() * remainingWords.length);
+        setCurrentWord(remainingWords[randomIndex]);
+        setGuessedLetters(new Set());
+        setWrongGuesses(0);
+        setShowHint(false);
+        setTimer(0);
+        setIsGameActive(true);
+      } else {
+        toast({
+          title: "Game Complete!",
+          description: `You've completed all ${GAME_WORD_COUNT} words!`,
+        });
+        handleRestart();
+      }
     }
   };
 
   const handleRestart = () => {
+    const shuffled = [...words].sort(() => 0.5 - Math.random());
+    setGameWords(shuffled.slice(0, GAME_WORD_COUNT));
     setScore({ correct: 0, total: 0 });
-    getNewWord();
+    setCurrentWord(null);
+    setGuessedLetters(new Set());
+    setWrongGuesses(0);
+    setShowHint(false);
+    setTimer(0);
+    setIsGameActive(false);
   };
 
   useEffect(() => {
-    if (words.length > 0 && !currentWord) {
+    if (gameWords.length > 0 && !currentWord) {
       getNewWord();
     }
-  }, [words]);
+  }, [gameWords]);
 
   if (isLoading) {
     return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">Loading...</div>;
@@ -229,7 +257,7 @@ const Hangman = () => {
       <div className="min-h-screen bg-white p-8 pt-24">
         <div className="max-w-2xl mx-auto space-y-8">
           <div className="flex justify-between items-center">
-            <ScoreDisplay correct={score.correct} total={score.total} totalWords={words.length} />
+            <ScoreDisplay correct={score.correct} total={score.total} totalWords={GAME_WORD_COUNT} />
             <GameTimer timeLeft={timer} />
           </div>
           
