@@ -16,11 +16,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type TableOption = "hebrew_words" | "hebrew_phrases" | "hebrew_alphabet" | "hebrew_verbs" | "hebrew_categorized_words";
 
-interface CategorizedWord {
+interface BaseWord {
   hebrew: string;
   english: string;
-  transliteration?: string;
+  transliteration?: string | null;
+}
+
+interface CategorizedWord extends BaseWord {
   category: string;
+}
+
+interface AlphabetEntry extends BaseWord {
+  letter: string;
+  name: string;
+  sound_description?: string | null;
 }
 
 const ImportWords = () => {
@@ -30,10 +39,6 @@ const ImportWords = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    checkAuthorization();
-  }, []);
 
   const checkAuthorization = async () => {
     try {
@@ -71,7 +76,7 @@ const ImportWords = () => {
     return englishRegex.test(text);
   };
 
-  const parseInput = (text: string) => {
+  const parseInput = (text: string): BaseWord[] | CategorizedWord[] | AlphabetEntry[] => {
     setError(null);
     
     if (selectedTable === "hebrew_categorized_words") {
@@ -94,22 +99,46 @@ const ImportWords = () => {
             throw new Error(`Item ${index + 1}: Invalid English text "${item.english}"`);
           }
           
-          return {
+          const entry: CategorizedWord = {
             hebrew: item.hebrew,
             english: item.english,
             transliteration: item.transliteration || null,
             category: item.category
           };
+          
+          return entry;
         });
         
         return validatedData;
       } catch (error: any) {
         throw new Error(`Invalid JSON format: ${error.message}`);
       }
+    } else if (selectedTable === "hebrew_alphabet") {
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      return lines.map((line, index) => {
+        const parts = line.split(/\s{2,}/).map(part => part.trim());
+        
+        if (parts.length < 3) {
+          throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Letter, Name, and Transliteration separated by two spaces.`);
+        }
+
+        const [letter, name, transliteration] = parts;
+        
+        const entry: AlphabetEntry = {
+          letter,
+          name,
+          hebrew: letter,
+          english: name,
+          transliteration: transliteration || null
+        };
+        
+        return entry;
+      });
     } else {
       const lines = text.split('\n').filter(line => line.trim());
       
-      const parsedEntries = lines.map((line, index) => {
+      return lines.map((line, index) => {
         const parts = line.split(/\s{2,}/).map(part => part.trim());
         
         if (parts.length < 2) {
@@ -130,14 +159,14 @@ const ImportWords = () => {
           throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters. Only English letters, numbers, and basic punctuation are allowed.`);
         }
         
-        return {
+        const entry: BaseWord = {
           hebrew,
           english,
           transliteration: transliteration || null,
         };
+        
+        return entry;
       });
-
-      return parsedEntries;
     }
   };
 
@@ -160,7 +189,7 @@ const ImportWords = () => {
 
       const { error: supabaseError } = await supabase
         .from(selectedTable)
-        .insert(entries);
+        .insert(entries as any); // Type assertion needed due to Supabase client typing limitations
 
       if (supabaseError) throw supabaseError;
 
