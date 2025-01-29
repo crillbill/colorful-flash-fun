@@ -28,15 +28,15 @@ interface Category {
 const FlashCard = ({ word, isFlipped, onFlip }: { word: Word; isFlipped: boolean; onFlip: () => void }) => {
   return (
     <div 
-      className={`flip-card w-full h-96 ${isFlipped ? 'flipped' : ''}`}
+      className={`flip-card w-full max-w-md h-72 ${isFlipped ? 'flipped' : ''}`}
       onClick={onFlip}
     >
       <div className="flip-card-inner w-full h-full">
         {/* Front of card */}
         <div className="flip-card-front">
-          <Card className="w-full h-full flex flex-col justify-center items-center p-8 cursor-pointer">
-            <div className="text-5xl font-bold mb-6">{word.hebrew}</div>
-            <div className="text-2xl text-gray-600">{word.transliteration}</div>
+          <Card className="w-full h-full flex flex-col justify-center items-center p-6 cursor-pointer">
+            <div className="text-4xl font-bold mb-4">{word.hebrew}</div>
+            <div className="text-xl text-gray-600">{word.transliteration}</div>
             <Button 
               variant="ghost" 
               size="icon"
@@ -46,16 +46,16 @@ const FlashCard = ({ word, isFlipped, onFlip }: { word: Word; isFlipped: boolean
                 // Add pronunciation logic here
               }}
             >
-              <Volume2 className="h-6 w-6" />
+              <Volume2 className="h-5 w-5" />
             </Button>
           </Card>
         </div>
 
         {/* Back of card */}
         <div className="flip-card-back">
-          <Card className="w-full h-full flex flex-col justify-between p-8 cursor-pointer">
-            <div className="text-3xl font-semibold mb-4">{word.english}</div>
-            <div className="space-y-4">
+          <Card className="w-full h-full flex flex-col justify-between p-6 cursor-pointer">
+            <div className="text-2xl font-semibold mb-4">{word.english}</div>
+            <div className="space-y-3">
               <div className="text-gray-600">
                 <p className="text-sm font-semibold mb-1">Category:</p>
                 <p>{word.category}</p>
