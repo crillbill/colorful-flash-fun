@@ -6,7 +6,6 @@ import { Header1 } from "@/components/ui/header";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { CategorySelector, type Category } from "@/components/CategorySelector";
 import { MemoryGameLeaderboard } from "@/components/MemoryGameLeaderboard";
 
 interface MemoryCard {
@@ -25,45 +24,20 @@ interface HebrewWord {
   transliteration: string | null;
 }
 
-const fetchHebrewData = async (category: Category) => {
-  let query;
+const fetchHebrewData = async () => {
+  const [phrases, words, letters, verbs] = await Promise.all([
+    supabase.from('hebrew_phrases').select('*'),
+    supabase.from('hebrew_words').select('*'),
+    supabase.from('hebrew_alphabet').select('*'),
+    supabase.from('hebrew_verbs').select('*')
+  ]);
   
-  switch (category) {
-    case "phrases":
-      query = supabase.from('hebrew_phrases').select('*');
-      break;
-    case "words":
-      query = supabase.from('hebrew_words').select('*');
-      break;
-    case "letters":
-      query = supabase.from('hebrew_alphabet').select('*');
-      break;
-    case "verbs":
-      query = supabase.from('hebrew_verbs').select('*');
-      break;
-    case "all":
-      const [phrases, words, letters, verbs] = await Promise.all([
-        supabase.from('hebrew_phrases').select('*'),
-        supabase.from('hebrew_words').select('*'),
-        supabase.from('hebrew_alphabet').select('*'),
-        supabase.from('hebrew_verbs').select('*')
-      ]);
-      
-      return [
-        ...(phrases.data || []),
-        ...(words.data || []),
-        ...(letters.data || []),
-        ...(verbs.data || [])
-      ];
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    throw error;
-  }
-  
-  return data;
+  return [
+    ...(phrases.data || []),
+    ...(words.data || []),
+    ...(letters.data || []),
+    ...(verbs.data || [])
+  ];
 };
 
 const MemoryGame = () => {
@@ -73,11 +47,10 @@ const MemoryGame = () => {
   const [timer, setTimer] = useState<number>(0);
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
   const [isProcessingMatch, setIsProcessingMatch] = useState<boolean>(false);
-  const [category, setCategory] = useState<Category>("words");
 
   const { data: hebrewData, isLoading, error } = useQuery({
-    queryKey: ['hebrewData', category],
-    queryFn: () => fetchHebrewData(category),
+    queryKey: ['hebrewData'],
+    queryFn: fetchHebrewData,
     enabled: true,
   });
 
@@ -217,24 +190,19 @@ const MemoryGame = () => {
       <div className="min-h-screen bg-white p-4 pt-24">
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="mb-8">
-            <div className="flex items-center justify-between w-full">
-              <div className="flex-shrink-0">
-                <CategorySelector value={category} onChange={setCategory} />
+            <div className="flex items-center justify-end w-full gap-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
+                <Timer className="w-4 h-4" />
+                {formatTime(timer)}
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                  <Timer className="w-4 h-4" />
-                  {formatTime(timer)}
-                </div>
-                <Button 
-                  onClick={shuffleCards} 
-                  className="bg-green-500 hover:bg-green-600 text-white h-10"
-                >
-                  {isGameStarted ? "Restart Game" : "Start Game"}
-                </Button>
-                <div className="text-sm font-medium text-gray-600 min-w-[80px]">
-                  Pairs: {matchedPairs}/8
-                </div>
+              <Button 
+                onClick={shuffleCards} 
+                className="bg-green-500 hover:bg-green-600 text-white h-10"
+              >
+                {isGameStarted ? "Restart Game" : "Start Game"}
+              </Button>
+              <div className="text-sm font-medium text-gray-600 min-w-[80px]">
+                Pairs: {matchedPairs}/8
               </div>
             </div>
           </div>
