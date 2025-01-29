@@ -211,18 +211,18 @@ const LetterMatchingContent = () => {
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white p-8 pt-24">
+      <div className="min-h-screen bg-gradient-to-b from-[#E5DEFF] to-white p-8 pt-24">
         <div className="max-w-6xl mx-auto space-y-8">
-          <Card className="border-2" style={{ borderColor: colors.primaryPurple }}>
+          <Card className="border-2 shadow-lg" style={{ borderColor: colors.vividPurple }}>
             <CardHeader>
-              <CardTitle className="text-center" style={{ color: colors.darkPurple }}>
-                Letter Matching Game
+              <CardTitle className="text-center text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#8B5CF6] to-[#D946EF]">
+                Letter Matching Game 🔤
               </CardTitle>
               {gameActive && <GameTimer timeLeft={timeLeft} />}
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center">
-                <p className="text-lg font-semibold">
+                <p className="text-lg font-semibold" style={{ color: colors.darkPurple }}>
                   Score: {score.correct}/{score.total} ({Math.round((score.correct / score.total) * 100)}%)
                 </p>
               </div>
@@ -232,7 +232,7 @@ const LetterMatchingContent = () => {
                   <div className="text-center">
                     <div className="flex flex-col items-center gap-2">
                       <div 
-                        className="text-8xl font-bold"
+                        className="text-8xl font-bold animate-float"
                         style={{ color: colors.vividPurple }}
                       >
                         {currentLetter.letter}
@@ -240,12 +240,12 @@ const LetterMatchingContent = () => {
                       
                       <div className="relative my-4 text-center">
                         <button 
-                          className={`inline-flex px-4 py-2 bg-gray-700/80 backdrop-blur-sm rounded-lg cursor-pointer transition-all duration-300 ${
+                          className={`inline-flex px-4 py-2 bg-[#8B5CF6]/80 text-white backdrop-blur-sm rounded-lg cursor-pointer transition-all duration-300 ${
                             showTransliteration ? 'opacity-0 pointer-events-none' : 'opacity-100'
                           }`}
                           onClick={() => setShowTransliteration(true)}
                         >
-                          <span className="text-white font-medium">Reveal Hint</span>
+                          <span className="font-medium">💡 Reveal Hint</span>
                         </button>
                         <div 
                           className={`absolute inset-0 bg-white rounded-lg p-4 transition-all duration-300 ${
@@ -265,10 +265,10 @@ const LetterMatchingContent = () => {
                       <Button
                         key={index}
                         variant="outline"
-                        className="h-16 text-lg hover:bg-accent"
+                        className="h-16 text-lg hover:bg-[#E5DEFF] transition-all duration-300"
                         onClick={() => handleOptionClick(option)}
                         style={{ 
-                          borderColor: colors.primaryPurple,
+                          borderColor: colors.vividPurple,
                           color: colors.darkPurple
                         }}
                       >
@@ -279,31 +279,23 @@ const LetterMatchingContent = () => {
                 </div>
               )}
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button
                   variant="outline"
-                  className="h-16 text-lg"
+                  className="h-16 text-lg bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white transition-all duration-300"
                   onClick={startNewGame}
-                  style={{ 
-                    borderColor: colors.primaryPurple,
-                    color: colors.darkPurple
-                  }}
                 >
                   <Puzzle className="mr-2 h-6 w-6" />
-                  Start New Game
+                  🎮 Start New Game
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-16 text-lg"
+                  className="h-16 text-lg bg-[#D946EF] hover:bg-[#D946EF]/90 text-white transition-all duration-300"
                   onClick={shuffleOptions}
                   disabled={!gameActive}
-                  style={{ 
-                    borderColor: colors.primaryPurple,
-                    color: colors.darkPurple
-                  }}
                 >
                   <Shuffle className="mr-2 h-6 w-6" />
-                  Shuffle Options
+                  🔄 Shuffle Options
                 </Button>
               </div>
             </CardContent>
