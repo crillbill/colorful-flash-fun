@@ -101,9 +101,18 @@ const ThematicLearning = () => {
 
       <div className="flex flex-col items-center gap-6">
         <FlashCard 
-          word={currentWordData}
-          isFlipped={isFlipped}
-          onFlip={() => setIsFlipped(!isFlipped)}
+          question={currentWordData.hebrew}
+          answer={currentWordData.english}
+          transliteration={currentWordData.transliteration}
+          onNext={nextWord}
+          onPrevious={prevWord}
+          onCorrect={() => {}}
+          onIncorrect={() => {}}
+          showPrevious={currentCategory > 0 || currentWord > 0}
+          showNext={
+            currentCategory < words.length - 1 ||
+            currentWord < currentCategoryData.words.length - 1
+          }
         />
 
         <NavigationControls 
