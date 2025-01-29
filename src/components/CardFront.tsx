@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Volume2, ArrowLeft, ArrowRight } from "lucide-react";
-import { AudioButton } from "./AudioButton";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface CardFrontProps {
   question: string;
@@ -56,11 +55,6 @@ export const CardFront = ({
             <ArrowLeft className="h-6 w-6 text-primaryPurple" />
           </Button>
         )}
-        <AudioButton
-          isPlaying={isPlaying}
-          onToggle={onPlayAudio}
-          disabled={isListening || isProcessing}
-        />
         {showNext && (
           <Button
             variant="outline"
