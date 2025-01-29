@@ -10,6 +10,16 @@ const Index = () => {
       <div className="container mx-auto px-4 py-16 mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <Link to="/dictionary" className="transform transition-all duration-300 hover:scale-105">
+              <Button 
+                variant="ghost" 
+                className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
+              >
+                <Book className="w-6 h-6 mr-2" />
+                Dictionary
+              </Button>
+            </Link>
+
             <Link to="/letter-matching" className="transform transition-all duration-300 hover:scale-105">
               <Button 
                 variant="ghost" 
@@ -87,16 +97,6 @@ const Index = () => {
               >
                 <Grid3X3 className="w-6 h-6 mr-2" />
                 Memory Game
-              </Button>
-            </Link>
-
-            <Link to="/dictionary" className="transform transition-all duration-300 hover:scale-105">
-              <Button 
-                variant="ghost" 
-                className="w-full h-32 text-xl bg-[#8B5CF6] hover:bg-[#8B5CF6]/90 text-white shadow-lg hover:shadow-xl rounded-xl"
-              >
-                <Book className="w-6 h-6 mr-2" />
-                Dictionary
               </Button>
             </Link>
           </div>
