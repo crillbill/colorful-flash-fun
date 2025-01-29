@@ -321,6 +321,54 @@ export type Database = {
         }
         Relationships: []
       }
+      multiple_choice_leaderboard: {
+        Row: {
+          attempts: number | null
+          best_time: number | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number | null
+          best_time?: number | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number | null
+          best_time?: number | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      multiple_choice_scores: {
+        Row: {
+          created_at: string
+          id: string
+          score: number
+          time_taken: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          score: number
+          time_taken: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          score?: number
+          time_taken?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       pronunciation_leaderboard: {
         Row: {
           attempts: number

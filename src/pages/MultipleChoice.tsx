@@ -11,6 +11,7 @@ import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
+import { MultipleChoiceLeaderboard } from "@/components/MultipleChoiceLeaderboard";
 
 interface Question {
   word: string;
@@ -53,8 +54,24 @@ const MultipleChoice = () => {
     return () => clearInterval(timer);
   }, [isGameActive, timeLeft]);
 
-  const handleTimeUp = () => {
+  const handleTimeUp = async () => {
     setIsGameActive(false);
+    const percentage = Math.round((score.correct / score.total) * 100);
+    
+    try {
+      const { error } = await supabase
+        .from('multiple_choice_scores')
+        .insert({
+          score: percentage,
+          time_taken: GAME_TIME - timeLeft,
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving score:', error);
+    }
+
     toast({
       title: "Time's up!",
       description: `Final score: ${score.correct} out of ${score.total}`,
@@ -114,7 +131,7 @@ const MultipleChoice = () => {
     }
   };
 
-  const handleAnswer = () => {
+  const handleAnswer = async () => {
     if (!selectedAnswer) {
       toast({
         title: "Please select an answer",
@@ -124,10 +141,11 @@ const MultipleChoice = () => {
     }
 
     const isCorrect = selectedAnswer === questions[currentQuestion].translation;
-    setScore((prev) => ({
-      correct: isCorrect ? prev.correct + 1 : prev.correct,
-      total: prev.total + 1,
-    }));
+    const newScore = {
+      correct: isCorrect ? score.correct + 1 : score.correct,
+      total: score.total + 1,
+    };
+    setScore(newScore);
 
     toast({
       title: isCorrect ? "Correct!" : "Incorrect",
@@ -142,11 +160,25 @@ const MultipleChoice = () => {
       setSelectedAnswer("");
     } else {
       setIsGameActive(false);
+      const percentage = Math.round((newScore.correct / questions.length) * 100);
+      
+      try {
+        const { error } = await supabase
+          .from('multiple_choice_scores')
+          .insert({
+            score: percentage,
+            time_taken: GAME_TIME - timeLeft,
+            user_id: (await supabase.auth.getUser()).data.user?.id
+          });
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error saving score:', error);
+      }
+
       toast({
         title: "Quiz completed!",
-        description: `You scored ${score.correct + (isCorrect ? 1 : 0)} out of ${
-          questions.length
-        }`,
+        description: `You scored ${newScore.correct} out of ${questions.length}`,
       });
     }
   };
@@ -200,60 +232,67 @@ const MultipleChoice = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-4 pt-20">
-        <div className="max-w-xl mx-auto space-y-4">
-          <div className="flex justify-between items-center mb-2">
-            <ScoreDisplay correct={score.correct} total={score.total} />
-            <GameTimer timeLeft={timeLeft} />
-          </div>
-          <ProgressBar current={currentQuestion + 1} total={questions.length} />
-
-          <Card className="shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-semibold">
-                  {questions[currentQuestion].word}
-                </h2>
-                <AudioButton
-                  isPlaying={isPlaying}
-                  onToggle={handlePlayAudio}
-                  disabled={isPlaying}
-                />
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <ScoreDisplay correct={score.correct} total={score.total} />
+                <GameTimer timeLeft={timeLeft} />
               </div>
+              <ProgressBar current={currentQuestion + 1} total={questions.length} />
 
-              <RadioGroup
-                value={selectedAnswer}
-                onValueChange={setSelectedAnswer}
-                className="space-y-2"
-              >
-                {questions[currentQuestion].options.map((option) => (
-                  <div
-                    key={option}
-                    className="flex items-center space-x-2 border rounded-md p-2 hover:bg-accent cursor-pointer"
-                    onClick={() => setSelectedAnswer(option)}
-                  >
-                    <RadioGroupItem value={option} id={option} />
-                    <label
-                      htmlFor={option}
-                      className="text-base cursor-pointer flex-grow"
-                    >
-                      {option}
-                    </label>
+              <Card className="shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className="text-lg font-semibold">
+                      {questions[currentQuestion]?.word}
+                    </h2>
+                    <AudioButton
+                      isPlaying={isPlaying}
+                      onToggle={handlePlayAudio}
+                      disabled={isPlaying}
+                    />
                   </div>
-                ))}
-              </RadioGroup>
 
-              <div className="flex justify-between mt-4 pt-2 border-t">
-                <Button variant="outline" onClick={resetQuiz} size="sm">
-                  Reset Quiz
-                </Button>
-                <Button onClick={handleAnswer} disabled={!isGameActive} size="sm">
-                  {currentQuestion === questions.length - 1
-                    ? "Finish Quiz"
-                    : "Next Question"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                  <RadioGroup
+                    value={selectedAnswer}
+                    onValueChange={setSelectedAnswer}
+                    className="space-y-2"
+                  >
+                    {questions[currentQuestion]?.options.map((option) => (
+                      <div
+                        key={option}
+                        className="flex items-center space-x-2 border rounded-md p-2 hover:bg-accent cursor-pointer"
+                        onClick={() => setSelectedAnswer(option)}
+                      >
+                        <RadioGroupItem value={option} id={option} />
+                        <label
+                          htmlFor={option}
+                          className="text-sm cursor-pointer flex-grow"
+                        >
+                          {option}
+                        </label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+
+                  <div className="flex justify-between mt-3 pt-2 border-t">
+                    <Button variant="outline" onClick={resetQuiz} size="sm">
+                      Reset Quiz
+                    </Button>
+                    <Button onClick={handleAnswer} disabled={!isGameActive} size="sm">
+                      {currentQuestion === questions.length - 1
+                        ? "Finish Quiz"
+                        : "Next Question"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          <div className="md:col-span-1">
+            <MultipleChoiceLeaderboard />
+          </div>
         </div>
       </div>
     </>
