@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -8,10 +7,8 @@ import {
   ChevronRight, 
   ChevronLeft,
   Volume2,
-  Check,
-  X
 } from "lucide-react";
-import { Header1 } from "@/components/ui/header";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Word {
@@ -19,11 +16,6 @@ interface Word {
   english: string;
   transliteration: string | null;
   category: string;
-}
-
-interface Category {
-  name: string;
-  words: Word[];
 }
 
 const FlashCard = ({ word, isFlipped, onFlip }: { word: Word; isFlipped: boolean; onFlip: () => void }) => {
@@ -57,12 +49,6 @@ const FlashCard = ({ word, isFlipped, onFlip }: { word: Word; isFlipped: boolean
           <Card className="w-full h-full flex flex-col justify-between p-8 cursor-pointer">
             <div className="text-3xl font-semibold mb-4">{word.english}</div>
             <div className="space-y-4">
-              {word.notes && (
-                <div className="text-gray-600">
-                  <p className="text-sm font-semibold mb-1">Notes:</p>
-                  <p>{word.notes}</p>
-                </div>
-              )}
               <div className="text-gray-600">
                 <p className="text-sm font-semibold mb-1">Category:</p>
                 <p>{word.category}</p>
@@ -155,132 +141,95 @@ const ThematicLearning = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
-        <Header1 />
-        <div className="container mx-auto px-4 py-16 mt-20 flex justify-center items-center">
-          Loading...
-        </div>
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="text-center">Loading...</div>
       </div>
     );
   }
 
   if (!words.length) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
-        <Header1 />
-        <div className="container mx-auto px-4 py-16 mt-20">
-          <p className="text-center text-lg text-gray-700">
-            No categories available yet. Please add some categorized words to get started.
-          </p>
-        </div>
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="text-center">No words available.</div>
       </div>
     );
   }
 
   const currentCategoryData = words[currentCategory];
-  const currentWordData = currentCategoryData?.words[currentWord];
+  const currentWordData = currentCategoryData.words[currentWord];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
-      <Header1 />
-      <div className="max-w-4xl mx-auto p-4 pt-24">
-        {/* Study Mode Toggle */}
-        <div className="flex justify-center gap-4 mb-6">
-          <Button
-            variant={studyMode === 'learn' ? "default" : "outline"}
-            onClick={() => setStudyMode('learn')}
-            className="w-32"
-          >
-            <BookOpen className="mr-2 h-4 w-4" />
-            Learn
-          </Button>
-          <Button
-            variant={studyMode === 'review' ? "default" : "outline"}
-            onClick={() => setStudyMode('review')}
-            className="w-32"
-          >
-            <Rotate3D className="mr-2 h-4 w-4" />
-            Review
-          </Button>
-        </div>
+    <div className="max-w-4xl mx-auto p-4">
+      {/* Study Mode Toggle */}
+      <div className="flex justify-center gap-4 mb-6">
+        <Button
+          variant={studyMode === 'learn' ? "default" : "outline"}
+          onClick={() => setStudyMode('learn')}
+          className="w-32"
+        >
+          <BookOpen className="mr-2 h-4 w-4" />
+          Learn
+        </Button>
+        <Button
+          variant={studyMode === 'review' ? "default" : "outline"}
+          onClick={() => setStudyMode('review')}
+          className="w-32"
+        >
+          <Rotate3D className="mr-2 h-4 w-4" />
+          Review
+        </Button>
+      </div>
 
-        {/* Category Selector */}
-        <CategorySelector 
-          categories={words}
-          activeCategory={currentCategory}
-          onSelect={(idx) => {
-            setCurrentCategory(idx);
-            setCurrentWord(0);
-            setIsFlipped(false);
+      {/* Category Selector */}
+      <CategorySelector 
+        categories={words}
+        activeCategory={currentCategory}
+        onSelect={(idx) => {
+          setCurrentCategory(idx);
+          setCurrentWord(0);
+          setIsFlipped(false);
+        }}
+      />
+
+      {/* Progress Bar */}
+      <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
+        <div 
+          className="h-full bg-blue-500 rounded-full transition-all duration-300"
+          style={{
+            width: `${((currentWord + 1) / currentCategoryData.words.length) * 100}%`
           }}
         />
+      </div>
 
-        {/* Progress Bar */}
-        <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
-          <div 
-            className="h-full bg-blue-500 rounded-full transition-all duration-300"
-            style={{
-              width: `${((currentWord + 1) / currentCategoryData.words.length) * 100}%`
-            }}
-          />
-        </div>
+      {/* Flashcard */}
+      <FlashCard 
+        word={currentWordData}
+        isFlipped={isFlipped}
+        onFlip={() => setIsFlipped(!isFlipped)}
+      />
 
-        {/* Flashcard */}
-        <FlashCard 
-          word={currentWordData}
-          isFlipped={isFlipped}
-          onFlip={() => setIsFlipped(!isFlipped)}
-        />
+      {/* Navigation Controls */}
+      <div className="flex justify-between mt-6">
+        <Button
+          onClick={prevWord}
+          disabled={currentCategory === 0 && currentWord === 0}
+          className="w-32"
+        >
+          <ChevronLeft className="mr-2" />
+          Previous
+        </Button>
 
-        {/* Navigation Controls */}
-        <div className="flex justify-between mt-6">
-          <Button
-            onClick={prevWord}
-            disabled={currentCategory === 0 && currentWord === 0}
-            className="w-32"
-          >
-            <ChevronLeft className="mr-2" />
-            Previous
-          </Button>
-
-          {studyMode === 'review' && (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="w-24"
-                onClick={() => {
-                  // Add review logic here
-                  nextWord();
-                }}
-              >
-                <X className="mr-2 h-4 w-4" />
-                Again
-              </Button>
-              <Button
-                className="w-24"
-                onClick={() => {
-                  // Add review logic here
-                  nextWord();
-                }}
-              >
-                <Check className="mr-2 h-4 w-4" />
-                Good
-              </Button>
-            </div>
-          )}
-
-          <Button
-            onClick={nextWord}
-            disabled={
-              currentCategory === words.length - 1 &&
-              currentWord === words[currentCategory].words.length - 1
-            }
-            className="w-32"
-          >
-            Next
-            <ChevronRight className="ml-2" />
-          </Button>
-        </div>
+        <Button
+          onClick={nextWord}
+          disabled={
+            currentCategory === words.length - 1 &&
+            currentWord === words[currentCategory].words.length - 1
+          }
+          className="w-32"
+        >
+          Next
+          <ChevronRight className="ml-2" />
+        </Button>
       </div>
     </div>
   );
