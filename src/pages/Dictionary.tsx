@@ -160,35 +160,7 @@ const Dictionary = () => {
               </div>
             </div>
 
-          {/* Hebrew to English Title */}
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-700">Hebrew to English</h2>
-            <p className="text-lg font-medium text-gray-600" dir="rtl">עברית לאנגלית</p>
-          </div>
-
-          {/* Hebrew to English Search */}
-          <div className="relative bg-white rounded-xl shadow-xl overflow-hidden">
-            <div className="flex items-center px-6 py-4">
-              <Search className={`h-6 w-6 transition-all duration-300 ${isActive ? 'text-purple-500' : 'text-gray-400'}`} />
-              <input
-                type="text"
-                dir="rtl"
-                lang="he"
-                inputMode="text"
-                className="w-full px-4 py-2 text-lg focus:outline-none text-right"
-                placeholder="חיפוש מעברית לאנגלית..."
-                value={hebrewSearchTerm}
-                onChange={(e) => setHebrewSearchTerm(e.target.value)}
-                onFocus={handleSearchFocus}
-                onBlur={handleSearchBlur}
-              />
-              {hebrewSearchTerm && (
-                <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
-                  <X className="h-5 w-5" />
-                </button>
-              )}
-            </div>
-          </div>
+          {/* Hebrew to English section temporarily hidden */}
 
             {isActive && (
               <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border-t border-gray-100">
