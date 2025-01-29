@@ -229,7 +229,7 @@ const Hangman = () => {
       <div className="min-h-screen bg-white p-8 pt-24">
         <div className="max-w-2xl mx-auto space-y-8">
           <div className="flex justify-between items-center">
-            <ScoreDisplay correct={score.correct} total={score.total} />
+            <ScoreDisplay correct={score.correct} total={score.total} totalWords={words.length} />
             <GameTimer timeLeft={timer} />
           </div>
           
