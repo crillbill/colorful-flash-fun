@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Button } from "@/components/ui/button";
+import { Header1 } from "@/components/ui/header";
 import { useToast } from "@/hooks/use-toast";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
-import { Header1 } from "@/components/ui/header";
-import { useColors } from "@/contexts/ColorContext";
 import { GameTimer } from "@/components/GameTimer";
 import { SentenceBuilderLeaderboard } from "@/components/SentenceBuilderLeaderboard";
 import { supabase } from "@/integrations/supabase/client";
+import { GameArea } from "@/components/sentence-builder/GameArea";
 
 interface Word {
   id: string;
@@ -56,7 +54,6 @@ const sentences: Sentence[] = [
 ];
 
 const SentenceBuilder = () => {
-  const colors = useColors();
   const { toast } = useToast();
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const [words, setWords] = useState(sentences[0].words);
@@ -107,7 +104,6 @@ const SentenceBuilder = () => {
 
       if (newScore.correct === sentences.length) {
         setIsGameComplete(true);
-        // Save score to database
         const user = (await supabase.auth.getUser()).data.user;
         if (user) {
           const { error } = await supabase
@@ -188,59 +184,15 @@ const SentenceBuilder = () => {
           {isGameComplete ? (
             <SentenceBuilderLeaderboard />
           ) : (
-            <div className="bg-card p-6 rounded-lg shadow-lg space-y-6">
-              <p className="text-lg text-center">
-                Translation: {sentences[currentSentenceIndex].translation}
-              </p>
-
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <Droppable droppableId="words" direction="horizontal">
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className="flex flex-wrap gap-4 p-4 min-h-[100px] bg-accent/20 rounded-lg"
-                    >
-                      {words.map((word, index) => (
-                        <Draggable
-                          key={word.id}
-                          draggableId={word.id}
-                          index={index}
-                        >
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className="bg-primary text-primary-foreground p-3 rounded-md cursor-move hover:opacity-80 transition-opacity"
-                            >
-                              {word.content}
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </DragDropContext>
-
-              <div className="flex flex-wrap gap-4 justify-center">
-                <Button onClick={checkSentence}>Check Answer</Button>
-                <Button variant="outline" onClick={() => setShowHint(true)}>
-                  Show Hint
-                </Button>
-                <Button variant="secondary" onClick={resetGame}>
-                  Reset Game
-                </Button>
-              </div>
-
-              {showHint && (
-                <p className="text-center text-muted-foreground">
-                  Hint: {sentences[currentSentenceIndex].hint}
-                </p>
-              )}
-            </div>
+            <GameArea
+              currentSentence={sentences[currentSentenceIndex]}
+              words={words}
+              showHint={showHint}
+              onDragEnd={handleDragEnd}
+              onCheck={checkSentence}
+              onShowHint={() => setShowHint(true)}
+              onReset={resetGame}
+            />
           )}
         </div>
       </div>
