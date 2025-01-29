@@ -1,8 +1,16 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ChevronRight, ChevronLeft, Info, Loader2 } from 'lucide-react';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { 
+  BookOpen, 
+  Rotate3D, 
+  ChevronRight, 
+  ChevronLeft,
+  Volume2,
+  Check,
+  X
+} from "lucide-react";
 import { Header1 } from "@/components/ui/header";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,12 +26,77 @@ interface Category {
   words: Word[];
 }
 
+const FlashCard = ({ word, isFlipped, onFlip }: { word: Word; isFlipped: boolean; onFlip: () => void }) => {
+  return (
+    <div 
+      className="relative w-full h-96 [perspective:1000px]"
+      onClick={onFlip}
+    >
+      <div className={`w-full h-full duration-500 preserve-3d relative ${
+        isFlipped ? 'rotate-y-180' : ''
+      }`} style={{ transformStyle: 'preserve-3d' }}>
+        {/* Front of card */}
+        <div className="absolute w-full h-full [backface-visibility:hidden]">
+          <Card className="w-full h-full flex flex-col justify-center items-center p-8 cursor-pointer">
+            <div className="text-5xl font-bold mb-6">{word.hebrew}</div>
+            <div className="text-2xl text-gray-600">{word.transliteration}</div>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="absolute top-4 right-4"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Add pronunciation logic here
+              }}
+            >
+              <Volume2 className="h-6 w-6" />
+            </Button>
+          </Card>
+        </div>
+
+        {/* Back of card */}
+        <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
+          <Card className="w-full h-full flex flex-col justify-center items-center p-8 cursor-pointer">
+            <div className="text-3xl font-semibold mb-4">{word.english}</div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CategorySelector = ({ 
+  categories, 
+  activeCategory, 
+  onSelect 
+}: { 
+  categories: Category[]; 
+  activeCategory: number; 
+  onSelect: (idx: number) => void;
+}) => {
+  return (
+    <div className="flex overflow-x-auto gap-2 p-2 mb-6">
+      {categories.map((category, idx) => (
+        <Button
+          key={category.name}
+          variant={activeCategory === idx ? "default" : "outline"}
+          onClick={() => onSelect(idx)}
+          className="whitespace-nowrap"
+        >
+          {category.name}
+        </Button>
+      ))}
+    </div>
+  );
+};
+
 const ThematicLearning = () => {
   const [currentCategory, setCurrentCategory] = useState(0);
   const [currentWord, setCurrentWord] = useState(0);
-  const [showTranslation, setShowTranslation] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [studyMode, setStudyMode] = useState<'learn' | 'review'>('learn');
 
-  const { data: categories = [], isLoading } = useQuery({
+  const { data: words = [], isLoading } = useQuery({
     queryKey: ['categorized-words'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -51,23 +124,23 @@ const ThematicLearning = () => {
   });
 
   const nextWord = () => {
-    if (currentWord < (categories[currentCategory]?.words.length || 0) - 1) {
+    setIsFlipped(false);
+    if (currentWord < (words[currentCategory]?.words.length || 0) - 1) {
       setCurrentWord(curr => curr + 1);
-    } else if (currentCategory < categories.length - 1) {
+    } else if (currentCategory < words.length - 1) {
       setCurrentCategory(curr => curr + 1);
       setCurrentWord(0);
     }
-    setShowTranslation(false);
   };
 
   const prevWord = () => {
+    setIsFlipped(false);
     if (currentWord > 0) {
       setCurrentWord(curr => curr - 1);
     } else if (currentCategory > 0) {
       setCurrentCategory(curr => curr - 1);
-      setCurrentWord(categories[currentCategory - 1].words.length - 1);
+      setCurrentWord(words[currentCategory - 1].words.length - 1);
     }
-    setShowTranslation(false);
   };
 
   if (isLoading) {
@@ -75,13 +148,13 @@ const ThematicLearning = () => {
       <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
         <Header1 />
         <div className="container mx-auto px-4 py-16 mt-20 flex justify-center items-center">
-          <Loader2 className="w-8 h-8 animate-spin" />
+          Loading...
         </div>
       </div>
     );
   }
 
-  if (!categories.length) {
+  if (!words.length) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
         <Header1 />
@@ -94,85 +167,109 @@ const ThematicLearning = () => {
     );
   }
 
-  const currentCategoryData = categories[currentCategory];
+  const currentCategoryData = words[currentCategory];
   const currentWordData = currentCategoryData?.words[currentWord];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
       <Header1 />
-      <div className="container mx-auto px-4 py-16 mt-20">
-        <div className="w-full max-w-4xl mx-auto">
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>{currentCategoryData.name}</span>
-                <span className="text-sm text-gray-500">
-                  {currentWord + 1}/{currentCategoryData.words.length}
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center space-y-6">
-                <div className="text-4xl font-bold mb-4">
-                  {currentWordData.hebrew}
-                </div>
-                
-                {currentWordData.transliteration && (
-                  <div className="text-xl text-gray-600">
-                    {currentWordData.transliteration}
-                  </div>
-                )}
+      <div className="max-w-4xl mx-auto p-4 pt-24">
+        {/* Study Mode Toggle */}
+        <div className="flex justify-center gap-4 mb-6">
+          <Button
+            variant={studyMode === 'learn' ? "default" : "outline"}
+            onClick={() => setStudyMode('learn')}
+            className="w-32"
+          >
+            <BookOpen className="mr-2 h-4 w-4" />
+            Learn
+          </Button>
+          <Button
+            variant={studyMode === 'review' ? "default" : "outline"}
+            onClick={() => setStudyMode('review')}
+            className="w-32"
+          >
+            <Rotate3D className="mr-2 h-4 w-4" />
+            Review
+          </Button>
+        </div>
 
-                <Button 
-                  onClick={() => setShowTranslation(!showTranslation)}
-                  className="w-full"
-                >
-                  {showTranslation ? "Hide Translation" : "Show Translation"}
-                </Button>
+        {/* Category Selector */}
+        <CategorySelector 
+          categories={words}
+          activeCategory={currentCategory}
+          onSelect={(idx) => {
+            setCurrentCategory(idx);
+            setCurrentWord(0);
+            setIsFlipped(false);
+          }}
+        />
 
-                {showTranslation && (
-                  <div className="mt-4 space-y-2">
-                    <p className="text-xl">{currentWordData.english}</p>
-                  </div>
-                )}
+        {/* Progress Bar */}
+        <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
+          <div 
+            className="h-full bg-blue-500 rounded-full transition-all duration-300"
+            style={{
+              width: `${((currentWord + 1) / currentCategoryData.words.length) * 100}%`
+            }}
+          />
+        </div>
 
-                <div className="flex justify-between mt-6">
-                  <Button 
-                    onClick={prevWord}
-                    disabled={currentCategory === 0 && currentWord === 0}
-                    className="w-24"
-                  >
-                    <ChevronLeft className="mr-2" /> Prev
-                  </Button>
-                  <Button 
-                    onClick={nextWord}
-                    disabled={currentCategory === categories.length - 1 && 
-                             currentWord === categories[currentCategory].words.length - 1}
-                    className="w-24"
-                  >
-                    Next <ChevronRight className="ml-2" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Flashcard */}
+        <FlashCard 
+          word={currentWordData}
+          isFlipped={isFlipped}
+          onFlip={() => setIsFlipped(!isFlipped)}
+        />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {categories.map((category, idx) => (
+        {/* Navigation Controls */}
+        <div className="flex justify-between mt-6">
+          <Button
+            onClick={prevWord}
+            disabled={currentCategory === 0 && currentWord === 0}
+            className="w-32"
+          >
+            <ChevronLeft className="mr-2" />
+            Previous
+          </Button>
+
+          {studyMode === 'review' && (
+            <div className="flex gap-2">
               <Button
-                key={category.name}
-                variant={currentCategory === idx ? "default" : "outline"}
+                variant="outline"
+                className="w-24"
                 onClick={() => {
-                  setCurrentCategory(idx);
-                  setCurrentWord(0);
-                  setShowTranslation(false);
+                  // Add review logic here
+                  nextWord();
                 }}
-                className="h-24"
               >
-                {category.name}
+                <X className="mr-2 h-4 w-4" />
+                Again
               </Button>
-            ))}
-          </div>
+              <Button
+                className="w-24"
+                onClick={() => {
+                  // Add review logic here
+                  nextWord();
+                }}
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Good
+              </Button>
+            </div>
+          )}
+
+          <Button
+            onClick={nextWord}
+            disabled={
+              currentCategory === words.length - 1 &&
+              currentWord === words[currentCategory].words.length - 1
+            }
+            className="w-32"
+          >
+            Next
+            <ChevronRight className="ml-2" />
+          </Button>
         </div>
       </div>
     </div>
