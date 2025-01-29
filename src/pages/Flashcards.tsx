@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import FlashCard from "@/components/FlashCard";
-import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Header1 } from "@/components/ui/header";
 import { supabase } from "@/integrations/supabase/client";
@@ -123,7 +122,6 @@ const Flashcards = () => {
             </Card>
           ) : (
             <>
-              <ScoreDisplay correct={correctAnswers} total={totalAnswered} />
               <ProgressBar 
                 current={currentCardIndex + 1} 
                 total={flashcardsData.length} 
