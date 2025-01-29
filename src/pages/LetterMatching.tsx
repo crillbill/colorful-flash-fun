@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Puzzle, Shuffle, Check, X } from "lucide-react";
-import { ScoreDisplay } from "@/components/ScoreDisplay";
-import { ProgressBar } from "@/components/ProgressBar";
+import { Puzzle, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 import { useColors } from "@/contexts/ColorContext";
 import { Header1 } from "@/components/ui/header";
 import { supabase } from "@/integrations/supabase/client";
+import { GameTimer } from "@/components/GameTimer";
+import { Leaderboard } from "@/components/Leaderboard";
 
 interface HebrewLetter {
   letter: string;
@@ -17,6 +17,8 @@ interface HebrewLetter {
   hebrew: string;
   english: string;
 }
+
+const GAME_TIME = 300; // 5 minutes in seconds
 
 const LetterMatching = () => {
   const colors = useColors();
@@ -30,10 +32,37 @@ const LetterMatching = () => {
   const [totalRounds, setTotalRounds] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showTransliteration, setShowTransliteration] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(GAME_TIME);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     fetchHebrewLetters();
   }, []);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (gameActive && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            endGame();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [gameActive, timeLeft]);
 
   const fetchHebrewLetters = async () => {
     try {
@@ -53,7 +82,6 @@ const LetterMatching = () => {
         return;
       }
 
-      console.log('Fetched letters:', data);
       setLetters(data);
       setTotalRounds(data.length);
     } catch (error) {
@@ -61,6 +89,40 @@ const LetterMatching = () => {
       toast.error("Failed to load Hebrew letters. Please try refreshing the page.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveScore = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('pronunciation_scores')
+        .insert([
+          {
+            user_id: user.id,
+            word: 'letter_matching',
+            score: Math.round((score.correct / score.total) * 100),
+            time_taken: GAME_TIME - timeLeft
+          }
+        ]);
+
+      if (error) throw error;
+      toast.success("Score saved successfully!");
+    } catch (error) {
+      console.error('Error saving score:', error);
+      toast.error("Failed to save score");
+    }
+  };
+
+  const endGame = async () => {
+    setGameActive(false);
+    if (user) {
+      await saveScore();
+    } else {
+      toast("Sign in to save your score!", {
+        description: "Your progress won't be saved without an account"
+      });
     }
   };
 
@@ -83,6 +145,7 @@ const LetterMatching = () => {
     setGameActive(true);
     setRemainingLetters(shuffleArray([...letters]));
     setShowTransliteration(false);
+    setTimeLeft(GAME_TIME);
     setupRound();
     toast("New game started! Match all Hebrew letters to their names.");
   };
@@ -111,13 +174,9 @@ const LetterMatching = () => {
     }));
 
     if (isCorrect) {
-      toast.success("Correct! Well done!", {
-        icon: <Check className="h-4 w-4 text-green-500" />
-      });
+      toast.success("Correct! Well done!");
     } else {
-      toast.error(`Incorrect. The correct name was "${currentLetter.name}"`, {
-        icon: <X className="h-4 w-4 text-red-500" />
-      });
+      toast.error(`Incorrect. The correct name was "${currentLetter.name}"`);
     }
 
     setRemainingLetters(prev => prev.slice(1));
@@ -127,7 +186,7 @@ const LetterMatching = () => {
       setCurrentRound(prev => prev + 1);
       setupRound();
     } else {
-      setGameActive(false);
+      endGame();
       toast("Game Over! You've completed all Hebrew letters. Click 'Start New Game' to play again.");
     }
   };
@@ -152,16 +211,20 @@ const LetterMatching = () => {
     <>
       <Header1 />
       <div className="min-h-screen bg-white p-8 pt-24">
-        <div className="max-w-2xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-8">
           <Card className="border-2" style={{ borderColor: colors.primaryPurple }}>
             <CardHeader>
               <CardTitle className="text-center" style={{ color: colors.darkPurple }}>
                 Letter Matching Game
               </CardTitle>
+              {gameActive && <GameTimer timeLeft={timeLeft} />}
             </CardHeader>
             <CardContent className="space-y-6">
-              <ScoreDisplay correct={score.correct} total={score.total} />
-              <ProgressBar current={currentRound} total={totalRounds} />
+              <div className="text-center">
+                <p className="text-lg font-semibold">
+                  Score: {score.correct}/{score.total} ({Math.round((score.correct / score.total) * 100)}%)
+                </p>
+              </div>
               
               {gameActive && currentLetter && (
                 <div className="space-y-6">
@@ -189,19 +252,10 @@ const LetterMatching = () => {
                           }`}
                         >
                           <span className="text-black font-medium text-lg">
-                            {currentLetter.transliteration || "No transliteration available"}
+                            {currentLetter.transliteration}
                           </span>
                         </div>
                       </div>
-                      
-                      {currentLetter.sound_description && (
-                        <div 
-                          className="text-md mt-2"
-                          style={{ color: colors.secondaryPurple }}
-                        >
-                          Sound: {currentLetter.sound_description}
-                        </div>
-                      )}
                     </div>
                   </div>
                   
@@ -253,6 +307,8 @@ const LetterMatching = () => {
               </div>
             </CardContent>
           </Card>
+
+          <Leaderboard />
         </div>
       </div>
     </>

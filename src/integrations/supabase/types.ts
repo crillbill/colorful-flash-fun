@@ -325,6 +325,7 @@ export type Database = {
         Row: {
           attempts: number
           average_score: number | null
+          best_time: number | null
           id: string
           total_score: number
           updated_at: string
@@ -333,6 +334,7 @@ export type Database = {
         Insert: {
           attempts?: number
           average_score?: number | null
+          best_time?: number | null
           id?: string
           total_score?: number
           updated_at?: string
@@ -341,6 +343,7 @@ export type Database = {
         Update: {
           attempts?: number
           average_score?: number | null
+          best_time?: number | null
           id?: string
           total_score?: number
           updated_at?: string
@@ -353,6 +356,7 @@ export type Database = {
           created_at: string
           id: string
           score: number
+          time_taken: number | null
           user_id: string
           word: string
         }
@@ -360,6 +364,7 @@ export type Database = {
           created_at?: string
           id?: string
           score: number
+          time_taken?: number | null
           user_id: string
           word: string
         }
@@ -367,6 +372,7 @@ export type Database = {
           created_at?: string
           id?: string
           score?: number
+          time_taken?: number | null
           user_id?: string
           word?: string
         }
