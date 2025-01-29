@@ -410,6 +410,54 @@ export type Database = {
           },
         ]
       }
+      sentence_builder_leaderboard: {
+        Row: {
+          attempts: number | null
+          best_time: number | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number | null
+          best_time?: number | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number | null
+          best_time?: number | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sentence_builder_scores: {
+        Row: {
+          created_at: string
+          id: string
+          score: number
+          time_taken: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          score: number
+          time_taken: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          score?: number
+          time_taken?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
