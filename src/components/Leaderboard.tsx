@@ -26,7 +26,7 @@ export const Leaderboard = () => {
             time_taken,
             score
           `)
-          .eq('word', 'letter_matching')
+          .eq('word', 'word_search')
           .eq('score', 100)
           .order('time_taken', { ascending: true })
           .limit(10);
@@ -63,7 +63,7 @@ export const Leaderboard = () => {
 
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-4 text-center">Letter Matching Champions</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Word Search Champions</h2>
       <p className="text-center text-muted-foreground mb-4">
         Players who completed with 100% accuracy
       </p>
