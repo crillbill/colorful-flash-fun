@@ -32,31 +32,31 @@ const FlashCard = ({ word, isFlipped, onFlip }: { word: Word; isFlipped: boolean
       <div className="flip-card-inner w-full h-full">
         {/* Front of card */}
         <div className="flip-card-front">
-          <Card className="w-full h-full flex flex-col justify-center items-center p-6 cursor-pointer">
-            <div className="text-4xl font-bold mb-4">{word.hebrew}</div>
-            <div className="text-xl text-gray-600">{word.transliteration}</div>
+          <Card className="w-full h-full flex flex-col justify-center items-center p-6 cursor-pointer bg-gradient-to-br from-softPurple via-softBlue to-softPink">
+            <div className="text-4xl font-bold mb-4 text-vividPurple">{word.hebrew} ✨</div>
+            <div className="text-xl text-magentaPink">{word.transliteration} 🎵</div>
             <Button 
               variant="ghost" 
               size="icon"
-              className="absolute top-4 right-4"
+              className="absolute top-4 right-4 hover:bg-white/20"
               onClick={(e) => {
                 e.stopPropagation();
                 // Add pronunciation logic here
               }}
             >
-              <Volume2 className="h-5 w-5" />
+              <Volume2 className="h-5 w-5 text-primaryPurple" />
             </Button>
           </Card>
         </div>
 
         {/* Back of card */}
         <div className="flip-card-back">
-          <Card className="w-full h-full flex flex-col justify-between p-6 cursor-pointer">
-            <div className="text-2xl font-semibold mb-4">{word.english}</div>
+          <Card className="w-full h-full flex flex-col justify-between p-6 cursor-pointer bg-gradient-to-br from-softPeach via-softYellow to-softOrange">
+            <div className="text-2xl font-semibold mb-4 text-brightOrange">{word.english} 🌟</div>
             <div className="space-y-3">
-              <div className="text-gray-600">
-                <p className="text-sm font-semibold mb-1">Category:</p>
-                <p>{word.category}</p>
+              <div className="text-oceanBlue">
+                <p className="text-sm font-semibold mb-1">Category 📚</p>
+                <p>{word.category} ✨</p>
               </div>
             </div>
           </Card>
@@ -82,9 +82,13 @@ const CategorySelector = ({
           key={category.name}
           variant={activeCategory === idx ? "default" : "outline"}
           onClick={() => onSelect(idx)}
-          className="whitespace-nowrap"
+          className={`whitespace-nowrap ${
+            activeCategory === idx 
+              ? 'bg-gradient-to-r from-vividPurple to-magentaPink text-white' 
+              : 'hover:bg-softPurple/20'
+          }`}
         >
-          {category.name}
+          {category.name} 🏷️
         </Button>
       ))}
     </div>
@@ -170,18 +174,26 @@ const ThematicLearning = () => {
         <Button
           variant={studyMode === 'learn' ? "default" : "outline"}
           onClick={() => setStudyMode('learn')}
-          className="w-32"
+          className={`w-32 ${
+            studyMode === 'learn' 
+              ? 'bg-gradient-to-r from-vividPurple to-magentaPink hover:from-magentaPink hover:to-vividPurple' 
+              : 'hover:bg-softPurple/20'
+          }`}
         >
           <BookOpen className="mr-2 h-4 w-4" />
-          Learn
+          Learn 📚
         </Button>
         <Button
           variant={studyMode === 'review' ? "default" : "outline"}
           onClick={() => setStudyMode('review')}
-          className="w-32"
+          className={`w-32 ${
+            studyMode === 'review' 
+              ? 'bg-gradient-to-r from-vividPurple to-magentaPink hover:from-magentaPink hover:to-vividPurple' 
+              : 'hover:bg-softPurple/20'
+          }`}
         >
           <Rotate3D className="mr-2 h-4 w-4" />
-          Review
+          Review 🔄
         </Button>
       </div>
 
@@ -197,9 +209,9 @@ const ThematicLearning = () => {
       />
 
       {/* Progress Bar */}
-      <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
+      <div className="w-full h-2 bg-softGray rounded-full mb-6">
         <div 
-          className="h-full bg-blue-500 rounded-full transition-all duration-300"
+          className="h-full bg-gradient-to-r from-vividPurple to-magentaPink rounded-full transition-all duration-300"
           style={{
             width: `${((currentWord + 1) / currentCategoryData.words.length) * 100}%`
           }}
@@ -220,10 +232,10 @@ const ThematicLearning = () => {
           <Button
             onClick={prevWord}
             disabled={currentCategory === 0 && currentWord === 0}
-            className="w-32"
+            className="w-32 bg-gradient-to-r from-vividPurple to-magentaPink hover:from-magentaPink hover:to-vividPurple disabled:opacity-50"
           >
             <ChevronLeft className="mr-2" />
-            Previous
+            Previous ⬅️
           </Button>
 
           <Button
@@ -232,9 +244,9 @@ const ThematicLearning = () => {
               currentCategory === words.length - 1 &&
               currentWord === words[currentCategory].words.length - 1
             }
-            className="w-32"
+            className="w-32 bg-gradient-to-r from-vividPurple to-magentaPink hover:from-magentaPink hover:to-vividPurple disabled:opacity-50"
           >
-            Next
+            Next ➡️
             <ChevronRight className="ml-2" />
           </Button>
         </div>
