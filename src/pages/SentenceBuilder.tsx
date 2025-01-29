@@ -117,7 +117,11 @@ const SentenceBuilder = () => {
       <Header1 />
       <div className="min-h-screen bg-white p-8 pt-24">
         <div className="max-w-2xl mx-auto space-y-8">
-          <ScoreDisplay correct={score.correct} total={score.total} />
+          <ScoreDisplay 
+            correct={score.correct} 
+            total={score.total} 
+            totalWords={sentences.length} 
+          />
           <ProgressBar
             current={currentSentenceIndex + 1}
             total={sentences.length}
