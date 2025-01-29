@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Header1 } from "@/components/ui/header";
-import { Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Type, Book } from "lucide-react";
+import { Puzzle, BookOpen, Search, Brain, PenTool, ListChecks, Mic, Grid3X3, Book } from "lucide-react";
 
 const Index = () => {
   return (
@@ -63,13 +63,6 @@ const Index = () => {
               <Button variant="ghost" className="w-full h-32 text-xl bg-[#06B6D4] hover:bg-[#06B6D4]/90 text-white shadow-lg hover:shadow-xl">
                 <Grid3X3 className="w-6 h-6 mr-2" />
                 Memory Game
-              </Button>
-            </Link>
-
-            <Link to="/fill-in-the-blank" className="transform transition-all duration-300 hover:scale-105">
-              <Button variant="ghost" className="w-full h-32 text-xl bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white shadow-lg hover:shadow-xl">
-                <Type className="w-6 h-6 mr-2" />
-                Fill in the Blank
               </Button>
             </Link>
 
