@@ -114,7 +114,7 @@ export const FlashCard = ({
             isListening={isListening}
             isProcessing={isProcessing}
             timeLeft={timeLeft}
-            onPlayAudio={playAudio}
+            onPlayAudio={() => playAudio(question)}
             onStartListening={startListening}
             onPrevious={onPrevious}
             onNext={onNext}
