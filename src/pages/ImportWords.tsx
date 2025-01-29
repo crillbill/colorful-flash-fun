@@ -107,42 +107,37 @@ const ImportWords = () => {
         throw new Error(`Invalid JSON format: ${error.message}`);
       }
     } else {
-    const lines = text.split('\n').filter(line => line.trim());
-    
-    const parsedEntries = lines.map((line, index) => {
-      console.log(`Processing line ${index + 1}:`, line); // Debug log
+      const lines = text.split('\n').filter(line => line.trim());
       
-      // Split by two or more spaces
-      const parts = line.split(/\s{2,}/).map(part => part.trim());
-      console.log(`Line ${index + 1} parts:`, parts); // Debug log
-      
-      if (parts.length < 2) {
-        throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces. Found: "${line}"`);
-      }
+      const parsedEntries = lines.map((line, index) => {
+        const parts = line.split(/\s{2,}/).map(part => part.trim());
+        
+        if (parts.length < 2) {
+          throw new Error(`Line ${index + 1}: Invalid format. Each line must contain Hebrew and English separated by two spaces. Found: "${line}"`);
+        }
 
-      const [hebrew, english, transliteration] = parts;
-      
-      if (!hebrew || !english) {
-        throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew  English  Transliteration`);
-      }
-      
-      if (!validateHebrewText(hebrew)) {
-        throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
-      }
+        const [hebrew, english, transliteration] = parts;
+        
+        if (!hebrew || !english) {
+          throw new Error(`Line ${index + 1}: Missing required fields. Format should be: Hebrew  English  Transliteration`);
+        }
+        
+        if (!validateHebrewText(hebrew)) {
+          throw new Error(`Line ${index + 1}: Text "${hebrew}" must contain Hebrew characters`);
+        }
 
-      if (!validateEnglishText(english)) {
-        throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters. Only English letters, numbers, and basic punctuation are allowed.`);
-      }
-      
-      return {
-        hebrew,
-        english,
-        transliteration: transliteration || null,
-      };
-    });
+        if (!validateEnglishText(english)) {
+          throw new Error(`Line ${index + 1}: Text "${english}" contains invalid characters. Only English letters, numbers, and basic punctuation are allowed.`);
+        }
+        
+        return {
+          hebrew,
+          english,
+          transliteration: transliteration || null,
+        };
+      });
 
-    return parsedEntries;
-  };
+      return parsedEntries;
     }
   };
 
