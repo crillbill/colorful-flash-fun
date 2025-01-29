@@ -14,7 +14,14 @@ import {
 import { Header1 } from "@/components/ui/header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-type TableOption = "hebrew_words" | "hebrew_phrases" | "hebrew_alphabet" | "hebrew_verbs";
+type TableOption = "hebrew_words" | "hebrew_phrases" | "hebrew_alphabet" | "hebrew_verbs" | "hebrew_categorized_words";
+
+interface CategorizedWord {
+  hebrew: string;
+  english: string;
+  transliteration?: string;
+  category: string;
+}
 
 const ImportWords = () => {
   const navigate = useNavigate();
@@ -55,20 +62,51 @@ const ImportWords = () => {
   };
 
   const validateHebrewText = (text: string): boolean => {
-    // Hebrew characters range from \u0590 to \u05FF
     const hebrewRegex = /[\u0590-\u05FF]/;
     return hebrewRegex.test(text);
   };
 
   const validateEnglishText = (text: string): boolean => {
-    // Basic English text validation - allows letters, numbers, spaces, and basic punctuation
     const englishRegex = /^[a-zA-Z0-9\s.,!?'"-]+$/;
     return englishRegex.test(text);
   };
 
   const parseInput = (text: string) => {
     setError(null);
-    // Split by newlines and filter out empty lines
+    
+    if (selectedTable === "hebrew_categorized_words") {
+      try {
+        const jsonData = JSON.parse(text);
+        if (!Array.isArray(jsonData)) {
+          throw new Error("JSON must be an array of word objects");
+        }
+        
+        const validatedData = jsonData.map((item: any, index) => {
+          if (!item.hebrew || !item.english || !item.category) {
+            throw new Error(`Item ${index + 1}: Missing required fields (hebrew, english, category)`);
+          }
+          
+          if (!validateHebrewText(item.hebrew)) {
+            throw new Error(`Item ${index + 1}: Invalid Hebrew text "${item.hebrew}"`);
+          }
+          
+          if (!validateEnglishText(item.english)) {
+            throw new Error(`Item ${index + 1}: Invalid English text "${item.english}"`);
+          }
+          
+          return {
+            hebrew: item.hebrew,
+            english: item.english,
+            transliteration: item.transliteration || null,
+            category: item.category
+          };
+        });
+        
+        return validatedData;
+      } catch (error: any) {
+        throw new Error(`Invalid JSON format: ${error.message}`);
+      }
+    } else {
     const lines = text.split('\n').filter(line => line.trim());
     
     const parsedEntries = lines.map((line, index) => {
@@ -105,6 +143,8 @@ const ImportWords = () => {
 
     return parsedEntries;
   };
+    }
+  };
 
   const handleImport = async () => {
     if (!isAuthorized) {
@@ -116,15 +156,12 @@ const ImportWords = () => {
       setIsLoading(true);
       setError(null);
       
-      console.log("Input text:", inputText); // Debug log
       const entries = parseInput(inputText);
       
-      if (entries.length === 0) {
+      if (!entries || entries.length === 0) {
         toast.error("No valid entries found");
         return;
       }
-
-      console.log("Parsed entries:", entries); // Debug log
 
       const { error: supabaseError } = await supabase
         .from(selectedTable)
@@ -144,6 +181,23 @@ const ImportWords = () => {
   };
 
   const getPlaceholderText = () => {
+    if (selectedTable === "hebrew_categorized_words") {
+      return `[
+  {
+    "hebrew": "ספר",
+    "english": "book",
+    "transliteration": "sefer",
+    "category": "objects"
+  },
+  {
+    "hebrew": "שולחן",
+    "english": "table",
+    "transliteration": "shulchan",
+    "category": "furniture"
+  }
+]`;
+    }
+    
     switch (selectedTable) {
       case "hebrew_alphabet":
         return 'א  Alef  al-ef\nב  Bet  bet';
@@ -155,6 +209,9 @@ const ImportWords = () => {
   };
 
   const getInstructions = () => {
+    if (selectedTable === "hebrew_categorized_words") {
+      return "Format: JSON array of objects with hebrew, english, transliteration (optional), and category fields";
+    }
     return "Format: Hebrew  English  Transliteration (separate fields with TWO spaces)";
   };
 
@@ -195,6 +252,7 @@ const ImportWords = () => {
                   <SelectItem value="hebrew_phrases">Phrases</SelectItem>
                   <SelectItem value="hebrew_alphabet">Alphabet</SelectItem>
                   <SelectItem value="hebrew_verbs">Verbs</SelectItem>
+                  <SelectItem value="hebrew_categorized_words">Categorized Words</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -204,7 +262,6 @@ const ImportWords = () => {
                 Paste your content ({getInstructions()})
               </label>
               <p className="text-sm text-muted-foreground">
-                Each entry on a new line. Separate Hebrew, English, and Transliteration with TWO spaces.
                 Example format:
               </p>
               <pre className="bg-gray-100 p-2 rounded text-sm">

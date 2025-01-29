@@ -153,6 +153,36 @@ export type Database = {
         }
         Relationships: []
       }
+      hebrew_categorized_words: {
+        Row: {
+          category: string
+          created_at: string
+          english: string
+          hebrew: string
+          id: string
+          transliteration: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          english: string
+          hebrew: string
+          id?: string
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          english?: string
+          hebrew?: string
+          id?: string
+          transliteration?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hebrew_fill_blanks: {
         Row: {
           created_at: string
