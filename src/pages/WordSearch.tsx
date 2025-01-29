@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { WordSearchGrid } from "@/components/WordSearchGrid";
 import { WordList } from "@/components/WordList";
 import { GameTimer } from "@/components/GameTimer";
+import { Leaderboard } from "@/components/Leaderboard";
 import { generateGrid } from "@/utils/wordSearchUtils";
 import { GRID_WIDTH, GRID_HEIGHT } from "@/utils/constants";
 import type { WordLocation, HebrewWord, GridCell } from "@/types/wordSearch";
@@ -170,6 +171,10 @@ const WordSearch = () => {
             <Button onClick={handleNewGame}>
               New Game
             </Button>
+          </div>
+
+          <div className="mt-8">
+            <Leaderboard />
           </div>
         </div>
       </div>
