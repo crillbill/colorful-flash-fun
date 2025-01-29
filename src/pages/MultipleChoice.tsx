@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { AudioButton } from "@/components/AudioButton";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { GameTimer } from "@/components/GameTimer";
@@ -10,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Header1 } from "@/components/ui/header";
 import { useColors } from "@/contexts/ColorContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { MultipleChoiceLeaderboard } from "@/components/MultipleChoiceLeaderboard";
 
 interface Question {
@@ -243,15 +241,10 @@ const MultipleChoice = () => {
 
               <Card className="shadow-sm">
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2">
                     <h2 className="text-lg font-semibold">
                       {questions[currentQuestion]?.word}
                     </h2>
-                    <AudioButton
-                      isPlaying={isPlaying}
-                      onToggle={handlePlayAudio}
-                      disabled={isPlaying}
-                    />
                   </div>
 
                   <RadioGroup
