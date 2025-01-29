@@ -18,6 +18,7 @@ import ScavengerHuntAdmin from "@/pages/ScavengerHuntAdmin";
 import BulkImport from "@/pages/BulkImport";
 import ImportWords from "@/pages/ImportWords";
 import Login from "@/pages/Login";
+import Hangman from "@/pages/Hangman";
 import { ColorProvider } from "@/contexts/ColorContext";
 import "./App.css";
 
@@ -43,6 +44,7 @@ function App() {
           <Route path="/bulk-import" element={<BulkImport />} />
           <Route path="/import-words" element={<ImportWords />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/hangman" element={<Hangman />} />
         </Routes>
         <Toaster />
         <SonnerToaster position="top-center" />
