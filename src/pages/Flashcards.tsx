@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BookOpen } from "lucide-react";
 import FlashCard from "@/components/FlashCard";
 import { ScoreDisplay } from "@/components/ScoreDisplay";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Header1 } from "@/components/ui/header";
-import { Button } from "@/components/ui/button";
-import { Square, X } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-
-type Category = "all" | "words" | "phrases" | "verbs" | "alphabet";
+import { useQuery } from "@tanstack/react-query";
 
 interface FlashcardData {
   hebrew: string;
@@ -18,105 +18,38 @@ interface FlashcardData {
 
 const MAX_CARDS = 25;
 
+const fetchFlashcards = async (): Promise<FlashcardData[]> => {
+  const { data, error } = await supabase
+    .from("hebrew_bulk_words")
+    .select("hebrew, english, transliteration");
+
+  if (error) {
+    console.error("Error fetching flashcards:", error);
+    throw error;
+  }
+
+  return (data || []).sort(() => Math.random() - 0.5).slice(0, MAX_CARDS);
+};
+
 const Flashcards = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>(["all"]);
   const [gameActive, setGameActive] = useState(false);
-  const [flashcardsData, setFlashcardsData] = useState<FlashcardData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCategoryChange = (category: Category) => {
-    setSelectedCategories(prev => {
-      // If selecting "all"
-      if (category === "all") {
-        // If "all" is currently selected and we're clicking it, switch to no categories
-        if (prev.includes("all")) {
-          return [];
-        }
-        // If we're selecting "all", clear other selections
-        return ["all"];
-      }
+  const { data: flashcardsData = [], isLoading: isQueryLoading, error } = useQuery({
+    queryKey: ['flashcards'],
+    queryFn: fetchFlashcards,
+    enabled: gameActive,
+  });
 
-      // If selecting any other category, remove "all" if it exists
-      let newCategories = prev.filter(c => c !== "all");
-
-      // Toggle the selected category
-      if (newCategories.includes(category)) {
-        newCategories = newCategories.filter(c => c !== category);
-      } else {
-        newCategories.push(category);
-      }
-
-      // If no categories are selected, default to "all"
-      if (newCategories.length === 0) {
-        return ["all"];
-      }
-
-      return newCategories;
-    });
-  };
-
-  const fetchFlashcards = async (categories: Category[]) => {
-    setIsLoading(true);
-    try {
-      let allData: FlashcardData[] = [];
-
-      const fetchAll = categories.includes("all") || categories.length === 0;
-
-      if (fetchAll || categories.includes("words")) {
-        const { data: words } = await supabase
-          .from("hebrew_words")
-          .select("hebrew, english, transliteration");
-        if (words) allData.push(...words);
-      }
-
-      if (fetchAll || categories.includes("phrases")) {
-        const { data: phrases } = await supabase
-          .from("hebrew_phrases")
-          .select("hebrew, english, transliteration");
-        if (phrases) allData.push(...phrases);
-      }
-
-      if (fetchAll || categories.includes("verbs")) {
-        const { data: verbs } = await supabase
-          .from("hebrew_verbs")
-          .select("hebrew, english, transliteration");
-        if (verbs) allData.push(...verbs);
-      }
-
-      if (fetchAll || categories.includes("alphabet")) {
-        const { data: alphabet } = await supabase
-          .from("hebrew_alphabet")
-          .select("letter, name, transliteration");
-        
-        const transformedAlphabet = alphabet?.map(letter => ({
-          hebrew: letter.letter,
-          english: letter.name,
-          transliteration: letter.transliteration
-        }));
-        
-        if (transformedAlphabet) allData.push(...transformedAlphabet);
-      }
-
-      const shuffledData = allData.sort(() => Math.random() - 0.5).slice(0, MAX_CARDS);
-      setFlashcardsData(shuffledData);
-      setGameActive(true);
-    } catch (error) {
-      console.error("Error fetching flashcards:", error);
-      toast.error("Failed to load flashcards");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const startGame = async () => {
+  const startGame = () => {
     setCurrentCardIndex(0);
     setCorrectAnswers(0);
     setTotalAnswered(0);
-    await fetchFlashcards(selectedCategories);
-    toast.success(`Starting new game with selected categories!`);
+    setGameActive(true);
+    toast.success("Starting new game with Hebrew words!");
   };
 
   const handleNext = () => {
@@ -144,7 +77,6 @@ const Flashcards = () => {
 
   const resetGame = () => {
     setGameActive(false);
-    setFlashcardsData([]);
     setCurrentCardIndex(0);
     setCorrectAnswers(0);
     setTotalAnswered(0);
@@ -153,51 +85,10 @@ const Flashcards = () => {
   const isGameComplete = currentCardIndex === flashcardsData.length - 1 && 
                         totalAnswered === flashcardsData.length;
 
-  const CustomCheckbox = ({ 
-    id, 
-    checked, 
-    onChange, 
-    label, 
-    disabled 
-  }: { 
-    id: string; 
-    checked: boolean; 
-    onChange: () => void; 
-    label: string;
-    disabled?: boolean;
-  }) => (
-    <div className="flex items-center space-x-2">
-      <button
-        type="button"
-        id={id}
-        onClick={onChange}
-        disabled={disabled}
-        className={`w-5 h-5 border-2 rounded flex items-center justify-center transition-colors
-          ${checked 
-            ? 'bg-primary border-primary text-primary-foreground' 
-            : 'border-primary bg-transparent'
-          } ${disabled 
-            ? 'opacity-50 cursor-not-allowed' 
-            : 'hover:bg-primary/10 cursor-pointer'}`
-        }
-        aria-checked={checked}
-        role="checkbox"
-      >
-        {checked ? (
-          <X className="h-3 w-3" />
-        ) : (
-          <Square className="h-3 w-3 opacity-0" />
-        )}
-      </button>
-      <label
-        htmlFor={id}
-        className={`text-sm font-medium leading-none select-none
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-      >
-        {label}
-      </label>
-    </div>
-  );
+  if (error) {
+    toast.error("Failed to load flashcards");
+    return null;
+  }
 
   return (
     <>
@@ -205,59 +96,31 @@ const Flashcards = () => {
       <div className="min-h-screen bg-white p-8 pt-24">
         <div className="max-w-2xl mx-auto space-y-8">
           {!gameActive ? (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-center">Hebrew Flashcards</h2>
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Select Categories
-                  </label>
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                    <CustomCheckbox 
-                      id="all"
-                      checked={selectedCategories.includes("all")}
-                      onChange={() => handleCategoryChange("all")}
-                      label="All Categories"
-                    />
-                    <CustomCheckbox 
-                      id="words"
-                      checked={selectedCategories.includes("words")}
-                      onChange={() => handleCategoryChange("words")}
-                      disabled={selectedCategories.includes("all")}
-                      label="Words"
-                    />
-                    <CustomCheckbox 
-                      id="phrases"
-                      checked={selectedCategories.includes("phrases")}
-                      onChange={() => handleCategoryChange("phrases")}
-                      disabled={selectedCategories.includes("all")}
-                      label="Phrases"
-                    />
-                    <CustomCheckbox 
-                      id="verbs"
-                      checked={selectedCategories.includes("verbs")}
-                      onChange={() => handleCategoryChange("verbs")}
-                      disabled={selectedCategories.includes("all")}
-                      label="Verbs"
-                    />
-                    <CustomCheckbox 
-                      id="alphabet"
-                      checked={selectedCategories.includes("alphabet")}
-                      onChange={() => handleCategoryChange("alphabet")}
-                      disabled={selectedCategories.includes("all")}
-                      label="Alphabet"
-                    />
+            <Card className="border-2 border-primary/20">
+              <CardHeader>
+                <CardTitle className="text-center text-3xl font-bold bg-gradient-to-r from-primaryPurple via-vividPurple to-magentaPink text-transparent bg-clip-text">
+                  Hebrew Flashcards
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex flex-col items-center justify-center space-y-4 py-6">
+                  <BookOpen className="h-16 w-16 text-primary/60" />
+                  <div className="text-center space-y-2">
+                    <h3 className="text-xl font-semibold">Ready to Practice?</h3>
+                    <p className="text-muted-foreground">
+                      Test your knowledge with {MAX_CARDS} Hebrew words
+                    </p>
                   </div>
                 </div>
                 <Button 
                   onClick={startGame} 
-                  className="w-full"
+                  className="w-full h-12 text-lg"
                   disabled={isLoading}
                 >
                   {isLoading ? "Loading..." : "Start Game"}
                 </Button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ) : (
             <>
               <ScoreDisplay correct={correctAnswers} total={totalAnswered} />
