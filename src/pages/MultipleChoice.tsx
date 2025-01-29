@@ -53,13 +53,13 @@ const MultipleChoice = () => {
 
   const handleTimeUp = async () => {
     setIsGameActive(false);
-    const percentage = Math.round((score.correct / score.total) * 100);
+    const finalScore = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
     
     try {
       const { error } = await supabase
         .from('multiple_choice_scores')
         .insert({
-          score: percentage,
+          score: finalScore,
           time_taken: GAME_TIME - timeLeft,
           user_id: (await supabase.auth.getUser()).data.user?.id
         });
