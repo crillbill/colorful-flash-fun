@@ -7,6 +7,7 @@ import { Header1 } from "@/components/ui/header";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { CategorySelector, type Category } from "@/components/CategorySelector";
+import { Mic, Trophy, Sparkles, Brain } from "lucide-react";
 
 interface Word {
   hebrew: string;
@@ -68,7 +69,8 @@ const PronunciationChallenge = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast("Please sign in to save your scores", {
-          description: "You'll be redirected to the login page"
+          description: "You'll be redirected to the login page",
+          icon: "🔒"
         });
         navigate("/login");
         return;
@@ -81,7 +83,9 @@ const PronunciationChallenge = () => {
 
   const handleCorrect = async () => {
     if (!user) {
-      toast("Please sign in to save your scores");
+      toast("Please sign in to save your scores", {
+        icon: "🔒"
+      });
       return;
     }
 
@@ -103,18 +107,20 @@ const PronunciationChallenge = () => {
       }
       
       setCorrectCount(prev => prev + 1);
-      toast.success("Perfect pronunciation!", {
-        description: "Keep up the great work!"
+      toast.success("Perfect pronunciation! 🎯", {
+        description: "Keep up the great work! ⭐",
       });
     } catch (error) {
       console.error('Error saving score:', error);
-      toast.error("Failed to save score");
+      toast.error("Failed to save score ❌");
     }
   };
 
   const handleIncorrect = async () => {
     if (!user) {
-      toast("Please sign in to save your scores");
+      toast("Please sign in to save your scores", {
+        icon: "🔒"
+      });
       return;
     }
 
@@ -136,7 +142,7 @@ const PronunciationChallenge = () => {
       }
     } catch (error) {
       console.error('Error saving score:', error);
-      toast.error("Failed to save score");
+      toast.error("Failed to save score ❌");
     }
   };
 
@@ -150,19 +156,26 @@ const PronunciationChallenge = () => {
   };
 
   if (!user || isLoading) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-softPurple to-softPink p-8 pt-24">
+        <div className="max-w-2xl mx-auto text-center">
+          <Brain className="animate-pulse w-12 h-12 mx-auto mb-4 text-primaryPurple" />
+          <p className="text-lg">Loading your pronunciation practice... 🎯</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    toast.error("Failed to load content");
+    toast.error("Failed to load content ❌");
     return null;
   }
 
   if (words.length === 0) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-gray-800 text-center">
-          <h1 className="text-2xl font-bold mb-4">No content available</h1>
+      <div className="min-h-screen bg-gradient-to-br from-softPurple to-softPink p-8 pt-24">
+        <div className="max-w-2xl mx-auto text-center bg-white/90 rounded-xl shadow-lg p-8">
+          <h1 className="text-2xl font-bold mb-4 text-primaryPurple">No content available 😢</h1>
           <p>Please try again later</p>
         </div>
       </div>
@@ -170,19 +183,25 @@ const PronunciationChallenge = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
       <Header1 />
-      <div className="container mx-auto px-4 pt-24">
+      <div className="min-h-screen bg-gradient-to-br from-softPurple to-softPink p-4 pt-20">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-5xl font-bold text-center mb-12 bg-gradient-to-r from-primaryPurple via-vividPurple to-magentaPink text-transparent bg-clip-text">
-            Learn Hebrew Pronunciation
+          <h1 className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-primaryPurple via-vividPurple to-magentaPink text-transparent bg-clip-text">
+            Pronunciation Practice 🎯
           </h1>
           
-          <CategorySelector value={category} onChange={setCategory} />
+          <div className="mb-6">
+            <CategorySelector value={category} onChange={setCategory} />
+          </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <div className="bg-gray-50 rounded-2xl shadow-xl p-8 border border-gray-100 transition-all duration-300 hover:bg-gray-100">
+              <div className="bg-white/90 rounded-2xl shadow-xl p-8 border border-gray-100">
+                <div className="flex items-center justify-center gap-2 mb-6">
+                  <Mic className="w-6 h-6 text-primaryPurple" />
+                  <h2 className="text-2xl font-bold text-primaryPurple">Practice Mode</h2>
+                </div>
                 <FlashCard
                   question={words[currentWordIndex].hebrew}
                   answer={words[currentWordIndex].english}
@@ -197,16 +216,17 @@ const PronunciationChallenge = () => {
               </div>
             </div>
             
-            <div className="bg-gray-50 rounded-2xl shadow-xl p-8 border border-gray-100 transition-all duration-300 hover:bg-gray-100">
-              <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-primaryPurple to-vividPurple text-transparent bg-clip-text">
-                Leaderboard
-              </h2>
+            <div className="bg-white/90 rounded-2xl shadow-xl p-6 border border-gray-100">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Trophy className="w-5 h-5 text-primaryPurple" />
+                <h3 className="text-xl font-semibold text-primaryPurple">Top Speakers 🏆</h3>
+              </div>
               <Leaderboard />
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
