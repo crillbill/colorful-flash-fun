@@ -7,6 +7,8 @@ import { useColors } from "@/contexts/ColorContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
+import { GameTimer } from "@/components/GameTimer";
+import { Leaderboard } from "@/components/Leaderboard";
 
 interface Word {
   hebrew: string;
@@ -81,11 +83,46 @@ const Hangman = () => {
   const [wrongGuesses, setWrongGuesses] = useState<number>(0);
   const [score, setScore] = useState<{ correct: number; total: number }>({ correct: 0, total: 0 });
   const [showHint, setShowHint] = useState<boolean>(false);
+  const [timer, setTimer] = useState<number>(0);
+  const [isGameActive, setIsGameActive] = useState<boolean>(false);
 
   const { data: words = [], isLoading, error } = useQuery({
     queryKey: ['hangmanWords'],
     queryFn: fetchWords,
   });
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isGameActive) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isGameActive]);
+
+  const saveScore = async (score: number, timeTaken: number) => {
+    const { error } = await supabase
+      .from('pronunciation_scores')
+      .insert({
+        word: 'hangman',
+        score,
+        time_taken: timeTaken,
+      });
+
+    if (error) {
+      console.error('Error saving score:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save your score",
+        variant: "destructive",
+      });
+    }
+  };
 
   const getNewWord = () => {
     if (words.length > 0) {
@@ -94,6 +131,8 @@ const Hangman = () => {
       setGuessedLetters(new Set());
       setWrongGuesses(0);
       setShowHint(false);
+      setTimer(0);
+      setIsGameActive(true);
     }
   };
 
@@ -120,7 +159,7 @@ const Hangman = () => {
     .map((letter) => (guessedLetters.has(letter) ? letter : "_"))
     .join(" ");
 
-  const handleGuess = (letter: string) => {
+  const handleGuess = async (letter: string) => {
     if (guessedLetters.has(letter)) {
       toast({
         title: "Already Guessed",
@@ -138,17 +177,23 @@ const Hangman = () => {
       setWrongGuesses(newWrongGuesses);
 
       if (newWrongGuesses >= BALLOON_COLORS.length) {
+        setIsGameActive(false);
         toast({
           title: "Game Over",
           description: `The word was: ${currentWord.hebrew} (${currentWord.english})`,
           variant: "destructive",
         });
+        const finalScore = Math.round((score.correct / (score.total + 1)) * 100);
+        await saveScore(finalScore, timer);
         setScore((prev) => ({ ...prev, total: prev.total + 1 }));
         setTimeout(getNewWord, 2000);
       }
     } else if (
       currentWord.hebrew.split("").every((letter) => newGuessedLetters.has(letter))
     ) {
+      setIsGameActive(false);
+      const finalScore = Math.round(((score.correct + 1) / (score.total + 1)) * 100);
+      await saveScore(finalScore, timer);
       toast({
         title: "Congratulations!",
         description: "You found the word!",
@@ -168,7 +213,10 @@ const Hangman = () => {
       <Header1 />
       <div className="min-h-screen bg-white p-8 pt-24">
         <div className="max-w-2xl mx-auto space-y-8">
-          <ScoreDisplay correct={score.correct} total={score.total} />
+          <div className="flex justify-between items-center">
+            <ScoreDisplay correct={score.correct} total={score.total} />
+            <GameTimer timeLeft={timer} />
+          </div>
           
           <div className="flex justify-center space-x-4 mb-8">
             {BALLOON_COLORS.map((color, index) => (
@@ -223,6 +271,8 @@ const Hangman = () => {
               ))}
             </div>
           </div>
+
+          <Leaderboard />
         </div>
       </div>
     </>
