@@ -14,6 +14,7 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { generateGrid } from "@/utils/wordSearchUtils";
 import { GRID_WIDTH, GRID_HEIGHT } from "@/utils/constants";
 import type { WordLocation, HebrewWord, GridCell } from "@/types/wordSearch";
+import { Search, Timer, Trophy, Star } from "lucide-react";
 
 const fetchWords = async () => {
   const { data, error } = await supabase
@@ -71,7 +72,7 @@ const WordSearch = () => {
       const word = words.find(w => w.hebrew === wordLocation.word);
       if (word) {
         toast({
-          title: "Word Found!",
+          title: "✨ Word Found! 🎉",
           description: `You found ${word.hebrew} (${word.english})`,
         });
         setWordLocations(prev => 
@@ -104,7 +105,7 @@ const WordSearch = () => {
         if (prev <= 1) {
           clearInterval(timer);
           toast({
-            title: "Time's up!",
+            title: "⏰ Time's up!",
             description: "Game Over! Click 'New Game' to play again.",
           });
           return 0;
@@ -128,11 +129,11 @@ const WordSearch = () => {
   };
 
   if (isLoading) {
-    return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">Loading...</div>;
+    return <div className="min-h-screen bg-gradient-to-br from-softPurple to-softPink p-8 pt-24 flex items-center justify-center">Loading... 🔄</div>;
   }
 
   if (error) {
-    return <div className="min-h-screen bg-white p-8 pt-24 flex items-center justify-center">Error loading words</div>;
+    return <div className="min-h-screen bg-gradient-to-br from-softPurple to-softPink p-8 pt-24 flex items-center justify-center">Error loading words ❌</div>;
   }
 
   const foundWordsSet = new Set(
@@ -142,38 +143,57 @@ const WordSearch = () => {
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white p-4 pt-24">
+      <div className="min-h-screen bg-gradient-to-br from-softPurple to-softPink p-4 pt-24">
         <div className="mx-auto space-y-3 max-w-[500px]">
-          <h1 className="text-3xl font-bold text-center">Hebrew Word Search</h1>
-          
-          <div className="flex justify-between items-center">
-            <ScoreDisplay correct={score.found} total={score.total} />
-            <GameTimer timeLeft={timeLeft} />
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold text-primaryPurple flex items-center justify-center gap-2">
+              <Search className="w-8 h-8" />
+              Hebrew Word Search
+              <Star className="w-6 h-6 text-yellow-400" />
+            </h1>
+            
+            <div className="flex justify-between items-center bg-white/50 rounded-lg p-4 shadow-lg">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                <ScoreDisplay correct={score.found} total={score.total} />
+              </div>
+              <div className="flex items-center gap-2">
+                <Timer className="w-5 h-5 text-red-500" />
+                <GameTimer timeLeft={timeLeft} />
+              </div>
+            </div>
           </div>
 
           <ProgressBar current={score.found} total={score.total} />
 
-          <WordSearchGrid
-            grid={grid}
-            onCellClick={handleCellClick}
-            isCellSelected={isCellSelected}
-            isCellFound={isCellFound}
-          />
+          <div className="bg-white/50 p-4 rounded-lg shadow-lg">
+            <WordSearchGrid
+              grid={grid}
+              onCellClick={handleCellClick}
+              isCellSelected={isCellSelected}
+              isCellFound={isCellFound}
+            />
+          </div>
 
-          <WordList
-            words={words}
-            foundWords={foundWordsSet}
-            revealedWords={revealedWords}
-            onRevealWord={handleRevealWord}
-          />
+          <div className="bg-white/50 p-4 rounded-lg shadow-lg">
+            <WordList
+              words={words}
+              foundWords={foundWordsSet}
+              revealedWords={revealedWords}
+              onRevealWord={handleRevealWord}
+            />
+          </div>
 
           <div className="flex justify-center">
-            <Button onClick={handleNewGame}>
-              New Game
+            <Button 
+              onClick={handleNewGame}
+              className="bg-primaryPurple hover:bg-vividPurple text-white font-bold"
+            >
+              🎮 New Game
             </Button>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 bg-white/50 p-4 rounded-lg shadow-lg">
             <Leaderboard />
           </div>
         </div>

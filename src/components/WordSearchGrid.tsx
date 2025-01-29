@@ -15,15 +15,18 @@ export const WordSearchGrid: React.FC<WordSearchGridProps> = ({
   isCellFound,
 }) => {
   return (
-    <div className="bg-accent p-0.5">
+    <div className="bg-white/30 p-0.5 rounded-lg">
       {grid.map((row, rowIndex) => (
         <div key={rowIndex} className="flex">
           {row.map((letter, colIndex) => (
             <button
               key={`${rowIndex}-${colIndex}`}
-              className={`w-[42px] h-[42px] text-2xl font-bold flex items-center justify-center transition-colors
-                ${isCellSelected(rowIndex, colIndex) ? 'bg-primary text-primary-foreground' : 
-                  isCellFound(rowIndex, colIndex) ? 'bg-green-500 text-white' : 'bg-card hover:bg-accent-foreground/10'}`}
+              className={`w-[42px] h-[42px] text-2xl font-bold flex items-center justify-center transition-all duration-300 m-0.5 rounded-md
+                ${isCellSelected(rowIndex, colIndex) 
+                  ? 'bg-primaryPurple text-white shadow-lg scale-105' 
+                  : isCellFound(rowIndex, colIndex) 
+                    ? 'bg-green-500 text-white shadow-md scale-105' 
+                    : 'bg-white hover:bg-accent-foreground/10 hover:scale-105'}`}
               onClick={() => onCellClick(rowIndex, colIndex)}
             >
               {letter}

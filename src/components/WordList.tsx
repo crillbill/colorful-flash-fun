@@ -17,7 +17,9 @@ export const WordList: React.FC<WordListProps> = ({
 }) => {
   return (
     <div className="space-y-2">
-      <h2 className="text-xl font-semibold">Words to Find:</h2>
+      <h2 className="text-xl font-semibold text-primaryPurple flex items-center gap-2">
+        📝 Words to Find:
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         {words.map(({ hebrew, english, transliteration }) => {
           const isFound = foundWords.has(hebrew);
@@ -27,11 +29,13 @@ export const WordList: React.FC<WordListProps> = ({
               <PopoverTrigger asChild>
                 <div className="relative h-24">
                   <div
-                    className={`absolute inset-0 p-2 rounded-md transition-all
-                      ${isFound ? 'bg-green-500 text-white' : 'bg-card'}`}
+                    className={`absolute inset-0 p-2 rounded-md transition-all shadow-md
+                      ${isFound 
+                        ? 'bg-green-500 text-white' 
+                        : 'bg-white/80 hover:bg-white'}`}
                   >
                     <div className="text-base font-bold">
-                      {isFound || isRevealed ? hebrew : '• • • •'}
+                      {isFound || isRevealed ? `${hebrew} ${isFound ? '✅' : '👀'}` : '❓ ❓ ❓'}
                     </div>
                     {(isFound || isRevealed) && (
                       <>
@@ -46,15 +50,15 @@ export const WordList: React.FC<WordListProps> = ({
                     <div
                       onClick={() => onRevealWord(hebrew)}
                       className="absolute inset-0 flex items-center justify-center 
-                        bg-gray-200/90 hover:bg-gray-300/90 cursor-pointer rounded-md
-                        text-gray-700 font-medium transition-all"
+                        bg-primaryPurple/90 hover:bg-vividPurple/90 cursor-pointer rounded-md
+                        text-white font-medium transition-all shadow-md"
                     >
-                      Reveal Hint
+                      🔍 Reveal Hint
                     </div>
                   )}
                 </div>
               </PopoverTrigger>
-              <PopoverContent className="w-48">
+              <PopoverContent className="w-48 bg-white/95 shadow-lg">
                 <div className="space-y-1">
                   <p className="font-semibold">{hebrew}</p>
                   <p className="text-sm">{english}</p>
