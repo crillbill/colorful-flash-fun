@@ -67,7 +67,7 @@ const PronunciationChallenge = () => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("Please sign in to save your scores", {
+        toast("Please sign in to save your scores", {
           description: "You'll be redirected to the login page"
         });
         navigate("/login");
@@ -81,7 +81,7 @@ const PronunciationChallenge = () => {
 
   const handleCorrect = async () => {
     if (!user) {
-      toast.error("Please sign in to save your scores");
+      toast("Please sign in to save your scores");
       return;
     }
 
@@ -114,7 +114,7 @@ const PronunciationChallenge = () => {
 
   const handleIncorrect = async () => {
     if (!user) {
-      toast.error("Please sign in to save your scores");
+      toast("Please sign in to save your scores");
       return;
     }
 
@@ -134,10 +134,6 @@ const PronunciationChallenge = () => {
         console.error('Error saving score:', error);
         throw error;
       }
-      
-      toast.error("Keep practicing!", {
-        description: "Try again to improve your pronunciation."
-      });
     } catch (error) {
       console.error('Error saving score:', error);
       toast.error("Failed to save score");
