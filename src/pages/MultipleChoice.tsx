@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Header1 } from "@/components/ui/header";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MultipleChoiceLeaderboard } from "@/components/MultipleChoiceLeaderboard";
