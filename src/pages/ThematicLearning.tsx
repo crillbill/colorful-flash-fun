@@ -29,14 +29,12 @@ interface Category {
 const FlashCard = ({ word, isFlipped, onFlip }: { word: Word; isFlipped: boolean; onFlip: () => void }) => {
   return (
     <div 
-      className="relative w-full h-96 [perspective:1000px]"
+      className={`flip-card w-full h-96 ${isFlipped ? 'flipped' : ''}`}
       onClick={onFlip}
     >
-      <div className={`w-full h-full duration-500 preserve-3d relative ${
-        isFlipped ? 'rotate-y-180' : ''
-      }`} style={{ transformStyle: 'preserve-3d' }}>
+      <div className="flip-card-inner w-full h-full">
         {/* Front of card */}
-        <div className="absolute w-full h-full [backface-visibility:hidden]">
+        <div className="flip-card-front">
           <Card className="w-full h-full flex flex-col justify-center items-center p-8 cursor-pointer">
             <div className="text-5xl font-bold mb-6">{word.hebrew}</div>
             <div className="text-2xl text-gray-600">{word.transliteration}</div>
@@ -55,9 +53,21 @@ const FlashCard = ({ word, isFlipped, onFlip }: { word: Word; isFlipped: boolean
         </div>
 
         {/* Back of card */}
-        <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
-          <Card className="w-full h-full flex flex-col justify-center items-center p-8 cursor-pointer">
+        <div className="flip-card-back">
+          <Card className="w-full h-full flex flex-col justify-between p-8 cursor-pointer">
             <div className="text-3xl font-semibold mb-4">{word.english}</div>
+            <div className="space-y-4">
+              {word.notes && (
+                <div className="text-gray-600">
+                  <p className="text-sm font-semibold mb-1">Notes:</p>
+                  <p>{word.notes}</p>
+                </div>
+              )}
+              <div className="text-gray-600">
+                <p className="text-sm font-semibold mb-1">Category:</p>
+                <p>{word.category}</p>
+              </div>
+            </div>
           </Card>
         </div>
       </div>
