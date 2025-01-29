@@ -44,16 +44,6 @@ export const MeterChart = ({ score, maxScore = 100 }: MeterChartProps) => {
           style={{ left: `${percentage}%` }}
         />
       </div>
-      
-      {/* Score display */}
-      <div className="text-center mt-2">
-        <span className={cn(
-          "text-sm font-medium text-gray-600",
-          percentage > 90 && "font-bold"
-        )}>
-          Score: {score}
-        </span>
-      </div>
     </div>
   );
 };
