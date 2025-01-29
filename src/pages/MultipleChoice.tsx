@@ -29,7 +29,6 @@ const MultipleChoice = () => {
   const [timeLeft, setTimeLeft] = useState(GAME_TIME);
   const [isGameActive, setIsGameActive] = useState(false);
   const { toast } = useToast();
-  const { isPlaying, playAudio } = useAudioPlayback();
 
   useEffect(() => {
     fetchWords();
@@ -177,19 +176,6 @@ const MultipleChoice = () => {
       toast({
         title: "Quiz completed!",
         description: `You scored ${newScore.correct} out of ${questions.length}`,
-      });
-    }
-  };
-
-  const handlePlayAudio = async () => {
-    try {
-      await playAudio(questions[currentQuestion].word);
-    } catch (error) {
-      console.error("Error playing audio:", error);
-      toast({
-        title: "Error playing audio",
-        description: "Please try again",
-        variant: "destructive",
       });
     }
   };
