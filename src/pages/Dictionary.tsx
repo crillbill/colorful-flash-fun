@@ -173,6 +173,8 @@ const Dictionary = () => {
                 <input
                   type="text"
                   dir="rtl"
+                  lang="he"
+                  inputMode="text"
                   className="w-full px-4 py-2 text-lg focus:outline-none text-right"
                   placeholder="חיפוש מעברית לאנגלית..."
                   value={hebrewSearchTerm}
