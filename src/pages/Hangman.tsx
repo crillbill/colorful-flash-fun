@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { GameTimer } from "@/components/GameTimer";
 import { Leaderboard } from "@/components/Leaderboard";
+import { Trophy, Ghost } from "lucide-react";
 
 interface Word {
   hebrew: string;
@@ -254,10 +255,14 @@ const Hangman = () => {
   return (
     <>
       <Header1 />
-      <div className="min-h-screen bg-white p-8 pt-24">
+      <div className="min-h-screen bg-gradient-to-br from-softPurple to-softPink p-8 pt-24">
         <div className="max-w-2xl mx-auto space-y-8">
-          <div className="flex justify-between items-center">
-            <ScoreDisplay correct={score.correct} total={score.total} totalWords={GAME_WORD_COUNT} />
+          <div className="flex justify-between items-center bg-white/80 p-4 rounded-lg shadow-md">
+            <ScoreDisplay 
+              correct={score.correct} 
+              total={score.total} 
+              totalWords={GAME_WORD_COUNT} 
+            />
             <GameTimer timeLeft={timer} />
           </div>
           
@@ -271,32 +276,34 @@ const Hangman = () => {
             ))}
           </div>
 
-          <div className="text-center space-y-4">
-            <div className="text-4xl font-bold mb-8">{displayWord}</div>
+          <div className="text-center space-y-4 bg-white/90 p-6 rounded-xl shadow-lg">
+            <div className="text-4xl font-bold mb-8 text-primaryPurple">{displayWord}</div>
             
             <div className="flex justify-center gap-4 mb-4">
               <Button 
                 variant="outline" 
                 onClick={() => setShowHint(true)}
                 disabled={showHint}
+                className="bg-softBlue hover:bg-blue-100"
               >
-                Show Hint
+                ❓ Show Hint
               </Button>
               <Button 
                 variant="default"
                 onClick={handleRestart}
+                className="bg-vividPurple hover:bg-purple-600"
               >
-                Restart Game
+                🔄 Restart Game
               </Button>
             </div>
 
             {showHint && (
-              <div className="mt-2 space-y-1">
-                <p className="text-muted-foreground">
-                  <span className="font-semibold">Hint:</span> {currentWord.transliteration || 'No transliteration available'}
+              <div className="mt-2 space-y-1 p-4 bg-softYellow rounded-lg">
+                <p className="text-charcoalGray">
+                  <span className="font-semibold">✨ Hint:</span> {currentWord.transliteration || 'No transliteration available'}
                 </p>
-                <p className="text-muted-foreground">
-                  <span className="font-semibold">English:</span> {currentWord.english}
+                <p className="text-charcoalGray">
+                  <span className="font-semibold">📝 English:</span> {currentWord.english}
                 </p>
               </div>
             )}
@@ -314,7 +321,13 @@ const Hangman = () => {
                         : "destructive"
                       : "outline"
                   }
-                  className="w-10 h-10"
+                  className={`w-10 h-10 ${
+                    guessedLetters.has(letter)
+                      ? currentWord.hebrew.includes(letter)
+                        ? "bg-softGreen"
+                        : "bg-softPink"
+                      : "bg-white hover:bg-softPurple"
+                  }`}
                 >
                   {letter}
                 </Button>
@@ -322,7 +335,13 @@ const Hangman = () => {
             </div>
           </div>
 
-          <Leaderboard />
+          <div className="bg-white/90 p-6 rounded-xl shadow-lg">
+            <div className="flex items-center gap-2 mb-4">
+              <Trophy className="w-6 h-6 text-vividPurple" />
+              <h2 className="text-2xl font-bold text-primaryPurple">Hangman Champions 🏆</h2>
+            </div>
+            <Leaderboard />
+          </div>
         </div>
       </div>
     </>
